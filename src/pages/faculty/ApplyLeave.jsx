@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../auth/AuthContext";
 import DatePicker from "react-datepicker";
-import { format, differenceInCalendarDays } from "date-fns";
+import { format, differenceInCalendarDays, addDays } from "date-fns";
 import "react-datepicker/dist/react-datepicker.css";
 import "./ApplyLeave.css";
 
@@ -15,6 +15,8 @@ const ApplyLeave = () => {
   const [leaveTo, setLeaveTo] = useState(null);
   const [reasonForLeave, setReasonForLeave] = useState("");
   const [emergencyContact, setEmergencyContact] = useState("");
+  const [dashboardData, setDashboardData] = useState(null);
+  
 
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
@@ -24,6 +26,35 @@ const ApplyLeave = () => {
     leaveFrom && leaveTo
       ? differenceInCalendarDays(leaveTo, leaveFrom) + 1
       : 0;
+useEffect(() => {
+    const fetchDashboardDetails = async () => {
+      try {
+        setLoading(true);
+        setErrors("");
+
+        const response = await fetch(
+          `http://localhost:9090/getDashboardDetails?empId=${user.employeeId}`
+        );
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.message || "Failed to load dashboard");
+        }
+
+        setDashboardData(data);
+      } catch (err) {
+        setErrors(err.message || "Something went wrong");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (user?.employeeId) {
+      fetchDashboardDetails();
+    }
+  }, [user]);
+     
 
   const validate = () => {
     const newErrors = {};
@@ -115,10 +146,10 @@ const ApplyLeave = () => {
               onChange={(e) => setTypeOfLeave(e.target.value)}
             >
               <option value="Casual Leaves">
-                Casual Leave (Available: 12)
+                Casual Leave ({dashboardData?.casualLeaves || 0})
               </option>
               <option value="Medical Leaves">
-                Medical Leave (Available: 8)
+                Medical Leave ({dashboardData?.medicalLeaves || 0})
               </option>
             </select>
           </div>
@@ -145,6 +176,8 @@ const ApplyLeave = () => {
               onChange={(date) => setLeaveTo(date)}
               dateFormat="dd-MMM-yyyy"
               minDate={leaveFrom}
+              maxDate={addDays(leaveFrom, 2)}
+              
             />
             {errors.leaveTo && (
               <span className="error">{errors.leaveTo}</span>
