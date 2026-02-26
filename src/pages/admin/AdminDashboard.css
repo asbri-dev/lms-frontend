@@ -1,72 +1,67 @@
 .admin-dashboard {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 25px;
 }
 
-/* HEADER */
-.dashboard-header h2 {
-  margin: 0;
-  font-size: 24px;
-  color: #1f2937;
+.welcome-banner {
+  background: linear-gradient(to right, #2b3c6b, #3f548f);
+  color: white;
+  padding: 20px;
+  border-radius: 10px;
 }
 
-.dashboard-header p {
-  margin-top: 6px;
-  color: #6b7280;
-}
-
-/* STATS */
-.dashboard-stats {
+.summary-cards {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 15px;
 }
 
-.stat-card {
+.card {
   background: white;
   padding: 20px;
   border-radius: 10px;
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 6px 15px rgba(0,0,0,0.06);
 }
 
-.stat-card h4 {
-  margin: 0;
-  font-size: 14px;
-  color: #6b7280;
-}
-
-.stat-card span {
-  display: block;
-  margin-top: 10px;
-  font-size: 26px;
+.card span {
+  font-size: 22px;
   font-weight: bold;
-  color: #2563eb;
 }
 
-/* ACTIONS */
-.dashboard-actions h3 {
-  margin-bottom: 12px;
-  font-size: 18px;
-  color: #1f2937;
-}
-
-.actions-grid {
-  display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-
-.action-btn {
-  background: #2563eb;
-  color: white;
-  border: none;
-  padding: 10px 16px;
-  border-radius: 6px;
+.clickable {
   cursor: pointer;
-  font-size: 14px;
+  transition: 0.2s ease;
 }
 
-.action-btn:hover {
-  background: #1e40af;
+.clickable:hover {
+  transform: scale(1.03);
 }
+
+.pending { color: orange; }
+.approved { color: green; }
+.rejected { color: red; }
+
+.detail-section {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 6px 15px rgba(0,0,0,0.06);
+}
+
+.request-card {
+  display: flex;
+  justify-content: space-between;
+  padding: 15px;
+  border-bottom: 1px solid #eee;
+}
+
+.status {
+  padding: 6px 12px;
+  border-radius: 6px;
+  color: white;
+}
+
+.status.pending { background: orange; }
+.status.approved { background: green; }
+.status.rejected { background: red; }
