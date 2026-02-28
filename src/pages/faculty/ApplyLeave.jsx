@@ -1,8 +1,12 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../auth/AuthContext";
 import DatePicker from "react-datepicker";
-import { format, differenceInCalendarDays, addDays } from "date-fns";
+import {
+  format,
+  eachDayOfInterval,
+  isSunday,
+} from "date-fns";
 import "react-datepicker/dist/react-datepicker.css";
 import "./ApplyLeave.css";
 
@@ -10,94 +14,172 @@ const ApplyLeave = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
 
-  const [typeOfLeave, setTypeOfLeave] = useState("Casual Leaves");
+  const [typeOfLeave, setTypeOfLeave] = useState("cl");
   const [leaveFrom, setLeaveFrom] = useState(null);
   const [leaveTo, setLeaveTo] = useState(null);
+  const [sessionFrom, setSessionFrom] = useState("1");
+  const [sessionTo, setSessionTo] = useState("2");
   const [reasonForLeave, setReasonForLeave] = useState("");
-  const [emergencyContact, setEmergencyContact] = useState("");
-  const [dashboardData, setDashboardData] = useState(null);
-  
+ 
 
-  const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
+  const [checking, setChecking] = useState(false);
+  const [eligible, setEligible] = useState(false);
+  const [message, setMessage] = useState("");
 
-  // 🔢 Calculate number of days
-  const noOfDays =
-    leaveFrom && leaveTo
-      ? differenceInCalendarDays(leaveTo, leaveFrom) + 1
-      : 0;
-useEffect(() => {
-    const fetchDashboardDetails = async () => {
-      try {
-        setLoading(true);
-        setErrors("");
+ /* =========================================
+   Calculate Leave Days (Exclude Sundays)
+========================================= */
+const calculateLeaveDays = () => {
+  if (!leaveFrom || !leaveTo) return 0;
 
-        const response = await fetch(
-          `http://localhost:9090/getDashboardDetails?empId=${user.employeeId}`
-        );
+  const allDays = eachDayOfInterval({
+    start: leaveFrom,
+    end: leaveTo,
+  });
 
-        const data = await response.json();
+  const workingDays = allDays.filter((day) => !isSunday(day));
 
-        if (!response.ok) {
-          throw new Error(data.message || "Failed to load dashboard");
-        }
+  if (workingDays.length === 0) return 0;
 
-        setDashboardData(data);
-      } catch (err) {
-        setErrors(err.message || "Something went wrong");
-      } finally {
-        setLoading(false);
-      }
-    };
+  let totalDays = workingDays.length;
 
-    if (user?.employeeId) {
-      fetchDashboardDetails();
-    }
-  }, [user]);
-     
+  const isSameDay =
+    format(leaveFrom, "yyyy-MM-dd") ===
+    format(leaveTo, "yyyy-MM-dd");
 
+  // 🟢 SAME DAY LOGIC
+  if (isSameDay) {
+    if (sessionFrom === "1" && sessionTo === "1") return 0.5;
+    if (sessionFrom === "2" && sessionTo === "2") return 0.5;
+    return 1; // 1 → 2
+  }
+
+  
+  if (sessionFrom === "2") {
+    totalDays -= 0.5;
+  }
+
+  if (sessionTo === "1") {
+    totalDays -= 0.5;
+  }
+
+  return totalDays;
+};
+
+const noOfDays = calculateLeaveDays();
+
+  /* =========================================
+     Validation
+  ========================================= */
   const validate = () => {
-    const newErrors = {};
-
-    if (!leaveFrom) newErrors.leaveFrom = "Start date is required";
-    if (!leaveTo) newErrors.leaveTo = "End date is required";
-
-    if (leaveFrom && leaveTo && leaveTo < leaveFrom) {
-      newErrors.leaveTo = "End date cannot be before start date";
+    if (!leaveFrom || !leaveTo) {
+      setMessage("Please select both start and end dates.");
+      return false;
     }
 
-    if (!reasonForLeave || reasonForLeave.length < 20) {
-      newErrors.reasonForLeave =
-        "Reason must be at least 20 characters";
+    if (leaveTo < leaveFrom) {
+      setMessage("End date cannot be before start date.");
+      return false;
     }
 
-    if (!emergencyContact) {
-      newErrors.emergencyContact = "Emergency contact is required";
+    if (!reasonForLeave || reasonForLeave.length < 10) {
+      setMessage("Reason must be at least 10 characters.");
+      return false;
     }
 
-    return newErrors;
+    
+
+    return true;
   };
 
+  /* =========================================
+     CHECK ELIGIBILITY
+  ========================================= */
+  const handleCheckEligibility = async () => {
+  if (!validate()) return;
+
+  try {
+    setChecking(true);
+    setEligible(false);
+    setMessage("");
+
+    const response = await fetch(
+      "http://localhost:9090/checkLeaveEligibe",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          empId: user.employeeId,
+          typeOfLeave,
+          adminEmpId: user.adminId,
+          noOfDays: String(noOfDays),
+          leaveFrom: format(leaveFrom, "dd-MMM-yyyy"),
+          leaveTo: format(leaveTo, "dd-MMM-yyyy"),
+          leaveApplied: format(new Date(), "dd-MMM-yyyy"),
+          reasonForLeave,
+          sessionFrom,
+          sessionTo,
+        }),
+      }
+    );
+
+    let data = null;
+
+    // 🟢 Try to parse JSON safely
+    try {
+      data = await response.json();
+    } catch {
+      data = null;
+    }
+
+    // 🔴 If server error (500+)
+    if (response.status >= 500) {
+      setMessage("Server error. Please try again later.");
+      setEligible(false);
+      return;
+    }
+
+    // 🟡 If bad request (400)
+    if (!response.ok) {
+      setMessage(
+        data?.message || "Leave eligibility check failed."
+      );
+      setEligible(false);
+      return;
+    }
+
+    // 🟢 Success
+    setMessage(data?.message || "Eligible for leave.");
+    setEligible(true);
+
+  } catch {
+    setMessage("Network error. Please check your connection.");
+    setEligible(false);
+  } finally {
+    setChecking(false);
+  }
+};
+
+  /* =========================================
+     APPLY LEAVE
+  ========================================= */
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const validationErrors = validate();
-    if (Object.keys(validationErrors).length > 0) {
-      setErrors(validationErrors);
+    if (!eligible) {
+      setMessage("Please check eligibility before applying.");
       return;
     }
 
     try {
       setLoading(true);
-      setErrors({});
 
       const response = await fetch(
         "http://localhost:9090/applyLeaves",
         {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             empId: user.employeeId,
             typeOfLeave,
@@ -107,7 +189,8 @@ useEffect(() => {
             leaveTo: format(leaveTo, "dd-MMM-yyyy"),
             leaveApplied: format(new Date(), "dd-MMM-yyyy"),
             reasonForLeave,
-            emergencyContact,
+            sessionFrom,
+            sessionTo,
           }),
         }
       );
@@ -115,14 +198,15 @@ useEffect(() => {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || "Failed to apply leave");
+        setMessage(data.message || "Failed to apply leave.");
+        return;
       }
 
       alert("Leave applied successfully!");
       navigate("/faculty/dashboard");
 
-    } catch (error) {
-      setErrors({ api: error.message });
+    } catch {
+      setMessage("Server error while applying leave.");
     } finally {
       setLoading(false);
     }
@@ -132,103 +216,83 @@ useEffect(() => {
     <div className="apply-container">
       <div className="apply-card">
         <h2>Apply Leave</h2>
-        <p>{user.adminId}</p>
 
-        {errors.api && <p className="error">{errors.api}</p>}
+        {message && (
+          <div className={eligible ? "success-msg" : "error-msg"}>
+            {message}
+          </div>
+        )}
 
         <form onSubmit={handleSubmit}>
 
-          {/* Leave Type */}
-          <div className="form-group">
-            <label>Leave Type</label>
-            <select
-              value={typeOfLeave}
-              onChange={(e) => setTypeOfLeave(e.target.value)}
-            >
-              <option value="Casual Leaves">
-                Casual Leave ({dashboardData?.casualLeaves || 0})
-              </option>
-              <option value="Medical Leaves">
-                Medical Leave ({dashboardData?.medicalLeaves || 0})
-              </option>
-            </select>
-          </div>
+          <select
+            value={typeOfLeave}
+            onChange={(e) => setTypeOfLeave(e.target.value)}
+          >
+            <option value="cl">Casual Leave</option>
+            <option value="ml">Medical Leave</option>
+          </select>
 
-          {/* Start Date */}
-          <div className="form-group">
-            <label>Start Date</label>
-<DatePicker
-  selected={leaveFrom}
-  onChange={(date) => setLeaveFrom(date)}
-  dateFormat="dd-MMM-yyyy"
-/>
+          <DatePicker
+          placeholderText="From Date"
+            selected={leaveFrom}
+            onChange={setLeaveFrom}
+            dateFormat="dd-MMM-yyyy"
+          />
 
-            {errors.leaveFrom && (
-              <span className="error">{errors.leaveFrom}</span>
-            )}
-          </div>
+          <select
+            value={sessionFrom}
+            onChange={(e) => setSessionFrom(e.target.value)}
+          >
+            <option value="1">Session 1</option>
+            <option value="2">Session 2</option>
+          </select>
 
-          {/* End Date */}
-          <div className="form-group">
-            <label>End Date</label>
-            <DatePicker
-              selected={leaveTo}
-              onChange={(date) => setLeaveTo(date)}
-              dateFormat="dd-MMM-yyyy"
-              minDate={leaveFrom}
-              maxDate={addDays(leaveFrom, 2)}
-              
-            />
-            {errors.leaveTo && (
-              <span className="error">{errors.leaveTo}</span>
-            )}
-          </div>
+          <DatePicker
+          placeholderText="To Date"
+            selected={leaveTo}
+            onChange={setLeaveTo}
+            minDate={leaveFrom}
+            dateFormat="dd-MMM-yyyy"
+          />
 
-          {/* Auto Calculated Days */}
-          <div className="form-group">
-            <label>Total Leave Days</label>
-            <input type="text" value={noOfDays} readOnly />
-          </div>
+          <select
+            value={sessionTo}
+            onChange={(e) => setSessionTo(e.target.value)}
+          >
+            <option value="1">Session 1</option>
+            <option value="2">Session 2</option>
+          </select>
 
-          {/* Reason */}
-          <div className="form-group">
-            <label>Reason</label>
-            <textarea
-              value={reasonForLeave}
-              onChange={(e) => setReasonForLeave(e.target.value)}
-              placeholder="Enter detailed reason"
-            />
-            {errors.reasonForLeave && (
-              <span className="error">
-                {errors.reasonForLeave}
-              </span>
-            )}
-          </div>
+          <div>Total Leave Days: {noOfDays}</div>
 
-          {/* Emergency Contact */}
-          <div className="form-group">
-            <label>Emergency Contact</label>
-            <input
-              type="text"
-              value={emergencyContact}
-              onChange={(e) =>
-                setEmergencyContact(e.target.value)
-              }
-            />
-            {errors.emergencyContact && (
-              <span className="error">
-                {errors.emergencyContact}
-              </span>
-            )}
-          </div>
+          <textarea
+            placeholder="Reason"
+            value={reasonForLeave}
+            onChange={(e) => setReasonForLeave(e.target.value)}
+          />
 
-          {/* Submit */}
+          
+
+          <button
+            type="button"
+            onClick={handleCheckEligibility}
+            disabled={checking}
+          >
+            {checking ? "Checking..." : "Check"}
+          </button>
+
           <button
             type="submit"
-            disabled={loading}
-            className="btn-primary"
+            disabled={!eligible || loading}
           >
-            {loading ? "Submitting..." : "Apply Leave"}
+            {loading ? "Applying..." : "Apply Leave"}
+          </button>
+          <button
+            type="button"
+            onClick={() => navigate("/faculty/dashboard")}
+          >
+            Cancel
           </button>
 
         </form>
