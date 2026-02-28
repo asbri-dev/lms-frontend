@@ -12,6 +12,8 @@ import LeaveApprovals from "./pages/admin/LeaveApprovals";
 import FacultyDashboard from "./pages/faculty/FacultyDashboard";
 import ApplyLeave from "./pages/faculty/ApplyLeave";
 import MyLeaves from "./pages/faculty/MyLeaves";
+import AttendanceInfo from "./pages/faculty/AttendanceInfo";
+
 
 
 import DashboardLayout from "./layouts/DashboardLayout";
@@ -66,6 +68,7 @@ function App() {
   <Route path="dashboard" element={<FacultyDashboard />} />
   <Route path="apply-leave" element={<ApplyLeave />} />
   <Route path="my-leaves" element={<MyLeaves />} />
+  <Route path="/faculty/attendance" element={<AttendanceInfo />} />
 </Route>
 
 

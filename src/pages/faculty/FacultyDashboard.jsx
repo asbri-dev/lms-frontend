@@ -54,7 +54,7 @@ const FacultyDashboard = () => {
       <div className="dashboard-header">
         <h2>Welcome, {dashboardData?.employeeName},{user.employeeId}</h2>
         <p>
-          Reporting Manager:{" "}
+          Reporting To:{" "}
           <strong>{dashboardData?.rmName}</strong> (
           {dashboardData?.rmEmployeeId})
         </p>
@@ -63,12 +63,12 @@ const FacultyDashboard = () => {
       {/* Leave Stats */}
       <div className="dashboard-stats">
         <div className="stat-card">
-          <h4>Casual Leaves</h4>
+          <h4>Available Casual Leave</h4>
           <span>{dashboardData?.casualLeaves || 0}</span>
         </div>
 
         <div className="stat-card">
-          <h4>Medical Leaves</h4>
+          <h4>Available Medical Leave</h4>
           <span>{dashboardData?.medicalLeaves || 0}</span>
         </div>
 

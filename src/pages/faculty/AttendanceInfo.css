@@ -1,0 +1,56 @@
+.attendance-container {
+  display: flex;
+  gap: 24px;
+}
+
+.calendar-section {
+  flex: 2;
+}
+
+.details-section {
+  flex: 1;
+  background: #f8fafc;
+  padding: 20px;
+  border-radius: 12px;
+}
+
+.card {
+  background: #ffffff;
+  padding: 16px;
+  margin-bottom: 16px;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+
+.details-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.details-table th,
+.details-table td {
+  border-bottom: 1px solid #e5e7eb;
+  padding: 8px;
+}
+
+.attendance-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.spinner {
+  margin-bottom: 10px;
+}
+
+.empty-state {
+  text-align: center;
+  color: #6b7280;
+  margin-top: 40px;
+}
+
+.selected-day {
+  background-color: #e0f2fe !important;
+  border-radius: 6px;
+}

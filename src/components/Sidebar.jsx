@@ -25,6 +25,7 @@ const Sidebar = () => {
           <NavLink to="/faculty/dashboard">Dashboard</NavLink>
           <NavLink to="/faculty/apply-leave">Apply Leave</NavLink>
           <NavLink to="/faculty/my-leaves">My Leaves</NavLink>
+          <NavLink to="/faculty/attendance">Attendance</NavLink>
         </>
       )}
     </aside>

@@ -1,140 +1,154 @@
-/* Page Background */
+/* ===============================
+   Container
+=============================== */
 .apply-container {
   display: flex;
   justify-content: center;
-  padding: 60px 20px;
-  background-color: #F7F7FF;
+  padding: 40px 20px;
+  background-color: #f3f6f9;
   min-height: 100vh;
 }
 
-/* Card */
 .apply-card {
   width: 100%;
-  max-width: 720px;
+  max-width: 900px;
   background: #ffffff;
-  padding: 35px;
-  border-radius: 14px;
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.06);
+  border-radius: 12px;
+  padding: 30px 40px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
 }
 
-/* Title */
+/* ===============================
+   Heading
+=============================== */
 .apply-card h2 {
-  margin-bottom: 5px;
-  color: #28417B;
-  font-weight: 600;
-}
-
-.apply-subtitle {
-  color: #6b7280;
-  font-size: 14px;
   margin-bottom: 25px;
+  font-weight: 600;
+  color: #1e293b;
 }
 
-/* Form Layout */
-.form-group {
-  margin-bottom: 20px;
-  display: flex;
-  flex-direction: column;
+/* ===============================
+   Form Layout (Grid)
+=============================== */
+.apply-card form {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px 30px;
 }
 
-/* Labels */
-label {
-  margin-bottom: 6px;
-  font-weight: 500;
-  font-size: 14px;
-  color: #374151;
+/* Full width fields */
+.apply-card textarea,
+.apply-card .full-width {
+  grid-column: span 2;
 }
 
-/* Inputs */
-input,
-select,
-textarea {
+/* ===============================
+   Labels & Inputs
+=============================== */
+.apply-card select,
+.apply-card input,
+.apply-card textarea,
+.react-datepicker-wrapper input {
+  width: 100%;
   padding: 10px 12px;
-  border-radius: 8px;
-  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  border: 1px solid #cbd5e1;
   font-size: 14px;
-  transition: 0.2s ease;
-  background-color: #f9fafb;
+  transition: all 0.2s ease;
 }
 
-input:focus,
-select:focus,
-textarea:focus {
+.apply-card select:focus,
+.apply-card input:focus,
+.apply-card textarea:focus {
+  border-color: #3b82f6;
   outline: none;
-  border-color: #28417B;
-  background-color: #ffffff;
-  box-shadow: 0 0 0 3px rgba(40, 65, 123, 0.1);
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
 }
 
-textarea {
-  min-height: 120px;
-  resize: none;
+/* ===============================
+   Textarea
+=============================== */
+.apply-card textarea {
+  min-height: 90px;
+  resize: vertical;
 }
 
-/* Two column date row */
-.date-row {
-  display: flex;
-  gap: 15px;
+/* ===============================
+   Leave Days Display
+=============================== */
+.leave-days {
+  grid-column: span 2;
+  font-weight: 600;
+  color: #334155;
+  padding: 10px 0;
 }
 
-.date-row .form-group {
-  flex: 1;
-}
-
-/* Character counter */
-.char-count {
-  font-size: 12px;
-  color: #6b7280;
-  text-align: right;
-  margin-top: 4px;
-}
-
-/* Error */
-.error {
-  color: #E7210B;
-  font-size: 13px;
-  margin-top: 4px;
-}
-
-/* Buttons Row */
-.button-row {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 25px;
-}
-
-/* Cancel */
-.btn-secondary {
+/* ===============================
+   Buttons
+=============================== */
+.apply-card button {
   padding: 10px 18px;
-  background: #f3f4f6;
+  border-radius: 6px;
   border: none;
-  border-radius: 8px;
-  cursor: pointer;
   font-weight: 500;
+  cursor: pointer;
   transition: 0.2s ease;
 }
 
-.btn-secondary:hover {
-  background: #e5e7eb;
+.apply-card button[type="button"] {
+  background-color: #e2e8f0;
+  color: #1e293b;
 }
 
-/* Primary Submit */
-.btn-primary {
-  padding: 10px 22px;
-  background: #28417B;
+.apply-card button[type="button"]:hover {
+  background-color: #cbd5e1;
+}
+
+.apply-card button[type="submit"] {
+  background-color: #2563eb;
   color: white;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: 500;
-  transition: 0.2s ease;
 }
 
-.btn-primary:hover {
-  opacity: 0.9;
+.apply-card button[type="submit"]:hover {
+  background-color: #1d4ed8;
 }
 
-.btn-primary:disabled {
-  background: #9ca3af;
+.apply-card button:disabled {
+  opacity: 0.6;
   cursor: not-allowed;
+}
+
+/* ===============================
+   Success & Error Messages
+=============================== */
+.success-msg {
+  background-color: #dcfce7;
+  color: #166534;
+  padding: 10px 14px;
+  border-radius: 6px;
+  margin-bottom: 20px;
+  font-size: 14px;
+}
+
+.error-msg {
+  background-color: #fee2e2;
+  color: #991b1b;
+  padding: 10px 14px;
+  border-radius: 6px;
+  margin-bottom: 20px;
+  font-size: 14px;
+}
+
+/* ===============================
+   Responsive Design
+=============================== */
+@media (max-width: 768px) {
+  .apply-card form {
+    grid-template-columns: 1fr;
+  }
+
+  .apply-card textarea,
+  .leave-days {
+    grid-column: span 1;
+  }
 }
