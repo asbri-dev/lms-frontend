@@ -58,6 +58,8 @@ const LeaveApprovals = () => {
             leaveFrom: leave.leaveFrom,
             leaveTo: leave.leaveTo,
             reasonForLeave: leave.reasonForLeave,
+            sessionFrom: leave.sessionFrom,
+            sessionTo: leave.sessionTo,
           }),
         }
       );

@@ -6,8 +6,15 @@ import SetPassword from "./pages/auth/SetPassword";
 import ForgotPassword from "./pages/auth/ForgotPassword";
 
 import SuperAdminDashboard from "./pages/superadmin/SuperAdminDashboard";
+import AttendanceMuster from "./pages/superadmin/AttendanceMuster";
+
+
+import OdApprovals from "./pages/admin/OdApprovals";
+import PermissionApprovals from "./pages/admin/PermissionApproval"; 
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import LeaveApprovals from "./pages/admin/LeaveApprovals";
+import { UserManagement } from "./pages/admin/UserManagement";
+
 
 import FacultyDashboard from "./pages/faculty/FacultyDashboard";
 import ApplyLeave from "./pages/faculty/ApplyLeave";
@@ -41,6 +48,7 @@ function App() {
         }
       >
         <Route path="dashboard" element={<SuperAdminDashboard />} />
+        <Route path="attendance-muster" element={<AttendanceMuster />} />
       </Route>
 
       {/* ADMIN */}
@@ -54,6 +62,9 @@ function App() {
       >
         <Route path="dashboard" element={<AdminDashboard />} />
          <Route path="leave-approvals" element={<LeaveApprovals />} />
+         <Route path="od-approvals" element={<OdApprovals />} />
+         <Route path="permission-approvals" element={<PermissionApprovals />} />
+         <Route path="users" element={<UserManagement />} />
       </Route>
 
       {/* FACULTY */}

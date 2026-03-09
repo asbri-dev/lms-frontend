@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "../../auth/AuthContext";
-import "./FacultyDashboard.css";
 
 const FacultyDashboard = () => {
   const { user } = useAuth();
@@ -10,6 +9,10 @@ const FacultyDashboard = () => {
   const [error, setError] = useState("");
 
   useEffect(() => {
+    if (!user?.employeeId) return;
+
+    let isMounted = true;
+
     const fetchDashboardDetails = async () => {
       try {
         setLoading(true);
@@ -19,68 +22,132 @@ const FacultyDashboard = () => {
           `http://localhost:9090/getDashboardDetails?empId=${user.employeeId}`
         );
 
-        const data = await response.json();
+        let data = null;
+        try {
+          data = await response.json();
+        } catch {
+          data = null;
+        }
+
+        if (!isMounted) return;
+
+        if (response.status >= 500) {
+          setError("Server error. Please try again later.");
+          return;
+        }
 
         if (!response.ok) {
-          throw new Error(data.message || "Failed to load dashboard");
+          setError(data?.message || "Failed to load dashboard.");
+          return;
         }
 
         setDashboardData(data);
-      } catch (err) {
-        setError(err.message || "Something went wrong");
+
+      } catch {
+        if (isMounted) {
+          setError("Network error. Please check connection.");
+        }
       } finally {
-        setLoading(false);
+        if (isMounted) {
+          setLoading(false);
+        }
       }
     };
 
-    if (user?.employeeId) {
-      fetchDashboardDetails();
-    }
-  }, [user]);
+    fetchDashboardDetails();
 
-  // 🔄 Loading State
+    return () => {
+      isMounted = false;
+    };
+  }, [user?.employeeId]);
+
+  /* ------------------ LOADING ------------------ */
   if (loading) {
-    return <div className="dashboard-loading">Loading dashboard...</div>;
+    return (
+      <div className="flex items-center justify-center h-64 text-gray-500 text-lg">
+        Loading dashboard...
+      </div>
+    );
   }
 
-  // ❌ Error State
+  /* ------------------ ERROR ------------------ */
   if (error) {
-    return <div className="dashboard-error">{error}</div>;
+    return (
+      <div className="bg-red-50 border border-red-200 text-red-600 p-4 rounded-lg">
+        {error}
+      </div>
+    );
   }
 
+  /* ------------------ UI ------------------ */
   return (
-    <div className="faculty-dashboard">
+    <div className="space-y-8">
+
       {/* Header Section */}
-      <div className="dashboard-header">
-        <h2>Welcome, {dashboardData?.employeeName},{user.employeeId}</h2>
-        <p>
+      <div
+        className="text-white p-6 rounded-xl shadow-md"
+        style={{
+          background: "linear-gradient(to right, #2b3c6b, #3f548f)",
+        }}
+      >
+        <h2 className="text-2xl font-semibold">
+          Welcome, {user?.name}
+        </h2>
+
+        <p className="text-sm mt-1 opacity-90">
+          Employee ID: {user?.employeeId}
+        </p>
+
+        <p className="text-sm mt-2">
           Reporting To:{" "}
-          <strong>{dashboardData?.rmName}</strong> (
-          {dashboardData?.rmEmployeeId})
+          <span className="font-medium">
+            {dashboardData?.rmName}
+          </span>{" "}
+          ({dashboardData?.rmEmployeeId})
         </p>
       </div>
 
-      {/* Leave Stats */}
-      <div className="dashboard-stats">
-        <div className="stat-card">
-          <h4>Available Casual Leave</h4>
-          <span>{dashboardData?.casualLeaves || 0}</span>
-        </div>
+      {/* Stats Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
 
-        <div className="stat-card">
-          <h4>Available Medical Leave</h4>
-          <span>{dashboardData?.medicalLeaves || 0}</span>
-        </div>
+        <StatCard
+          title="Casual Leave"
+          value={dashboardData?.casualLeaves || 0}
+          color="text-indigo-700"
+        />
 
-        <div className="stat-card">
-          <h4>Permission Requests</h4>
-          <span>{dashboardData?.permissionRequests || 0}</span>
-        </div>
+        <StatCard
+          title="Medical Leave"
+          value={dashboardData?.medicalLeaves || 0}
+          color="text-indigo-600"
+        />
 
-        <div className="stat-card">
-          <h4>On Duty Requests</h4>
-          <span>{dashboardData?.OnDutyRequests || 0}</span>
-        </div>
+        <StatCard
+          title="Permission Requests"
+          value={dashboardData?.permissionRequests || 0}
+          color="text-indigo-700"
+        />
+
+        <StatCard
+          title="On Duty Requests"
+          value={dashboardData?.OnDutyRequests || 0}
+          color="text-indigo-600"
+        />
+
+      </div>
+    </div>
+  );
+};
+
+/* ------------------ Reusable Card ------------------ */
+
+const StatCard = ({ title, value, color }) => {
+  return (
+    <div className="bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition duration-200">
+      <h4 className="text-sm text-gray-500 mb-2">{title}</h4>
+
+      <div className={`text-3xl font-bold ${color}`}>
+        {value}
       </div>
     </div>
   );

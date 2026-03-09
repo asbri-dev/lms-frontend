@@ -1,19 +1,21 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useState, useMemo } from "react";
 
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
 
-  // ✅ Initialize directly from sessionStorage
+  // 🔐 Initialize token from sessionStorage
   const [token, setToken] = useState(() => {
     return sessionStorage.getItem("authToken");
   });
 
+  // 👤 Initialize user from sessionStorage
   const [user, setUser] = useState(() => {
     const storedUser = sessionStorage.getItem("authUser");
     return storedUser ? JSON.parse(storedUser) : null;
   });
 
+  // ✅ Called after OTP verification
   const handleLoginSuccess = (jwtToken, userData) => {
     setToken(jwtToken);
     setUser(userData);
@@ -22,6 +24,7 @@ export const AuthProvider = ({ children }) => {
     sessionStorage.setItem("authUser", JSON.stringify(userData));
   };
 
+  // 🚪 Logout
   const logout = () => {
     setToken(null);
     setUser(null);
@@ -30,25 +33,29 @@ export const AuthProvider = ({ children }) => {
     sessionStorage.removeItem("authUser");
   };
 
+  // 🧠 Memoized context value
+  const value = useMemo(() => ({
+    token,
+    user,
+    isAuthenticated: !!token,
+    handleLoginSuccess,
+    logout,
+  }), [token, user]);
+
   return (
-    <AuthContext.Provider
-      value={{
-        token,
-        user,
-        isAuthenticated: !!token,
-        handleLoginSuccess,
-        logout,
-      }}
-    >
+    <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   );
 };
 
+// 🔑 Custom hook for using AuthContext
 export const useAuth = () => {
   const ctx = useContext(AuthContext);
+
   if (!ctx) {
     throw new Error("useAuth must be used inside AuthProvider");
   }
+
   return ctx;
 };

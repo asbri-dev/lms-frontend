@@ -1,61 +1,52 @@
-.app-header {
-  height: 60px;
-  background-color: #F7F7FF;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0 25px;
-  border-bottom: 1px solid #ddd;
+/* Notification */
+.notification-wrapper {
+  position: relative;
 }
 
-.header-left h3 {
-  color: #28417B;
-  font-weight: 600;
+.bell-icon {
+  position: relative;
+  font-size: 20px;
+  cursor: pointer;
 }
 
-.header-right {
-  display: flex;
-  align-items: center;
-  gap: 18px;
+.notification-badge {
+  position: absolute;
+  top: -6px;
+  right: -8px;
+  background: red;
+  color: white;
+  font-size: 11px;
+  padding: 3px 6px;
+  border-radius: 50%;
 }
 
-/* User Info */
-.user-info {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  color: #28417B;
-  font-weight: 500;
+.notification-dropdown {
+  position: absolute;
+  right: 0;
+  top: 35px;
+  width: 250px;
+  background: white;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+  border-radius: 8px;
+  padding: 10px;
+  z-index: 1000;
 }
 
-.username {
+.notification-dropdown h4 {
+  margin: 5px 0 10px;
+}
+
+.notification-item {
+  padding: 8px;
+  border-bottom: 1px solid #eee;
   font-size: 14px;
 }
 
-/* Role Badge */
-.role-badge {
-  background-color: #28417B;
-  color: #F7F7FF;
-  padding: 4px 10px;
-  border-radius: 20px;
-  font-size: 12px;
-  font-weight: 500;
+.notification-item:last-child {
+  border-bottom: none;
 }
 
-/* Logout Button */
-.logout-btn {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 12px;
-  background-color: #E7210B;
-  border: none;
-  color: white;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: 0.2s ease;
-}
-
-.logout-btn:hover {
-  opacity: 0.9;
+.no-notifications {
+  font-size: 14px;
+  color: #666;
 }

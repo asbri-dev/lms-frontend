@@ -108,9 +108,10 @@ const handleVerifyOtp = async () => {
 
     // 🔐 Build dynamic user object
     const userData = {
-      role: data.role,
-      employeeId: data.employeeId,
-    };
+  employeeId: data.employeeId,
+  role: data.role,
+  name: data.employeeName,
+};
 
     // Add hierarchy fields only when needed
     if (data.role === "FACULTY" && data.adminId) {
@@ -150,52 +151,79 @@ const handleVerifyOtp = async () => {
 };
 
   return (
-    <div className="page-center otp-container">
-      <div className="card otp-card">
-        <div className="otp-header">
-          <h2>OTP Verification</h2>
-          <p>Enter the 6-digit OTP sent to your registered email</p>
-        </div>
+  <div className="min-h-screen flex items-center justify-center 
+                  bg-gradient-to-br from-[#2b3c6b] to-[#3f548f] p-4">
 
-        <div className="otp-input-group" onPaste={handlePaste}>
-          {otp.map((digit, index) => (
-            <input
-              key={index}
-              ref={(el) => (inputRefs.current[index] = el)}
-              type="text"
-              inputMode="numeric"
-              maxLength={1}
-              className="otp-input"
-              value={digit}
-              onChange={(e) => handleChange(e.target.value, index)}
-              onKeyDown={(e) => handleKeyDown(e, index)}
-              onFocus={(e) => e.target.select()}
-            />
-          ))}
-        </div>
+    <div className="bg-white w-full max-w-md rounded-2xl shadow-xl p-8">
 
-        {error && <div className="otp-error">{error}</div>}
-
-        <div className="otp-button">
-          <button
-            onClick={handleVerifyOtp}
-            disabled={loading}
-            className="btn-primary"
-          >
-            {loading ? "Verifying..." : "Verify OTP"}
-          </button>
-        </div>
-
-        <div className="otp-resend">
-          {canResend ? (
-            <button onClick={startTimer}>Resend OTP</button>
-          ) : (
-            <>Resend OTP in {timeLeft}s</>
-          )}
-        </div>
+      {/* Header */}
+      <div className="text-center mb-6">
+        <h2 className="text-2xl font-semibold text-gray-800">
+          OTP Verification
+        </h2>
+        <p className="text-gray-500 text-sm mt-1">
+          Enter the 6-digit OTP sent to your registered email
+        </p>
       </div>
+
+      {/* OTP Inputs */}
+      <div
+        className="flex justify-between gap-3 mb-4"
+        onPaste={handlePaste}
+      >
+        {otp.map((digit, index) => (
+          <input
+            key={index}
+            ref={(el) => (inputRefs.current[index] = el)}
+            type="text"
+            inputMode="numeric"
+            maxLength={1}
+            value={digit}
+            onChange={(e) => handleChange(e.target.value, index)}
+            onKeyDown={(e) => handleKeyDown(e, index)}
+            onFocus={(e) => e.target.select()}
+            className="w-12 h-12 text-center text-lg font-semibold
+                       border border-gray-300 rounded-lg
+                       focus:outline-none focus:ring-2 focus:ring-[#3f548f]"
+          />
+        ))}
+      </div>
+
+      {/* Error */}
+      {error && (
+        <div className="text-red-600 text-sm text-center mb-4">
+          {error}
+        </div>
+      )}
+
+      {/* Verify Button */}
+      <button
+        onClick={handleVerifyOtp}
+        disabled={loading}
+        className="w-full bg-[#2b3c6b] hover:bg-[#3f548f]
+                   text-white py-2 rounded-lg font-medium
+                   transition duration-200"
+      >
+        {loading ? "Verifying..." : "Verify OTP"}
+      </button>
+
+      {/* Resend */}
+      <div className="text-center mt-4 text-sm text-gray-500">
+        {canResend ? (
+          <button
+            onClick={startTimer}
+            className="text-[#2b3c6b] hover:underline"
+          >
+            Resend OTP
+          </button>
+        ) : (
+          <>Resend OTP in {timeLeft}s</>
+        )}
+      </div>
+
     </div>
-  );
+  </div>
+);
 };
 
 export default OtpVerify;
