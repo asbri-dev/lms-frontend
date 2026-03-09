@@ -1,9 +1,6 @@
-// pages/AttendanceInfo.jsx
-
 import { useEffect, useState, useCallback } from "react";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
-import { format, addMonths, subMonths } from "date-fns";
 import { useAuth } from "../../auth/AuthContext";
 import {
   getMonthRange,
@@ -20,15 +17,17 @@ const AttendanceInfo = () => {
   const [selectedDetails, setSelectedDetails] = useState(null);
   const [selectedDate, setSelectedDate] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  /* ===============================
-     Fetch Attendance
-  =============================== */
+  /* =========================================
+     Fetch Attendance (Month Based)
+  ========================================= */
   const fetchAttendance = useCallback(async () => {
     if (!user?.employeeId) return;
 
     try {
       setLoading(true);
+      setError("");
 
       const { fromDate, toDate } = getMonthRange(currentMonth);
 
@@ -36,19 +35,34 @@ const AttendanceInfo = () => {
         `http://localhost:9090/getAttedanceInfo?empId=${user.employeeId}&fromDate=${fromDate}&toDate=${toDate}`
       );
 
-      if (!response.ok) throw new Error("Failed to fetch");
+      let data = null;
+      try {
+        data = await response.json();
+      } catch {
+        data = null;
+      }
 
-      const data = await response.json();
+      if (response.status >= 500) {
+        setError("Server error. Please try again later.");
+        return;
+      }
+
+      if (!response.ok) {
+        setError(data?.message || "Failed to load attendance.");
+        return;
+      }
+
       const transformed = transformAttendanceData(data);
-
       setEvents(transformed);
 
+      // Create fast lookup map
       const map = {};
       transformed.forEach((e) => {
         map[e.date] = e.extendedProps;
       });
       setEventMap(map);
 
+      // Auto select first available date
       if (transformed.length > 0) {
         setSelectedDate(transformed[0].date);
         setSelectedDetails(transformed[0].extendedProps);
@@ -57,13 +71,12 @@ const AttendanceInfo = () => {
         setSelectedDetails(null);
       }
 
-    } catch (err) {
-      console.error(err);
-      setSelectedDetails(null);
+    } catch {
+      setError("Network error. Please check your connection.");
     } finally {
       setLoading(false);
     }
-  }, [currentMonth, user]);
+  }, [currentMonth, user?.employeeId]);
 
   useEffect(() => {
     fetchAttendance();
@@ -72,49 +85,58 @@ const AttendanceInfo = () => {
   return (
     <div className="attendance-container">
 
-      {/* LEFT - CALENDAR */}
+      {/* LEFT SIDE - CALENDAR */}
       <div className="calendar-section">
 
-        <div className="attendance-header">
-          <button onClick={() => setCurrentMonth(prev => subMonths(prev, 1))}>
-            ←
-          </button>
-          <h3>{format(currentMonth, "MMMM yyyy")}</h3>
-          <button onClick={() => setCurrentMonth(prev => addMonths(prev, 1))}>
-            →
-          </button>
-        </div>
-
         {loading && <div className="spinner">Loading...</div>}
+        {error && <div className="error-msg">{error}</div>}
 
         <FullCalendar
-  plugins={[dayGridPlugin]}
-  initialView="dayGridMonth"
-  events={events}
-  height="auto"
-  eventDisplay="block"
+          plugins={[dayGridPlugin]}
+          initialView="dayGridMonth"
+          events={events}
+          height="auto"
+          eventDisplay="block"
 
-  // 🔹 Clicking empty cell
-  dateClick={(info) => {
-    setSelectedDate(info.dateStr);
-    setSelectedDetails(eventMap[info.dateStr] || null);
-  }}
+          headerToolbar={{
+            left: "prev,next today",
+            center: "title",
+            right: ""
+          }}
 
-  // 🔹 Clicking event (P, A, CL etc.)
-  eventClick={(info) => {
-    const clickedDate = info.event.startStr;
+          /* 🔥 When month changes */
+          datesSet={(arg) => {
+            const newMonth = arg.view.currentStart;
 
-    setSelectedDate(clickedDate);
-    setSelectedDetails(eventMap[clickedDate] || null);
-  }}
+            if (
+              newMonth.getMonth() !== currentMonth.getMonth() ||
+              newMonth.getFullYear() !== currentMonth.getFullYear()
+            ) {
+              setCurrentMonth(newMonth);
+            }
+          }}
 
-  dayCellClassNames={(arg) =>
-    arg.dateStr === selectedDate ? ["selected-day"] : []
-  }
-/>
+          /* 🔥 Click empty date */
+          dateClick={(info) => {
+            setSelectedDate(info.dateStr);
+            setSelectedDetails(eventMap[info.dateStr] || null);
+          }}
+
+          /* 🔥 Click event (P, A, etc.) */
+          eventClick={(info) => {
+            const clickedDate = info.event.startStr;
+            setSelectedDate(clickedDate);
+            setSelectedDetails(eventMap[clickedDate] || null);
+          }}
+
+          /* 🔥 Highlight selected day */
+          dayCellClassNames={(arg) =>
+            arg.dateStr === selectedDate ? ["selected-day"] : []
+          }
+        />
       </div>
 
-      {/* RIGHT - DETAILS */}
+      {/* RIGHT SIDE - DETAILS PANEL */}
       <div className="details-section">
         {selectedDetails?.details ? (
           <>
@@ -122,8 +144,14 @@ const AttendanceInfo = () => {
 
             <div className="card">
               <h4>Status Details</h4>
-              <p><strong>Status:</strong> {selectedDetails.details.status}</p>
-              <p><strong>Total Work Hours:</strong> {selectedDetails.details.workDuration}</p>
+              <p>
+                <strong>Status:</strong>{" "}
+                {selectedDetails.details.status}
+              </p>
+              <p>
+                <strong>Total Work Hours:</strong>{" "}
+                {selectedDetails.details.workDuration}
+              </p>
             </div>
 
             <div className="card">

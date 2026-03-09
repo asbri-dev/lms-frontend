@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import "./Login.css";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -23,7 +22,6 @@ const Login = () => {
     try {
       setIsLoading(true);
 
-      // 🔐 BACKEND LOGIN API (OTP TRIGGER)
       const response = await fetch("http://localhost:9090/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -33,19 +31,26 @@ const Login = () => {
         }),
       });
 
-      const data = await response.json();
+const text = await response.text();
 
-      if (!response.ok) {
-        throw new Error(data.message || "Login failed");
-      }
+let data = null;
 
-      // ✅ Store TEMP OTP session data (NOT AUTH TOKEN)
+try {
+  data = JSON.parse(text);
+} catch {
+  data = null;
+}
+
+if (!response.ok) {
+  throw new Error(
+    data?.message || text || "Login failed"
+  );
+}
+
       sessionStorage.setItem("otpToken", data.token);
       sessionStorage.setItem("employeeId", data.employeeId);
 
-      // ✅ Go to OTP verification page
       navigate("/otp");
-
     } catch (err) {
       setError(err.message);
     } finally {
@@ -54,78 +59,101 @@ const Login = () => {
   };
 
   return (
-    <div className="page-center login-container">
-      <div className="card login-card">
-        {/* HEADER */}
-        <div className="login-header">
-          <h2>Login</h2>
-          <p>Please enter your credentials</p>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#2b3c6b] to-[#3f548f] p-4">
+
+      <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-8">
+
+        {/* Header */}
+        <div className="text-center mb-6">
+          <h2 className="text-2xl font-semibold text-gray-800">
+            Login
+          </h2>
+          <p className="text-gray-500 text-sm mt-1">
+            Please enter your credentials
+          </p>
         </div>
 
-        {/* ERROR */}
-        {error && <div className="alert alert-error">{error}</div>}
+        {/* Error */}
+        {error && (
+          <div className="bg-red-100 text-red-600 text-sm p-3 rounded-lg mb-4">
+            {error}
+          </div>
+        )}
 
-        {/* FORM */}
-        <form onSubmit={handleSubmit}>
-          <div className="login-form-group">
-            <label>Mobile Number</label>
+        <form onSubmit={handleSubmit} className="space-y-5">
+
+          {/* Mobile Number */}
+          <div>
+            <label className="text-sm text-gray-600 font-medium">
+              Mobile Number
+            </label>
+
             <input
               type="tel"
-              className="input"
               value={mobileNumber}
               onChange={(e) => setMobileNumber(e.target.value)}
               disabled={isLoading}
               placeholder="Enter mobile number"
+              className="mt-1 w-full border border-gray-300 rounded-lg px-3 py-2 
+                         focus:outline-none focus:ring-2 focus:ring-[#3f548f]"
             />
           </div>
 
-          <div className="login-form-group">
-            <label>Password</label>
-            <div className="login-password-wrapper">
+          {/* Password */}
+          <div>
+            <label className="text-sm text-gray-600 font-medium">
+              Password
+            </label>
+
+            <div className="relative mt-1">
               <input
                 type={showPassword ? "text" : "password"}
-                className="input"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 disabled={isLoading}
                 placeholder="Enter password"
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 
+                           focus:outline-none focus:ring-2 focus:ring-[#3f548f]"
               />
+
               <button
                 type="button"
-                className="toggle-password"
                 onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-2 text-sm text-[#2b3c6b]"
               >
                 {showPassword ? "Hide" : "Show"}
               </button>
             </div>
           </div>
 
-          {/* BUTTON */}
-          <div className="login-button">
+          {/* Login Button */}
+          <button
+            type="submit"
+            disabled={isLoading}
+            className="w-full bg-[#2b3c6b] text-white py-2 rounded-lg 
+                       hover:bg-[#3f548f] transition font-medium"
+          >
+            {isLoading ? "Logging in..." : "Login"}
+          </button>
+
+          {/* Forgot Password */}
+          <div className="text-right">
             <button
-              type="submit"
-              className="btn-primary"
-              disabled={isLoading}
+              type="button"
+              onClick={() => navigate("/forgot-password")}
+              className="text-sm text-[#2b3c6b] hover:underline"
             >
-              {isLoading ? "Logging in..." : "Login"}
+              Forgot Password?
             </button>
           </div>
-          {/* Forgot Password */}
-<div className="login-forgot">
-  <button
-    type="button"
-    className="link-button"
-    onClick={() => navigate("/forgot-password")}
-  >
-    Forgot Password?
-  </button>
-</div>
+
         </form>
 
-        {/* FOOTER */}
-        <div className="login-footer">
+        {/* Footer */}
+        <div className="text-center text-xs text-gray-400 mt-6">
           © 2025 Your Company
         </div>
+
       </div>
     </div>
   );

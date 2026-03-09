@@ -65,7 +65,7 @@ const AdminDashboard = () => {
       <div key={index} className="request-card">
         <div>
           <h4>{leave.employeeId}</h4>
-          <p>{leave.typeOfLeave}</p>
+          <p>{leave.typeOfLeave}</p>+
           <p>
             {leave.leaveFrom} - {leave.leaveTo}
           </p>

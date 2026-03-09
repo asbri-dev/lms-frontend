@@ -13,3 +13,5 @@
 
 /* 4️⃣ Reusable UI components (buttons, inputs, cards) */
 @import "./styles/components.css";
+
+@import "tailwindcss";
