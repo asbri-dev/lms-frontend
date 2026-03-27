@@ -23,7 +23,7 @@ const Sidebar = () => {
     "text-xs font-semibold text-gray-400 uppercase tracking-wider mt-6 mb-2";
 
   return (
-    <aside className="w-64 bg-[#2b3c6b] text-white min-h-screen p-6 flex flex-col">
+    <aside className="h-full bg-[#2b3c6b] text-white p-6">
 
       {/* Logo / Title */}
       <div className="mb-10">
@@ -49,6 +49,16 @@ const Sidebar = () => {
             <LayoutDashboard size={18} />
             Attendance Muster
           </NavLink>
+
+            <NavLink to="/superadmin/excel-uploads" className={linkClasses}>
+            <LayoutDashboard size={18} />
+            Excel Uploads
+          </NavLink>
+
+          <NavLink to="/superadmin/holiday-settings" className={linkClasses}>
+            <LayoutDashboard size={18} />
+            Holiday Settings
+          </NavLink>
           </>
         )}
 
@@ -62,16 +72,26 @@ const Sidebar = () => {
               Dashboard
             </NavLink>
 
-            <p className={sectionTitle}>Management</p>
+            <p className={sectionTitle}>User Management</p>
 
             <NavLink to="/admin/users" className={linkClasses}>
               <Users size={18} />
-              Users
+              Faculty Profiles
             </NavLink>
-
+<p className={sectionTitle}>Approvals</p>
             <NavLink to="/admin/leave-approvals" className={linkClasses}>
               <ClipboardCheck size={18} />
               Leave Approvals
+            </NavLink>
+
+            <NavLink to="/admin/od-approvals" className={linkClasses}>
+              <ClipboardCheck size={18} />
+              OD Approvals
+            </NavLink>
+
+            <NavLink to="/admin/permission-approvals" className={linkClasses}>
+              <ClipboardCheck size={18} />
+              Permission Approvals
             </NavLink>
           </>
         )}
@@ -85,23 +105,34 @@ const Sidebar = () => {
               <LayoutDashboard size={18} />
               Dashboard
             </NavLink>
-
+            <p className={sectionTitle}>Attendance</p>
             <NavLink to="/faculty/attendance" className={linkClasses}>
               <CalendarDays size={18} />
-              Attendance
+              My Attendance
+            </NavLink>
+            <p className={sectionTitle}>Request Status</p>
+            <NavLink to="/faculty/my-leaves" className={linkClasses}>
+              <ClipboardCheck size={18} />
+              Pending Request
             </NavLink>
 
-            <p className={sectionTitle}>Leave Management</p>
+            <p className={sectionTitle}>Requests & Applications</p>
 
             <NavLink to="/faculty/apply-leave" className={linkClasses}>
               <FileText size={18} />
               Apply Leave
             </NavLink>
 
-            <NavLink to="/faculty/my-leaves" className={linkClasses}>
+            <NavLink to="/faculty/apply-permission" className={linkClasses}>
               <ClipboardCheck size={18} />
-              My Leaves
+              Apply Permission
             </NavLink>
+            
+             <NavLink to="/faculty/apply-od" className={linkClasses}>
+              <ClipboardCheck size={18} />
+              Apply OD
+            </NavLink>
+
           </>
         )}
 

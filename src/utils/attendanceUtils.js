@@ -14,13 +14,26 @@ export const getMonthRange = (date) => ({
    Status Mapping
 ============================ */
 export const STATUS_MAP = {
-  Present: { label: "P", color: "#16a34a", type: "Present" },
-  Absent: { label: "A", color: "#dc2626", type: "Absent" },
-  Offday: { label: "OFF", color: "#6b7280", type: "Leave" },
-  "Casual Leave": { label: "CL", color: "#2563eb", type: "Leave" },
-  "Medical Leave": { label: "ML", color: "#9333ea", type: "Leave" },
-  Onduty: { label: "OD", color: "#f59e0b", type: "Leave" },
+  Present: { label: "P", color: "#D7FDF0", type: "Present" },
+  Absent: { label: "A", color: "#FE8985", type: "Absent" },
+  Off: { label: "OFF", color: "#6b7280", type: "Leave" },
+  cl: { label: "Casual Leave", color: "#79ADDC", type: "Leave" },
+  ml: { label: "Medical Leave", color: "#79ADDC", type: "Leave" },
+  Onduty: { label: "OD", color: "#1B2A41", type: "Leave" },
   Holiday: { label: "H", color: "#0ea5e9", type: "Leave" },
+  "Present:Absent": { label: "P/A", color: "#FE8985", type: "Present/Absent" },
+  "Absent:Present": { label: "A/P", color: "#FE8985", type: "Absent/Present" },
+  "Present:cl": { label: "P/CL", color: "#D7FDF0", type: "Present/Casual Leave" },
+  "cl:Present": { label: "CL/P", color: "#D7FDF0", type: "Casual Leave/Present" },
+  "Present:ml": { label: "P/ML", color: "#D7FDF0", type: "Present/Medical Leave" },
+  "ml:Present": { label: "ML/P", color: "#D7FDF0", type: "Medical Leave/Present" },
+  "Absent:cl": { label: "A/CL", color: "#FE8985", type: "Absent/Casual Leave" },
+  "cl:Absent": { label: "CL/A", color: "#FE8985", type: "Casual Leave/Absent" },
+  "Absent:ml": { label: "A/ML", color: "#FE8985", type: "Absent/Medical Leave" },
+  "ml:Absent": { label: "ML/A", color: "#FE8985", type: "Medical Leave/Absent" },
+  "PR-Present:Present": { label: "PR-P", color: "#D7FDF0", type: "Present" },
+  "Present:Present-PR": { label: "P-PR", color: "#D7FDF0", type: "Present" },
+  Unknown: { label: "?", color: "#FF934F", type: "Unknown" },
 };
 
 /* ============================

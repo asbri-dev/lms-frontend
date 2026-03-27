@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "../../auth/AuthContext";
+import AttendanceInfo from "../faculty/AttendanceInfo";
 
 const PAGE_SIZE = 10;
 
@@ -12,6 +13,8 @@ const SuperAdminDashboard = () => {
   const [search, setSearch] = useState("");
   const [department, setDepartment] = useState("ALL");
   const [page, setPage] = useState(1);
+
+  const [selectedEmployee, setSelectedEmployee] = useState(null);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -112,6 +115,28 @@ const SuperAdminDashboard = () => {
     );
   }
 
+  /* ================= ATTENDANCE VIEW ================= */
+  if (selectedEmployee) {
+    return (
+      <div className="space-y-6">
+
+        <button
+          onClick={() => setSelectedEmployee(null)}
+          className="px-4 py-2 bg-gray-200 rounded-md"
+        >
+          ← Back to Dashboard
+        </button>
+
+        <h2 className="text-xl font-semibold text-gray-700">
+          Attendance - {selectedEmployee.firstName} {selectedEmployee.lastName}
+        </h2>
+
+        <AttendanceInfo employeeId={selectedEmployee.empId} />
+
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-8">
 
@@ -199,7 +224,11 @@ const SuperAdminDashboard = () => {
 
             <tbody>
               {paginatedData.map((emp) => (
-                <tr key={emp.id} className="border-t">
+                <tr
+                  key={emp.id}
+                  className="border-t cursor-pointer hover:bg-gray-50"
+                  onClick={() => setSelectedEmployee(emp)}
+                >
 
                   <td className="p-3">{emp.empId}</td>
 

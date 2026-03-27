@@ -76,7 +76,7 @@ const Header = () => {
   return (
     <>
       {/* ================= HEADER ================= */}
-      <header className="w-full bg-white shadow-sm px-6 py-4 flex justify-between items-center">
+     <header className="w-full bg-white shadow-sm px-6 py-4 flex justify-between items-center">
 
         <h2 className="text-xl font-semibold text-gray-800">
           Leave Management System
@@ -111,7 +111,7 @@ const Header = () => {
       </header>
 
       {/* ================= PROFILE MODAL ================= */}
-      {showProfile && (
+      {showProfile && role === "FACULTY" && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
 
           <div className="bg-white w-full max-w-6xl rounded-2xl shadow-2xl p-6 relative">

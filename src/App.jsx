@@ -7,6 +7,8 @@ import ForgotPassword from "./pages/auth/ForgotPassword";
 
 import SuperAdminDashboard from "./pages/superadmin/SuperAdminDashboard";
 import AttendanceMuster from "./pages/superadmin/AttendanceMuster";
+import HolidaySettings from "./pages/superadmin/HolidaySettings";
+import ExcelUploads from "./pages/superadmin/ExcelUploads";
 
 
 import OdApprovals from "./pages/admin/OdApprovals";
@@ -20,6 +22,8 @@ import FacultyDashboard from "./pages/faculty/FacultyDashboard";
 import ApplyLeave from "./pages/faculty/ApplyLeave";
 import MyLeaves from "./pages/faculty/MyLeaves";
 import AttendanceInfo from "./pages/faculty/AttendanceInfo";
+import ApplyPermission from "./pages/faculty/ApplyPermission";
+import ApplyOd from "./pages/faculty/ApplyOd";
 
 
 
@@ -49,6 +53,8 @@ function App() {
       >
         <Route path="dashboard" element={<SuperAdminDashboard />} />
         <Route path="attendance-muster" element={<AttendanceMuster />} />
+        <Route path="holiday-settings" element={<HolidaySettings />} /> 
+        <Route path="excel-uploads" element={<ExcelUploads />} />
       </Route>
 
       {/* ADMIN */}
@@ -80,6 +86,8 @@ function App() {
   <Route path="apply-leave" element={<ApplyLeave />} />
   <Route path="my-leaves" element={<MyLeaves />} />
   <Route path="/faculty/attendance" element={<AttendanceInfo />} />
+  <Route path="/faculty/apply-permission" element={<ApplyPermission />} />
+  <Route path="/faculty/apply-od" element={<ApplyOd />} />
 </Route>
 
 
