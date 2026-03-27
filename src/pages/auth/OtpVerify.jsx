@@ -148,8 +148,48 @@ const handleVerifyOtp = async () => {
   } finally {
     setLoading(false);
   }
-};
 
+  
+};
+// ✅ RESEND OTP (OUTSIDE)
+const handleResendOtp = async () => {
+  try {
+    setLoading(true);
+    setError("");
+
+    const mobileNumber = sessionStorage.getItem("mobileNumber");
+
+    if (!mobileNumber) {
+      setError("Mobile number not found. Please login again.");
+      return;
+    }
+
+    const response = await fetch(
+      `http://localhost:9090/resendOtp?mobileNumber=${mobileNumber}`,
+      {
+        method: "GET", // confirm backend
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || "Failed to resend OTP");
+    }
+
+    // ✅ Reset UI properly
+    setOtp(Array(OTP_LENGTH).fill(""));
+    startTimer();
+
+  } catch (err) {
+    setError(err.message || "Failed to resend OTP");
+  } finally {
+    setLoading(false);
+  }
+};
   return (
   <div className="min-h-screen flex items-center justify-center 
                   bg-gradient-to-br from-[#2b3c6b] to-[#3f548f] p-4">
@@ -208,18 +248,20 @@ const handleVerifyOtp = async () => {
       </button>
 
       {/* Resend */}
-      <div className="text-center mt-4 text-sm text-gray-500">
-        {canResend ? (
-          <button
-            onClick={startTimer}
-            className="text-[#2b3c6b] hover:underline"
-          >
-            Resend OTP
-          </button>
-        ) : (
-          <>Resend OTP in {timeLeft}s</>
-        )}
-      </div>
+     {/* Resend */}
+<div className="text-center mt-4 text-sm text-gray-500">
+  {canResend ? (
+    <button
+      onClick={handleResendOtp}
+      disabled={loading}
+      className="text-[#2b3c6b] hover:underline disabled:opacity-50"
+    >
+      {loading ? "Sending..." : "Resend OTP"}
+    </button>
+  ) : (
+    <>Resend OTP in {timeLeft}s</>
+  )}
+</div>
 
     </div>
   </div>

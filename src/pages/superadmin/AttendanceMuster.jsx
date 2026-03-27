@@ -6,9 +6,9 @@ const STATUS_MAP = {
   Present: { label: "P", color: "bg-green-100 text-green-700" },
   Absent: { label: "A", color: "bg-red-100 text-red-700" },
   Holiday: { label: "H", color: "bg-blue-100 text-blue-700" },
-  Offday: { label: "OFF", color: "bg-gray-200 text-gray-700" },
-  "Casual Leave": { label: "CL", color: "bg-purple-100 text-purple-700" },
-  "Medical Leave": { label: "ML", color: "bg-pink-100 text-pink-700" },
+  Off: { label: "OFF", color: "bg-gray-200 text-gray-700" },
+  "cl": { label: "CL", color: "bg-purple-100 text-purple-700" },
+  "ml": { label: "ML", color: "bg-pink-100 text-pink-700" },
   Onduty: { label: "OD", color: "bg-yellow-100 text-yellow-700" }
 };
 
@@ -176,10 +176,10 @@ const AttendanceMuster = () => {
               const totals = {
                 Present: 0,
                 Absent: 0,
-                "Casual Leave": 0,
-                "Medical Leave": 0,
+                "cl": 0,
+                "ml": 0,
                 Onduty: 0,
-                Offday: 0,
+                Off: 0,
                 Holiday: 0
               };
 
@@ -244,13 +244,13 @@ const AttendanceMuster = () => {
                     {totals.Absent}
                   </td>
 
-                  <td className="text-center">{totals["Casual Leave"]}</td>
+                  <td className="text-center">{totals["cl"]}</td>
 
-                  <td className="text-center">{totals["Medical Leave"]}</td>
+                  <td className="text-center">{totals["ml"]}</td>
 
                   <td className="text-center">{totals.Onduty}</td>
 
-                  <td className="text-center">{totals.Offday}</td>
+                  <td className="text-center">{totals.Off}</td>
 
                   <td className="text-center">{totals.Holiday}</td>
 

@@ -18,6 +18,10 @@ const Login = () => {
       setError("Mobile number and password are required");
       return;
     }
+    if (!/^\d{10}$/.test(mobileNumber)) {
+      setError("Please enter a valid 10-digit mobile number");
+      return;
+    }
 
     try {
       setIsLoading(true);
@@ -30,7 +34,6 @@ const Login = () => {
           password,
         }),
       });
-
 const text = await response.text();
 
 let data = null;
@@ -41,21 +44,38 @@ try {
   data = null;
 }
 
-if (!response.ok) {
-  throw new Error(
-    data?.message || text || "Login failed"
-  );
+if (response.status >= 400 && response.status < 500) {
+  throw new Error(data?.message || text || "Bad request");
 }
+
+if (response.status === 500) {
+  throw new Error("Something went wrong. Please try again later.");
+}
+
+if (!response.ok) {
+  throw new Error("Request failed");
+}
+
+// success (200)
+
 
       sessionStorage.setItem("otpToken", data.token);
       sessionStorage.setItem("employeeId", data.employeeId);
+      sessionStorage.setItem("mobileNumber", mobileNumber);  // ← Add this line
+
 
       navigate("/otp");
     } catch (err) {
-      setError(err.message);
-    } finally {
-      setIsLoading(false);
-    }
+
+  if (err.message === "Failed to fetch") {
+    setError("Server is unavailable. Please try again later.");
+  } else {
+    setError(err.message);
+  }
+
+} finally {
+  setIsLoading(false);
+}
   };
 
   return (
