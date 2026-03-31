@@ -14,9 +14,9 @@ export const getMonthRange = (date) => ({
    Status Mapping
 ============================ */
 export const STATUS_MAP = {
-  Present: { label: "P", color: "#D7FDF0", type: "Present" },
+  Present: { label: "P", color: "#D7FDF0", type: "Present",textColor: "#6b7280" },
   Absent: { label: "A", color: "#FE8985", type: "Absent" },
-  Off: { label: "OFF", color: "#6b7280", type: "Leave" },
+  Off: { label: "OFF", color: "#F7F7F7", type: "Leave" },
   cl: { label: "Casual Leave", color: "#79ADDC", type: "Leave" },
   ml: { label: "Medical Leave", color: "#79ADDC", type: "Leave" },
   Onduty: { label: "OD", color: "#1B2A41", type: "Leave" },
@@ -33,6 +33,8 @@ export const STATUS_MAP = {
   "ml:Absent": { label: "ML/A", color: "#FE8985", type: "Medical Leave/Absent" },
   "PR-Present:Present": { label: "PR-P", color: "#D7FDF0", type: "Present" },
   "Present:Present-PR": { label: "P-PR", color: "#D7FDF0", type: "Present" },
+  "PR-Present:Absent": { label: "PR-A", color: "#FE8985", type: "Absent" },
+  "Absent:Present-PR": { label: "A-PR", color: "#FE8985", type: "Absent" },
   Unknown: { label: "?", color: "#FF934F", type: "Unknown" },
 };
 
@@ -51,35 +53,45 @@ export const transformAttendanceData = (data = []) => {
   });
 
   return Array.from(uniqueMap.values()).map((item) => {
-    const parsedDate = parse(item.Date, "dd-MMM-yyyy", new Date());
-    const formattedDate = format(parsedDate, "yyyy-MM-dd");
+  const parsedDate = parse(item.Date, "dd-MMM-yyyy", new Date());
+  const formattedDate = format(parsedDate, "yyyy-MM-dd");
 
-    const details = item?.AttendanceDetails || {};
-    const statusObj = STATUS_MAP[details.status] || {
-      label: "",
-      color: "#9ca3af",
-      type: "Leave",
-    };
+  const details = item?.AttendanceDetails || {};
+  const statusObj = STATUS_MAP[details.status] || {
+    label: "",
+    color: "#9ca3af",
+    type: "Leave",
+  };
 
-    return {
-      title: statusObj.label,
-      date: formattedDate,
-      color: statusObj.color,
-      extendedProps: {
-        rawDate: item.Date,
-        details: {
-          status: details.status || "Unknown",
-          sessionOne: details.sessionOne || "-",
-          sessionTwo: details.sessionTwo || "-",
-          punchIn: details.punchIn || "-",
-          punchOut: details.punchOut || "-",
-          workDuration: details.workDuration || "-",
-          lateIn: details.lateIn || "-",
-          lateOut: details.lateOut || "-",
-          earlyIn: details.earlyIn || "-",
-          earlyOut: details.earlyOut || "-",
-        },
+  // 🔥 IMPORTANT: add +1 day for background event
+  const endDate = new Date(parsedDate);
+  endDate.setDate(endDate.getDate() + 1);
+
+  return {
+    start: formattedDate,
+    end: format(endDate, "yyyy-MM-dd"),
+
+    display: "background", // ✅ FULL CELL COLOR
+
+    backgroundColor: statusObj.color,
+
+    // 👇 keep data for click
+    extendedProps: {
+      rawDate: item.Date,
+      label: statusObj.label,
+      details: {
+        status: details.status || "Unknown",
+        sessionOne: details.sessionOne || "-",
+        sessionTwo: details.sessionTwo || "-",
+        punchIn: details.punchIn || "-",
+        punchOut: details.punchOut || "-",
+        workDuration: details.workDuration || "-",
+        lateIn: details.lateIn || "-",
+        lateOut: details.lateOut || "-",
+        earlyIn: details.earlyIn || "-",
+        earlyOut: details.earlyOut || "-",
       },
-    };
-  });
+    },
+  };
+});
 };

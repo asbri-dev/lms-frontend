@@ -84,7 +84,7 @@ const AdminDashboard = () => {
       {/* HEADER */}
      <div className="bg-gradient-to-r from-[#2b3c6b] to-[#3f548f] text-white p-6 rounded-2xl shadow-md flex justify-between items-center">
              <h2 className="text-2xl font-bold">
-        Welcome, {user?.employeeId}
+        Welcome, Admin 
         </h2>
         <p className="text-sm mt-1">
           Pending Requests:{" "}

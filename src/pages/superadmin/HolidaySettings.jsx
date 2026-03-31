@@ -1,6 +1,8 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, parseISO } from "date-fns";
 import { useAuth } from "../../auth/AuthContext";
+import toast from "react-hot-toast";
+
 
 const HolidayPage = () => {
   const { user } = useAuth();
@@ -13,6 +15,8 @@ const HolidayPage = () => {
 
   const [loading, setLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState(""); 
 
   const [formData, setFormData] = useState({
     fromDate: "",
@@ -40,8 +44,9 @@ const HolidayPage = () => {
   }, [month]);
 
   /* ================= FETCH HOLIDAYS ================= */
-  const fetchHolidays = async () => {
+  const fetchHolidays = useCallback(async () => {
     try {
+       setError("");
       const res = await fetch(
         `http://localhost:9090/getHolidays?fromDate=${fromDate}&toDate=${toDate}&collegeLocation=${location}`
       );
@@ -58,11 +63,11 @@ const HolidayPage = () => {
     } catch (e) {
       console.error(e);
     }
-  };
+  }, [fromDate, toDate, location]);
 
   useEffect(() => {
     fetchHolidays();
-  }, [fromDate, toDate, location]);
+  }, [fromDate, toDate, location, fetchHolidays]);
 
   /* ================= VALIDATION ================= */
   const validateForm = () => {
@@ -165,10 +170,18 @@ const HolidayPage = () => {
 
   /* ================= DELETE ================= */
   const handleDelete = async (date) => {
-    const confirmDelete = window.confirm("Delete this holiday?");
-    if (!confirmDelete) return;
+  setError("");
+  setSuccess("");
+  setLoading(true);
 
-    await fetch(
+  const confirmDelete = window.confirm("Delete this holiday?");
+  if (!confirmDelete) {
+    setLoading(false);
+    return;
+  }
+
+  try {
+    const response = await fetch(
       `http://localhost:9090/deleteHoliday?date=${format(
         new Date(date),
         "dd-MMM-yyyy"
@@ -176,12 +189,46 @@ const HolidayPage = () => {
       { method: "DELETE" }
     );
 
-    fetchHolidays();
-  };
+    if (!response.ok) {
+      let errorMessage = "Something went wrong";
 
+      try {
+        const contentType = response.headers.get("content-type");
+
+        if (contentType && contentType.includes("application/json")) {
+          const data = await response.json();
+          errorMessage = data.message || JSON.stringify(data);
+          toast.error(errorMessage);
+        } else {
+          errorMessage = await response.text();
+          toast.error(errorMessage);
+        }
+      } catch {
+        // fallback if parsing fails
+        errorMessage = "Failed to process error response";
+      }
+
+      throw new Error(errorMessage);
+    }
+
+    setSuccess("Holiday deleted successfully ✅");
+    fetchHolidays();
+
+  } catch (err) {
+    setError(err.message || "Delete failed");
+  } finally {
+    setLoading(false);
+
+    setTimeout(() => {
+      setError("");
+      setSuccess("");
+    }, 2000);
+  }
+};
   /* ================= RENDER ================= */
   return (
     <div className="p-6 space-y-6">
+     
 
       {/* HEADER */}
       <div className="flex gap-4 flex-wrap">
@@ -248,6 +295,13 @@ const HolidayPage = () => {
         })}
 
       </div>
+      {error && (
+  <p className="text-red-500 text-sm">{error}</p>
+)}
+
+{success && (
+  <p className="text-green-500 text-sm">{success}</p>
+)}
 
       {/* DETAILS */}
       
@@ -261,6 +315,7 @@ const HolidayPage = () => {
     <p className="text-sm text-gray-600">
       {selectedDate.description}
     </p>
+    
 
     <button
       onClick={() => handleDelete(selectedDate.date)}

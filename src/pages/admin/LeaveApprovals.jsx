@@ -16,6 +16,7 @@ const LeaveApprovals = () => {
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [actionMessage, setActionMessage] = useState("");
+  
 
   // 🔹 Fetch Data
   useEffect(() => {
@@ -27,6 +28,7 @@ const LeaveApprovals = () => {
         );
 
         const data = await response.json();
+        
 
         if (!response.ok) throw new Error("Failed to load data");
 
@@ -217,13 +219,19 @@ const LeaveApprovals = () => {
             pendingLeaves.map((leave, index) => {
               const key = (leave.employeeId || "") + leave.leaveFrom;
               const isLoading = actionLoading === key;
+              const leaveTypeMap = {
+  cl: "Casual Leave",
+  ml: "Medical Leave",
+              };     
 
               return (
                 <div key={index} className="bg-white p-4 rounded-xl shadow">
                   <p className="font-semibold">
                     {leave.employeeId || "N/A"}
                   </p>
-                  <p>{leave.typeOfLeave}</p>
+                  <p>
+                    {leaveTypeMap[leave.typeOfLeave] || leave.typeOfLeave || "Leave"}
+                  </p>
                   <p>
                     {leave.leaveFrom} → {leave.leaveTo}
                   </p>
@@ -255,6 +263,7 @@ const LeaveApprovals = () => {
           )}
         </div>
       )}
+      
 
       {/* 🔵 History */}
       {activeTab === "history" && (
@@ -288,11 +297,14 @@ const LeaveApprovals = () => {
 
           {/* Data */}
           {paginatedData.length === 0 ? (
+            
             <p className="text-gray-500">No data found</p>
           ) : (
             paginatedData.map((leave, index) => (
+              
               <div
                 key={index}
+                
                 className={`p-4 rounded-lg ${
                   leave.status === "Approved"
                     ? "bg-green-50"
@@ -302,7 +314,9 @@ const LeaveApprovals = () => {
                 <p className="font-semibold">
                   {leave.employeeId || "N/A"}
                 </p>
-                <p>{leave.typeOfLeave}</p>
+                <p>
+                  {leave.typeOfLeave=== "cl" ? "Casual Leave" : leave.typeOfLeave === "ml" ? "Medical Leave" : leave.typeOfLeave || "Leave"}
+                </p>
                 <p>
                   {leave.leaveFrom} → {leave.leaveTo}
                 </p>
