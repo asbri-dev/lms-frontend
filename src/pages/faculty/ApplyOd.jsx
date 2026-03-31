@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../auth/AuthContext";
 import DatePicker from "react-datepicker";
@@ -55,7 +55,7 @@ const ApplyOd = () => {
   }, [fromDate, toDate, sessionFrom, sessionTo]);
 
   /* ================= VALIDATION ================= */
-  const validate = () => {
+  const validate = useCallback(() => {
     if (!fromDate || !toDate) return "Select dates";
     if (toDate < fromDate) return "Invalid date range";
 
@@ -68,7 +68,7 @@ const ApplyOd = () => {
     }
 
     return null;
-  };
+  }, [fromDate, toDate, sessionFrom, sessionTo]);
 
   /* ================= AUTO CHECK ================= */
   useEffect(() => {
@@ -141,7 +141,7 @@ const ApplyOd = () => {
     if (fromDate && toDate) {
       runCheck();
     }
-  }, [fromDate, toDate, sessionFrom, sessionTo, totalDays]);
+  }, [fromDate, toDate, sessionFrom, sessionTo, totalDays, validate]);
 
   /* ================= RESET ================= */
   const resetForm = () => {

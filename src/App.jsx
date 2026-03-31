@@ -1,4 +1,7 @@
 import { Routes, Route } from "react-router-dom";
+import { Toaster } from "react-hot-toast";
+
+
 
 import Login from "./pages/auth/Login";
 import OtpVerify from "./pages/auth/OtpVerify";
@@ -9,6 +12,7 @@ import SuperAdminDashboard from "./pages/superadmin/SuperAdminDashboard";
 import AttendanceMuster from "./pages/superadmin/AttendanceMuster";
 import HolidaySettings from "./pages/superadmin/HolidaySettings";
 import ExcelUploads from "./pages/superadmin/ExcelUploads";
+import AdminManagement from "./pages/superadmin/AdminManagement";
 
 
 import OdApprovals from "./pages/admin/OdApprovals";
@@ -34,6 +38,24 @@ import OpeningPage from "./pages/OpeningPage";
 
 function App() {
   return (
+    <>
+      {/* 🔥 GLOBAL TOASTER */}
+     <Toaster
+  position="top-center"
+  reverseOrder={false}
+  gutter={8}
+  containerStyle={{
+    top: 20,
+  }}
+  toastOptions={{
+    duration: 3000,
+    style: {
+      fontSize: "14px",
+      borderRadius: "8px",
+      padding: "10px 14px",
+    },
+  }}
+/>
     <Routes>
       {/* PUBLIC */}
       <Route path="/" element={<OpeningPage />} />
@@ -43,6 +65,8 @@ function App() {
       <Route path="/forgot-password" element={<ForgotPassword />} />
 
       {/* SUPERADMIN */}
+      
+   
       <Route
         path="/superadmin"
         element={
@@ -50,12 +74,14 @@ function App() {
             <DashboardLayout />
           </ProtectedRoute>
         }
-      >
+      >  
         <Route path="dashboard" element={<SuperAdminDashboard />} />
         <Route path="attendance-muster" element={<AttendanceMuster />} />
         <Route path="holiday-settings" element={<HolidaySettings />} /> 
         <Route path="excel-uploads" element={<ExcelUploads />} />
+        <Route path="admin-management" element={<AdminManagement />} />
       </Route>
+     
 
       {/* ADMIN */}
       <Route
@@ -93,7 +119,9 @@ function App() {
 
       <Route path="/unauthorized" element={<Unauthorized />} />
     </Routes>
+    </>
   );
 }
+
 
 export default App;

@@ -10,11 +10,12 @@ import {
 
 } from "lucide-react";
 import AttendanceDonutChart from "../../components/dashboard/AttendanceDonutChart";
-import { format } from "date-fns";
+import { format} from "date-fns";
 import casualImg from "../../assets/cl.jpeg";
 import medical from "../../assets/ml.jpeg";
 import pend from "../../assets/pending.jpeg";
 import permission from "../../assets/permisson.jpeg";
+
 
 
 
@@ -29,25 +30,42 @@ const FacultyDashboard = () => {
 const [actionLoading, setActionLoading] = useState(null);
 const [attendanceSummary, setAttendanceSummary] = useState(null);
 const [selectedMonth, setSelectedMonth] = useState(new Date());
+const [error, setError] = useState("");
+
 
   /* ================= FETCH ================= */
-  const fetchDashboard = async () => {
-    try {
-      setLoading(true);
+ const fetchDashboard = async () => {
+  try {
+    setLoading(true);
+    setError("");
+    setActionMessage("");
 
-      const res = await fetch(
-        `http://localhost:9090/getDashboardDetails?empId=${user.employeeId}`
-      );
+    const res = await fetch(
+      `http://localhost:9090/getDashboardDetails?empId=${user.employeeId}`
+    );
 
-      const json = await res.json();
-      setData(json);
-
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
+    if (!res.ok) {
+      const errorText = await res.text();
+      throw new Error(errorText || `Server Error: ${res.status}`);
     }
-  };
+
+    const json = await res.json();
+    setData(json);
+
+  } catch (err) {
+    console.error("Dashboard Fetch Error:", err.message);
+
+    // 🔥 Handle backend OFF separately
+    if (err.message === "Failed to fetch") {
+      setError("Server is not running. Please try again later.");
+    } else {
+      setError(err.message);
+    }
+
+  } finally {
+    setLoading(false);
+  }
+};
 
   useEffect(() => {
     if (user?.employeeId) fetchDashboard();
@@ -98,17 +116,26 @@ useEffect(() => {
 }, [user?.employeeId, selectedMonth]); // 🔥 ADD selectedMonth
 
   /* ================= WITHDRAW ================= */
-  const handleWithdraw = async (leave) => {
+ const handleWithdraw = async (leave) => {
+  const key = (leave.employeeId || "") + leave.leaveFrom;
+
+  // 🚫 Prevent multiple clicks
+  if (actionLoading === key) return;
+
   try {
-    const key = (leave.employeeId || "") + leave.leaveFrom;
     setActionLoading(key);
     setActionMessage("");
+
+    // ⏱️ Timeout controller (5 sec)
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 5000);
 
     const response = await fetch("http://localhost:9090/withDrawnLeave", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
+      signal: controller.signal,
       body: JSON.stringify({
         empId: leave.employeeId,
         typeOfLeave: leave.typeOfLeave,
@@ -124,36 +151,72 @@ useEffect(() => {
       }),
     });
 
-    // 🔥 read response (JSON + TEXT)
+    clearTimeout(timeout);
+
+    // 🔥 Safe response reading
     let message = "";
     const contentType = response.headers.get("content-type");
 
-    if (contentType && contentType.includes("application/json")) {
-      const data = await response.json();
-      message = data.message || JSON.stringify(data);
-    } else {
-      message = await response.text();
+    try {
+      if (contentType && contentType.includes("application/json")) {
+        const data = await response.json();
+        message = data?.message || JSON.stringify(data);
+      } else {
+        message = await response.text();
+      }
+    } catch {
+      message = "Invalid server response";
     }
 
     if (!response.ok) {
       setActionMessage(message || "Withdraw failed");
-    } else {
-      setActionMessage(message || "Leave withdrawn successfully");
+      return;
     }
+
+    setActionMessage(message || "Leave withdrawn successfully");
 
     await fetchDashboard();
 
   } catch (err) {
-    console.error(err);
-    setActionMessage("Server error, please try again");
+    console.error("Withdraw Error:", err);
+
+    // 🔥 Handle different errors
+    if (err.name === "AbortError") {
+      setActionMessage("Request timed out. Try again.");
+    } else if (err.message === "Failed to fetch") {
+      setActionMessage("Server is not running.");
+    } else {
+      setActionMessage("Something went wrong.");
+    }
+
   } finally {
     setActionLoading(null);
   }
 };
   if (loading) return <div>Loading...</div>;
 
-  const basic = data.basicDetails;
+if (error) {
   return (
+    <div className="h-[80vh] flex flex-col justify-center items-center">
+      <p className="text-red-500 text-lg font-semibold">{error}</p>
+      <button
+        onClick={fetchDashboard}
+        className="mt-4 px-4 py-2 bg-blue-600 text-white rounded"
+      >
+        Retry
+      </button>
+    </div>
+  );
+}
+
+if (!data) {
+  return <div>No data available</div>;
+}
+
+  const basic = data.basicDetails;
+const allpending=Number(basic.pendingLeaves||0)+Number(basic.pendingPrs||0)+Number(basic.pendingOds||0);  
+  return (
+    
     <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
 
       {/* ================= LEFT SIDE ================= */}
@@ -196,7 +259,7 @@ useEffect(() => {
           <StatCard
             icon={<Clock size={18} />}
             title="Pending Requests"
-            value={basic.pendingLeaves}
+            value={allpending}
             color="text-yellow-600"
             bgImage={pend}
             onClick={() => navigate("/faculty/my-leaves")}
@@ -205,7 +268,7 @@ useEffect(() => {
           <StatCard
             icon={<FileText size={18} />}
             title="Permissions"
-            value={basic.pendingPrs}
+            value={basic.availablePermissions||0}
             color="text-purple-600"
             bgImage={permission}
             onClick={() => navigate("/faculty/apply-permission")}

@@ -2,7 +2,7 @@
 // ApplyLeave.jsx (Final Clean Version)
 // ==============================
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback,  } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../auth/AuthContext";
 import { CalendarDays, FileText, User } from "lucide-react";
@@ -41,7 +41,7 @@ const ApplyLeave = () => {
   });
   /* ================= BALANCE VALIDATION ================= */
 
-const checkLeaveBalance = () => {
+const checkLeaveBalance = useCallback(() => {
   if (typeOfLeave === "ml" && leaveBalance.ml <= 0) {
     return "No Medical Leave balance available";
   }
@@ -51,7 +51,7 @@ const checkLeaveBalance = () => {
   }
 
   return null;
-};
+}, [typeOfLeave, leaveBalance]);
 
   /* ================= LOAD DASHBOARD ================= */
 
@@ -104,7 +104,7 @@ const checkLeaveBalance = () => {
 
   /* ================= VALIDATION (NO REASON) ================= */
 
-  const validateEligibility = () => {
+  const validateEligibility = useCallback(() => {
     if (!leaveFrom || !leaveTo) return "Select dates";
     if (leaveTo < leaveFrom) return "Invalid date range";
 
@@ -117,11 +117,11 @@ const checkLeaveBalance = () => {
     }
 
     return null;
-  };
+  }, [leaveFrom, leaveTo, sessionFrom, sessionTo]);
 
   /* ================= API CALL ================= */
 
-  const runCheck = async () => {
+  const runCheck = useCallback(async () => {
     try {
       setChecking(true);
       setEligible(false);
@@ -172,7 +172,7 @@ const checkLeaveBalance = () => {
     } finally {
       setChecking(false);
     }
-  };
+  }, [user.employeeId, typeOfLeave, user.adminId, noOfDays, leaveFrom, leaveTo, sessionFrom, sessionTo]);
 
   /* ================= DEBOUNCED CHECK ================= */
 
@@ -210,6 +210,9 @@ const checkLeaveBalance = () => {
     sessionTo,
     typeOfLeave,
     noOfDays,
+    checkLeaveBalance,
+    runCheck,
+    validateEligibility,
   ]);
 
   /* ================= SUBMIT ================= */
@@ -396,7 +399,8 @@ return (
               selected={leaveTo}
               onChange={setLeaveTo}
               minDate={leaveFrom}
-              dateFormat="dd-MMM-yyyy"
+              dateFormat="dd-MMM-YYYY"
+        
               placeholderText="Select date"
               className="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-[#3f548f]"
             />

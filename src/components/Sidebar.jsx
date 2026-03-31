@@ -59,6 +59,11 @@ const Sidebar = () => {
             <LayoutDashboard size={18} />
             Holiday Settings
           </NavLink>
+
+          <NavLink to="/superadmin/admin-management" className={linkClasses}>
+            <LayoutDashboard size={18} />
+            Admin Management
+          </NavLink>
           </>
         )}
 

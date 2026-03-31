@@ -100,7 +100,7 @@ const Header = () => {
           {/* User Details */}
           <div className="hidden sm:flex flex-col text-sm">
             <span className="font-medium text-gray-800">
-              {name}
+              {role === "ADMIN" ? "Admin" : name}
             </span>
             <span className="text-gray-500 text-xs">
               {role} • {empId}
