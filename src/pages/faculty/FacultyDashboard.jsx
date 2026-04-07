@@ -215,6 +215,12 @@ if (!data) {
 
   const basic = data.basicDetails;
 const allpending=Number(basic.pendingLeaves||0)+Number(basic.pendingPrs||0)+Number(basic.pendingOds||0);  
+// Add these calculations before your return statement
+const clApplied = data.pendingLeaveList?.filter(l => l.typeOfLeave === "cl").length ?? 0;
+const mlApplied = data.pendingLeaveList?.filter(l => l.typeOfLeave === "ml").length ?? 0;
+
+const clAvailed = data.approvedLeaveList?.filter(l => l.typeOfLeave === "cl").length ?? 0;
+const mlAvailed = data.approvedLeaveList?.filter(l => l.typeOfLeave === "ml").length ?? 0;
   return (
     
     <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
@@ -231,6 +237,7 @@ const allpending=Number(basic.pendingLeaves||0)+Number(basic.pendingPrs||0)+Numb
             <p className="text-sm opacity-90 mt-1">
               Reporting To: {basic.rmName} ({basic.rmEmployeeId})
             </p>
+            
           </div>
           <Activity className="opacity-20" size={60} />
         </div>
@@ -239,47 +246,52 @@ const allpending=Number(basic.pendingLeaves||0)+Number(basic.pendingPrs||0)+Numb
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
 
           <StatCard
-            icon={<CalendarDays size={18} />}
-            title="Casual Leave"
-            value={basic.casualLeaves}
-            color="text-blue-600"
-             bgImage={casualImg}
-            onClick={() => navigate("/faculty/apply-leave")}
-          />
+  icon={<CalendarDays size={18} />}
+  title="Casual Leave (CL)"
+  value={basic.casualLeaves}
+  applied={clApplied}
+  availed={clAvailed}
+  bgImage={casualImg}
+  onClick={() => navigate("/faculty/apply-leave")}
+/>
 
-          <StatCard
-            icon={<CalendarDays size={18} />}
-            title="Medical Leave"
-            value={basic.medicalLeaves}
-            color="text-green-600"
-             bgImage={medical}
-            onClick={() => navigate("/faculty/apply-leave")}
-          />
-
-          <StatCard
-            icon={<Clock size={18} />}
-            title="Pending Requests"
-            value={allpending}
-            color="text-yellow-600"
-            bgImage={pend}
-            onClick={() => navigate("/faculty/my-leaves")}
-          />
-
+<StatCard
+  icon={<CalendarDays size={18} />}
+  title="Medical Leave (ML)"
+  value={basic.medicalLeaves}
+  applied={mlApplied}
+  availed={mlAvailed}
+  bgImage={medical}
+  onClick={() => navigate("/faculty/apply-leave")}
+/>
           <StatCard
             icon={<FileText size={18} />}
             title="Permissions"
             value={basic.availablePermissions||0}
+            applied={basic.pendingPrs||0}
+            availed={basic.approvedPrs||0}
             color="text-purple-600"
             bgImage={permission}
             onClick={() => navigate("/faculty/apply-permission")}
           />
-
-        </div>{actionMessage && (
+          <StatCard
+            icon={<Clock size={18} />}
+            title="On Duty (OD)"
+            value={"onduty"}
+            applied={basic.pendingOds||0}
+            availed={basic.approvedOds||0}
+            color="text-yellow-600"
+            bgImage={pend}
+            onClick={() => navigate("/faculty/apply-od")}
+          />
+        <p className="className=bg-white p-5 rounded-2xl shadow-md space-y-4 justify-center items-center text-center text-gray-700">
+              Pending Requests: {allpending}
+            </p>
+  </div>{actionMessage && (
   <div className="text-center p-3 rounded bg-blue-100 text-blue-700">
     {actionMessage}
   </div>
 )}
-
         {/* LEAVE SECTION */}
         <Section title="Leave Requests" icon={<FileText size={18} />}>
           {data?.pendingLeaveList?.length ? (
@@ -355,33 +367,48 @@ export default FacultyDashboard;
 
 
 /* ================= COMPONENTS ================= */
-const StatCard = ({ icon, title, value, onClick, bgImage }) => {
+const StatCard = ({ icon, title, value, applied, availed, onClick, bgImage }) => {
   return (
     <div
       onClick={onClick}
-      className="relative rounded-2xl p-4 shadow-md cursor-pointer overflow-hidden h-32"
+      className="relative rounded-2xl shadow-md cursor-pointer overflow-hidden h-36"
     >
-      {/* Background Image */}
       {bgImage && (
         <div
           className="absolute inset-0 bg-cover bg-center"
           style={{ backgroundImage: `url(${bgImage})` }}
         />
       )}
+      {bgImage && <div className="absolute inset-0 bg-black/55" />}
 
-      {/* Dark Overlay (IMPORTANT) */}
-      {bgImage && <div className="absolute inset-0 bg-black/50"></div>}
+      <div className="relative z-10 flex flex-col justify-between h-full text-white p-4">
 
-      {/* Content */}
-      <div className="relative z-10 flex flex-col justify-between h-full text-white">
+        {/* Top: icon + title */}
         <div className="flex items-center gap-2">
-          <div className="p-2 rounded-lg bg-white/20">
-            {icon}
-          </div>
+          <div className="p-1.5 rounded-lg bg-white/20">{icon}</div>
           <h4 className="text-sm font-medium">{title}</h4>
         </div>
 
-        <p className="text-2xl font-bold">{value}</p>
+        {/* Balance */}
+        {value !== "onduty" && (
+          <p className=" text-3xl font-bold leading-none">{value}
+            <span className="text-xs font-normal opacity-70 ml-1">balance</span>
+          </p>
+        )}
+
+        {/* Bottom: Applied | Availed */}
+        <div className="flex gap-3 border-t border-white/20 pt-2">
+          <div className="flex flex-col">
+            <span className="text-[10px] text-white/60 uppercase tracking-wide">Applied</span>
+            <span className="text-sm font-semibold">{applied ?? "--"}</span>
+          </div>
+          <div className="w-px bg-white/20" />
+          <div className="flex flex-col">
+            <span className="text-[10px] text-white/60 uppercase tracking-wide">Availed</span>
+            <span className="text-sm font-semibold">{availed ?? "--"}</span>
+          </div>
+        </div>
+
       </div>
     </div>
   );

@@ -1,286 +1,116 @@
-import { useEffect, useMemo, useState } from "react";
-import { useAuth } from "../../auth/AuthContext";
-import AttendanceInfo from "../faculty/AttendanceInfo";
+import { useState } from "react";
+import EmployeeDirectory from "./modules/EmployeeDirectory";
+import ExcelUpload from "./modules/ExcelUpload";
+import TopLeaveTakers from "./modules/TopLeaveTakers";
+import PendingRequests from "./modules/PendingRequests";
+import EmployeeExitManagement from "./modules/EmployeeExitManagement";
 
-const PAGE_SIZE = 10;
+const MODULES = [
+  {
+    key: "directory",
+    label: "Employee Directory",
+    icon: (
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+        <circle cx="9" cy="7" r="4"/>
+        <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+        <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+      </svg>
+    ),
+    component: <EmployeeDirectory />,
+  },
+  {
+    key: "upload",
+    label: "Excel Upload",
+    icon: (
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+        <polyline points="17 8 12 3 7 8"/>
+        <line x1="12" y1="3" x2="12" y2="15"/>
+      </svg>
+    ),
+    component: <ExcelUpload />,
+  },
+  {
+    key: "leavetakers",
+    label: "Top Leave Takers",
+    icon: (
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+      </svg>
+    ),
+    component: <TopLeaveTakers />,
+  },
+  {
+    key: "pending",
+    label: "Pending Requests",
+    icon: (
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M9 11l3 3L22 4"/>
+        <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+      </svg>
+    ),
+    component: <PendingRequests />,
+  },
+  {
+    key: "exit",
+    label: "Exit Management",
+    icon: (
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+        <circle cx="9" cy="7" r="4"/>
+        <line x1="17" y1="8" x2="23" y2="8"/>
+      </svg>
+    ),
+    component: <EmployeeExitManagement />,
+  },
+];
 
 const SuperAdminDashboard = () => {
-  const { user } = useAuth();
+  const [active, setActive] = useState("directory");
 
-  const [data, setData] = useState(null);
-  const [activeTab, setActiveTab] = useState(null);
-
-  const [search, setSearch] = useState("");
-  const [department, setDepartment] = useState("ALL");
-  const [page, setPage] = useState(1);
-
-  const [selectedEmployee, setSelectedEmployee] = useState(null);
-
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-
-  /* ================= FETCH DASHBOARD ================= */
-  useEffect(() => {
-    if (!user?.employeeId) return;
-
-    const fetchDashboard = async () => {
-      try {
-        setLoading(true);
-        setError("");
-
-        const response = await fetch(
-          `http://localhost:9090/getFacultyAndAdmin?rmEmpId=${user.employeeId}`
-        );
-
-        const result = await response.json();
-
-        if (!response.ok) {
-          throw new Error(result.message || "Failed to load dashboard");
-        }
-
-        setData(result);
-      } catch (err) {
-        setError(err.message || "Network error");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchDashboard();
-  }, [user?.employeeId]);
-
-  /* ================= CURRENT LIST ================= */
-  const currentList = useMemo(() => {
-    if (!data) return [];
-
-    if (activeTab === "faculty") return data.FacultyDetails || [];
-    if (activeTab === "admin") return data.AdminDetails || [];
-
-    return [];
-  }, [data, activeTab]);
-
-  /* ================= DEPARTMENT OPTIONS ================= */
-  const departments = useMemo(() => {
-    if (activeTab !== "faculty") return ["ALL"];
-
-    const unique = new Set(
-      (data?.FacultyDetails || []).map((f) => f.facultyDept)
-    );
-
-    return ["ALL", ...unique];
-  }, [data, activeTab]);
-
-  /* ================= FILTER ================= */
-  const filteredData = useMemo(() => {
-    let list = [...currentList];
-
-    if (activeTab === "faculty" && department !== "ALL") {
-      list = list.filter((f) => f.facultyDept === department);
-    }
-
-    if (search) {
-      const s = search.toLowerCase();
-
-      list = list.filter((item) => {
-        const name = `${item.firstName} ${item.lastName}`.toLowerCase();
-
-        return (
-          name.includes(s) ||
-          item.empId?.toLowerCase().includes(s)
-        );
-      });
-    }
-
-    return list;
-  }, [currentList, department, search, activeTab]);
-
-  /* ================= PAGINATION ================= */
-  const totalPages = Math.ceil(filteredData.length / PAGE_SIZE);
-
-  const paginatedData = useMemo(() => {
-    const start = (page - 1) * PAGE_SIZE;
-    return filteredData.slice(start, start + PAGE_SIZE);
-  }, [filteredData, page]);
-
-  /* ================= LOADING ================= */
-  if (loading) {
-    return <div className="text-center py-10">Loading dashboard...</div>;
-  }
-
-  if (error) {
-    return (
-      <div className="bg-red-100 text-red-600 p-4 rounded-lg">
-        {error}
-      </div>
-    );
-  }
-
-  /* ================= ATTENDANCE VIEW ================= */
-  if (selectedEmployee) {
-    return (
-      <div className="space-y-6">
-
-        <button
-          onClick={() => setSelectedEmployee(null)}
-          className="px-4 py-2 bg-gray-200 rounded-md"
-        >
-          ← Back to Dashboard
-        </button>
-
-        <h2 className="text-xl font-semibold text-gray-700">
-          Attendance - {selectedEmployee.firstName} {selectedEmployee.lastName}
-        </h2>
-
-        <AttendanceInfo employeeId={selectedEmployee.empId} />
-
-      </div>
-    );
-  }
+  const current = MODULES.find((m) => m.key === active);
 
   return (
-    <div className="space-y-8">
+    <div className="min-h-screen bg-gray-50">
 
-      {/* ================= STAT CARDS ================= */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-
-        <div
-          onClick={() => {
-            setActiveTab("faculty");
-            setPage(1);
-          }}
-          className="bg-white p-6 rounded-xl shadow-md cursor-pointer hover:shadow-lg"
-        >
-          <h4 className="text-gray-500">Faculty</h4>
-          <div className="text-3xl font-bold text-blue-600">
-            {data.FacultyCount}
-          </div>
+      {/* ─── Top Header ─── */}
+      <div className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
+        <div>
+          <h1 className="text-lg font-semibold text-gray-800">Super Admin Dashboard</h1>
+          <p className="text-xs text-gray-400 mt-0.5">System-level control panel</p>
         </div>
-
-        <div
-          onClick={() => {
-            setActiveTab("admin");
-            setPage(1);
-          }}
-          className="bg-white p-6 rounded-xl shadow-md cursor-pointer hover:shadow-lg"
-        >
-          <h4 className="text-gray-500">Admins</h4>
-          <div className="text-3xl font-bold text-purple-600">
-            {data.AdminCount}
-          </div>
-        </div>
-
+        <span className="text-xs font-medium px-3 py-1 rounded-full bg-indigo-100 text-indigo-700">
+          Super Admin
+        </span>
       </div>
 
-      {/* ================= SEARCH + FILTER ================= */}
-      {activeTab && (
-        <div className="flex flex-wrap gap-4">
-
-          <input
-            type="text"
-            placeholder="Search name or employee ID"
-            value={search}
-            onChange={(e) => {
-              setSearch(e.target.value);
-              setPage(1);
-            }}
-            className="border px-3 py-2 rounded-md"
-          />
-
-          {activeTab === "faculty" && (
-            <select
-              value={department}
-              onChange={(e) => {
-                setDepartment(e.target.value);
-                setPage(1);
-              }}
-              className="border px-3 py-2 rounded-md"
+      {/* ─── Tab Bar ─── */}
+      <div className="bg-white border-b border-gray-200 px-6">
+        <div className="flex gap-1 overflow-x-auto scrollbar-hide">
+          {MODULES.map((m) => (
+            <button
+              key={m.key}
+              onClick={() => setActive(m.key)}
+              className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
+                active === m.key
+                  ? "border-indigo-600 text-indigo-600"
+                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+              }`}
             >
-              {departments.map((dept) => (
-                <option key={dept} value={dept}>
-                  {dept}
-                </option>
-              ))}
-            </select>
-          )}
-
+              <span className={active === m.key ? "text-indigo-600" : "text-gray-400"}>
+                {m.icon}
+              </span>
+              {m.label}
+            </button>
+          ))}
         </div>
-      )}
+      </div>
 
-      {/* ================= TABLE ================= */}
-      {activeTab && (
-        <div className="bg-white rounded-xl shadow-md overflow-x-auto">
-
-          <table className="min-w-full">
-
-            <thead className="bg-gray-100">
-              <tr>
-                <th className="text-left p-3">Emp ID</th>
-                <th className="text-left p-3">Name</th>
-                <th className="text-left p-3">Department</th>
-                <th className="text-left p-3">Designation</th>
-                <th className="text-left p-3">Mobile</th>
-              </tr>
-            </thead>
-
-            <tbody>
-              {paginatedData.map((emp) => (
-                <tr
-                  key={emp.id}
-                  className="border-t cursor-pointer hover:bg-gray-50"
-                  onClick={() => setSelectedEmployee(emp)}
-                >
-
-                  <td className="p-3">{emp.empId}</td>
-
-                  <td className="p-3">
-                    {emp.firstName} {emp.lastName}
-                  </td>
-
-                  <td className="p-3">
-                    {activeTab === "faculty"
-                      ? emp.facultyDept
-                      : emp.adminDept}
-                  </td>
-
-                  <td className="p-3">{emp.designation}</td>
-
-                  <td className="p-3">{emp.mobileNumber}</td>
-
-                </tr>
-              ))}
-            </tbody>
-
-          </table>
-
-        </div>
-      )}
-
-      {/* ================= PAGINATION ================= */}
-      {activeTab && totalPages > 1 && (
-        <div className="flex items-center gap-4">
-
-          <button
-            disabled={page === 1}
-            onClick={() => setPage(page - 1)}
-            className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
-          >
-            Prev
-          </button>
-
-          <span>
-            Page {page} / {totalPages}
-          </span>
-
-          <button
-            disabled={page === totalPages}
-            onClick={() => setPage(page + 1)}
-            className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
-          >
-            Next
-          </button>
-
-        </div>
-      )}
+      {/* ─── Active Module ─── */}
+      <div className="p-6">
+        {current?.component}
+      </div>
 
     </div>
   );

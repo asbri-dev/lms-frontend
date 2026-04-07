@@ -7,6 +7,9 @@ import {
   ClipboardCheck,
   CalendarDays,
   FileText,
+  Edit,
+  CalendarCheck,
+  Upload, 
 } from "lucide-react";
 
 const Sidebar = () => {
@@ -39,39 +42,69 @@ const Sidebar = () => {
       <nav className="space-y-1 flex-1">
 
         {/* SUPERADMIN */}
-        {user?.role === "SUPERADMIN" && (
-          <>
-          <NavLink to="/superadmin/dashboard" className={linkClasses}>
-            <LayoutDashboard size={18} />
-            Dashboard
-          </NavLink>
-           <NavLink to="/superadmin/attendance-muster" className={linkClasses}>
-            <LayoutDashboard size={18} />
-            Attendance Muster
-          </NavLink>
+       {user?.role === "SUPERADMIN" && (
+  <>
 
-            <NavLink to="/superadmin/excel-uploads" className={linkClasses}>
-            <LayoutDashboard size={18} />
-            Excel Uploads
-          </NavLink>
+    {/* ===== OVERVIEW ===== */}
+    <p className="text-xs text-gray-400 uppercase mt-4 mb-2 px-2">
+      Overview
+    </p>
 
-          <NavLink to="/superadmin/holiday-settings" className={linkClasses}>
-            <LayoutDashboard size={18} />
-            Holiday Settings
-          </NavLink>
+    <NavLink to="/superadmin/dashboard" className={linkClasses}>
+      <LayoutDashboard size={18} />
+      Dashboard
+    </NavLink>
 
-          <NavLink to="/superadmin/admin-management" className={linkClasses}>
-            <LayoutDashboard size={18} />
-            Admin Management
-          </NavLink>
-          </>
-        )}
+
+    {/* ===== ATTENDANCE ===== */}
+    <p className="text-xs text-gray-400 uppercase mt-6 mb-2 px-2">
+      Attendance
+    </p>
+
+    <NavLink to="/superadmin/attendance-muster" className={linkClasses}>
+      <CalendarDays size={18} />
+      Attendance Muster
+    </NavLink>
+
+    <NavLink to="/superadmin/attendance-modifier" className={linkClasses}>
+      <Edit size={18} />
+      Attendance Modifier
+    </NavLink>
+
+
+    {/* ===== MANAGEMENT ===== */}
+    <p className="text-xs text-gray-400 uppercase mt-6 mb-2 px-2">
+      Management
+    </p>
+
+    <NavLink to="/superadmin/admin-management" className={linkClasses}>
+      <Users size={18} />
+      Admin Management
+    </NavLink>
+
+    <NavLink to="/superadmin/excel-uploads" className={linkClasses}>
+      <Upload size={18} />
+      Excel Uploads
+    </NavLink>
+
+
+    {/* ===== SETTINGS ===== */}
+    <p className="text-xs text-gray-400 uppercase mt-6 mb-2 px-2">
+      Settings
+    </p>
+
+    <NavLink to="/superadmin/holiday-settings" className={linkClasses}>
+      <CalendarCheck size={18} />
+      Holiday Settings
+    </NavLink>
+
+  </>
+)}
 
         {/* ADMIN */}
         {user?.role === "ADMIN" && (
           <>
             <p className={sectionTitle}>Overview</p>
-
             <NavLink to="/admin/dashboard" className={linkClasses}>
               <LayoutDashboard size={18} />
               Dashboard

@@ -13,6 +13,7 @@ import AttendanceMuster from "./pages/superadmin/AttendanceMuster";
 import HolidaySettings from "./pages/superadmin/HolidaySettings";
 import ExcelUploads from "./pages/superadmin/ExcelUploads";
 import AdminManagement from "./pages/superadmin/AdminManagement";
+import AttendanceModifier from "./pages/superadmin/AttendanceModifier";
 
 
 import OdApprovals from "./pages/admin/OdApprovals";
@@ -80,6 +81,7 @@ function App() {
         <Route path="holiday-settings" element={<HolidaySettings />} /> 
         <Route path="excel-uploads" element={<ExcelUploads />} />
         <Route path="admin-management" element={<AdminManagement />} />
+        <Route path="attendance-modifier" element={<AttendanceModifier />} />
       </Route>
      
 

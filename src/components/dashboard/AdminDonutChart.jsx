@@ -46,7 +46,7 @@ const AdminDonutChart = ({
               outerRadius={95}
            
             
-              animationDuration={900}
+              animationDuration={9000}
             >
               {data.map((entry, i) => (
                 <Cell

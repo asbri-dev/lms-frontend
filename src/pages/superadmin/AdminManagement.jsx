@@ -186,7 +186,7 @@ const AdminManagement = () => {
     <div className="p-6 space-y-6">
 
       {/* HEADER */}
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-center ">
         <h2 className="text-xl font-semibold text-gray-800">
           Admin Management
         </h2>
