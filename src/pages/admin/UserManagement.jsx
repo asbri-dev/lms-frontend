@@ -105,9 +105,9 @@ export function UserManagement() {
 
       // ✅ DEDUPLICATE COLUMNS
       const keyMap = new Map(); // lowercase -> original
-      flattened.forEach((row) => {
-        Object.keys(row).forEach((k) => {
-          if (k !== "raw" && k !== "name") {
+      flattened.forEach((row) => {             // 
+        Object.keys(row).forEach((k) => {        //
+          if (k !== "raw" && k !== "name") {   //
             const lower = k.toLowerCase();
             if (!keyMap.has(lower)) keyMap.set(lower, k);
           }
@@ -136,7 +136,7 @@ export function UserManagement() {
   /* ---------- CLOSE DROPDOWN ---------- */
   useEffect(() => {
     const close = (e) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {  //
         setShowColumnMenu(false);
       }
     };
@@ -185,7 +185,7 @@ export function UserManagement() {
   /* ---------- TOGGLE COLUMN ---------- */
   const toggleColumn = (col) => {
     setVisibleCols((prev) =>
-      prev.includes(col) ? prev.filter((c) => c !== col) : [...prev, col]
+      prev.includes(col) ? prev.filter((c) => c !== col) : [...prev, col]  //////
     );
   };
 
@@ -195,9 +195,9 @@ export function UserManagement() {
 
   /* ---------- EXPORT ---------- */
   const exportExcel = () => {
-    const ws = XLSX.utils.json_to_sheet(rowData);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Faculty");
+    const ws = XLSX.utils.json_to_sheet(rowData);  //
+    const wb = XLSX.utils.book_new();              
+    XLSX.utils.book_append_sheet(wb, ws, "Faculty");  
     const buf = XLSX.write(wb, { bookType: "xlsx", type: "array" });
     saveAs(new Blob([buf]), "Faculty.xlsx");
   };
@@ -255,7 +255,7 @@ export function UserManagement() {
               {/* SELECT ACTIONS */}
               <div className="flex justify-between text-xs font-medium">
                 <button
-                  onClick={selectAllColumns}
+                  onClick={selectAllColumns}  
                   className="text-[#2b3c6b] hover:underline"
                 >
                   Select All

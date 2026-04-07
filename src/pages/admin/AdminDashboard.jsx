@@ -55,7 +55,7 @@ const AdminDashboard = () => {
 
   /* ---------- DATA ---------- */
   const {
-    totalUsers = 0,
+    facultyCnt = 0,
     pendingLeaveCnt = 0,
     pendingPermissionCnt = 0,
     pendingOdsCnt = 0,
@@ -96,7 +96,7 @@ const AdminDashboard = () => {
 
       {/* STATS */}
       <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-4 gap-5">
-        <StatCard title="Faculty" value={totalUsers} />
+        <StatCard title="Faculty" value={facultyCnt} />
         <StatCard title="All Pending Requests" value={allPendingRequests.length} />
         <StatCard title="All Approved Requests" value={allApprovedRequests} />
         <StatCard title="All Rejected Requests" value={allRejectedRequests} />

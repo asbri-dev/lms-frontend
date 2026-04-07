@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback,useRef} from "react";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import { useAuth } from "../../auth/AuthContext";
+import { Toaster } from "react-hot-toast";
 import {
   getMonthRange,
   transformAttendanceData,
@@ -271,16 +272,57 @@ return (
             </div>
 
             {/* SESSION */}
-            <div className="bg-white p-4 rounded-xl shadow-sm">
-              <h4 className="font-semibold text-gray-700 mb-2">
-                Sessions
-              </h4>
+           <div className="bg-white p-4 rounded-xl shadow-sm">
+  <h4 className="font-semibold text-gray-700 mb-3">Session Details</h4>
 
-              <div className="text-sm text-gray-600 space-y-1">
-                <p>S1: {selectedDetails.details.sessionOne}</p>
-                <p>S2: {selectedDetails.details.sessionTwo}</p>
-              </div>
-            </div>
+  {/* Session 1 */}
+  <div className="mb-4 pb-4 border-b border-gray-100">
+    <p className="text-xs text-gray-400 font-medium mb-1">Session 1</p>
+    <p className="text-sm text-gray-700 mb-3">
+      {selectedDetails.empId === "AREP"
+        ? "09:30 - 12:30"
+        : "09:00 - 13:00"}
+    </p>
+    <div className="flex justify-between">
+      <div>
+        <p className="text-xs text-gray-400">First In Time</p>
+        <p className="text-sm text-gray-700 font-medium">
+          {selectedDetails.details.punchIn|| "--"}
+        </p>
+      </div>
+      <div>
+        <p className="text-xs text-gray-400">Last Out Time</p>
+        <p className="text-sm text-gray-700 font-medium">
+          { "--"}
+        </p>
+      </div>
+    </div>
+  </div>
+
+  {/* Session 2 */}
+  <div>
+    <p className="text-xs text-gray-400 font-medium mb-1">Session 2</p>
+    <p className="text-sm text-gray-700 mb-3">
+      {selectedDetails.empId === "AREP"
+        ? "12:31 - 15:30"
+        : "13:01 - 14:30"}
+    </p>
+    <div className="flex justify-between">
+      <div>
+        <p className="text-xs text-gray-400">First In Time</p>
+        <p className="text-sm text-gray-700 font-medium">
+          {selectedDetails.details.PunchIn || "--"}
+        </p>
+      </div>
+      <div>
+        <p className="text-xs text-gray-400">Last Out Time</p>
+        <p className="text-sm text-gray-700 font-medium">
+          {selectedDetails.details.punchOut || "--"}
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
 
             {/* TIME */}
             <div className="bg-white p-4 rounded-xl shadow-sm">

@@ -225,39 +225,65 @@ const LeaveApprovals = () => {
               };     
 
               return (
-                <div key={index} className="bg-white p-4 rounded-xl shadow">
-                  <p className="font-semibold">
-                    {leave.employeeId || "N/A"}
-                  </p>
-                  <p>
-                    {leaveTypeMap[leave.typeOfLeave] || leave.typeOfLeave || "Leave"}
-                  </p>
-                  <p>
-                    {leave.leaveFrom} → {leave.leaveTo}
-                  </p>
+               <div
+  key={index}
+  className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm hover:shadow-md transition-all duration-200"
+>
+  {/* Top Section */}
+  <div className="flex items-start justify-between">
+    <div>
+      <p className="text-base font-semibold text-gray-800">
+        {leave.empName}
+      </p>
+      <p className="text-xs text-gray-500">
+        ID: {leave.employeeId || "N/A"}
+      </p>
+    </div>
 
-                  <div className="mt-2 space-x-2">
-                    <button
-                      onClick={() =>
-                        handleAction(leave, "Approved")
-                      }
-                      disabled={isLoading}
-                      className="bg-green-600 text-white px-3 py-1 rounded disabled:opacity-50"
-                    >
-                      {isLoading ? "Processing..." : "Approve"}
-                    </button>
+    {/* Leave Type Badge */}
+    <span className="text-xs font-medium px-3 py-1 rounded-full bg-blue-100 text-blue-700">
+      {leaveTypeMap[leave.typeOfLeave] || leave.typeOfLeave || "Leave"}
+    </span>
+  </div>
 
-                    <button
-                      onClick={() =>
-                        handleAction(leave, "Rejected")
-                      }
-                      disabled={isLoading}
-                      className="bg-red-600 text-white px-3 py-1 rounded disabled:opacity-50"
-                    >
-                      {isLoading ? "Processing..." : "Reject"}
-                    </button>
-                  </div>
-                </div>
+  {/* Divider */}
+  <div className="border-t border-gray-100 my-3" />
+
+  {/* Leave Duration */}
+  <div className="text-sm text-gray-600 mb-3">
+    <p className="font-medium text-gray-700">Duration</p>
+    <p>
+      {leave.leaveFrom} <span className="mx-1">→</span> {leave.leaveTo}
+    </p>
+  </div>
+
+  {/* Reason (Preview + Expand) */}
+  <div className="text-sm text-gray-600">
+    <p className="font-medium text-gray-700 mb-1">Reason</p>
+    <p className="line-clamp-2">
+      {leave.reasonForLeave || "No reason provided"}
+    </p>
+  </div>
+
+  {/* Actions */}
+  <div className="mt-4 flex justify-end gap-2">
+    <button
+      onClick={() => handleAction(leave, "Approved")}
+      disabled={isLoading}
+      className="bg-green-600 hover:bg-green-700 text-white text-xs font-medium px-3 py-1.5 rounded-lg transition disabled:opacity-50"
+    >
+      {isLoading ? "..." : "Approve"}
+    </button>
+
+    <button
+      onClick={() => handleAction(leave, "Rejected")}
+      disabled={isLoading}
+      className="bg-red-600 hover:bg-red-700 text-white text-xs font-medium px-3 py-1.5 rounded-lg transition disabled:opacity-50"
+    >
+      {isLoading ? "..." : "Reject"}
+    </button>
+  </div>
+</div>
               );
             })
           )}
@@ -313,6 +339,9 @@ const LeaveApprovals = () => {
               >
                 <p className="font-semibold">
                   {leave.employeeId || "N/A"}
+                </p>
+                <p className="font-semibold">
+                  {leave.empName || "N/A"}
                 </p>
                 <p>
                   {leave.typeOfLeave=== "cl" ? "Casual Leave" : leave.typeOfLeave === "ml" ? "Medical Leave" : leave.typeOfLeave || "Leave"}

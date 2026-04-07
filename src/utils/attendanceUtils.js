@@ -35,7 +35,7 @@ export const STATUS_MAP = {
   "Present:Present-PR": { label: "P-PR", color: "#D7FDF0", type: "Present" },
   "PR-Present:Absent": { label: "PR-A", color: "#FE8985", type: "Absent" },
   "Absent:Present-PR": { label: "A-PR", color: "#FE8985", type: "Absent" },
-  Unknown: { label: "?", color: "#FF934F", type: "Unknown" },
+  Unknown: { label: "?", color: "#FFD199", type: "Unknown" },
 };
 
 /* ============================
