@@ -1,248 +1,501 @@
-import { useEffect, useMemo, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import toast from "react-hot-toast";
 
-const getLocation = (employeeId) => {
-  if (!employeeId) return "Unknown";
-  if (employeeId.startsWith("AREP")) return "Palakkad";
-  if (employeeId.startsWith("AREC")) return "Chittoor";
+
+/* ─── Helpers ─── */
+const getLocation = (id = "") => {
+  if (id.startsWith("AREP")) return "Palakkad";
+  if (id.startsWith("AREC")) return "Chittoor";
   return "Unknown";
 };
 
-const REQUEST_TYPES = ["All", "Leave", "Permission", "OD"];
-const LOCATIONS     = ["All", "Palakkad", "Chittoor"];
-
-const StatusBadge = ({ status }) => {
-  const map = {
-    Pending:  "bg-amber-100 text-amber-700",
-    Approved: "bg-green-100 text-green-700",
-    Rejected: "bg-red-100 text-red-700",
-  };
-  return (
-    <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${map[status] || "bg-gray-100 text-gray-500"}`}>
-      {status}
-    </span>
-  );
+const formatDate = (val) => {
+  if (!val) return "—";
+  if (val.includes("T")) {
+    const d = new Date(val);
+    return d.toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
+  }
+  return val;
 };
 
-const TypeBadge = ({ type }) => {
-  const map = {
-    Leave:      "bg-purple-100 text-purple-700",
-    Permission: "bg-blue-100 text-blue-700",
-    OD:         "bg-yellow-100 text-yellow-700",
-  };
-  return (
-    <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${map[type] || "bg-gray-100 text-gray-500"}`}>
-      {type}
-    </span>
-  );
+const STATUS_STYLE = {
+  Pending:   "bg-amber-100 text-amber-700",
+  Approved:  "bg-green-100 text-green-700",
+  Rejected:  "bg-red-100 text-red-700",
+  Withdrawn: "bg-gray-100 text-gray-500",
+  P:         "bg-amber-100 text-amber-700",
+  A:         "bg-green-100 text-green-700",
+  R:         "bg-red-100 text-red-700",
+  W:         "bg-gray-100 text-gray-500",
 };
 
-/* ─── Single Request Card ─── */
-const RequestCard = ({ req, onApprove, onReject, actionable }) => {
-  const [acting, setActing] = useState(false);
-  const loc = getLocation(req.employeeId);
+const STATUS_LABEL = { P: "Pending", A: "Approved", R: "Rejected", W: "Withdrawn" };
 
-  const handle = async (action) => {
-    setActing(true);
-    await (action === "approve" ? onApprove(req) : onReject(req));
-    setActing(false);
-  };
+const LOC_STYLE = {
+  Palakkad: "bg-green-100 text-green-700",
+  Chittoor: "bg-orange-100 text-orange-700",
+  Unknown:  "bg-gray-100 text-gray-500",
+};
+
+const TYPE_STYLE = {
+  Leave:      "bg-purple-100 text-purple-700",
+  Permission: "bg-blue-100 text-blue-700",
+  OD:         "bg-yellow-100 text-yellow-700",
+};
+
+const APPROVE_API = {
+  Leave:      "/approveLeaves",
+  Permission: "/approvePr",
+  OD:         "/odApprove",
+};
+
+const resolveStatus = (s) => STATUS_LABEL[s] || s || "Unknown";
+
+/* ─── Badge ─── */
+const Badge = ({ label, style }) => (
+  <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${style}`}>{label}</span>
+);
+
+/* ─── Section Header ─── */
+const SectionHeader = ({ label, count }) => (
+  <div className="flex items-center gap-3 mb-3">
+    <span className="text-sm font-semibold text-gray-700">{label}</span>
+    <span className="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">{count}</span>
+    <div className="flex-1 border-t border-gray-200" />
+  </div>
+);
+
+/* ─── Skeleton ─── */
+const Skeleton = ({ count = 6 }) => (
+  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+    {Array.from({ length: count }).map((_, i) => (
+      <div key={i} className="border rounded-xl p-4 animate-pulse space-y-3">
+        <div className="flex justify-between">
+          <div className="h-4 bg-gray-200 rounded w-1/2" />
+          <div className="h-5 bg-gray-100 rounded w-16" />
+        </div>
+        <div className="h-3 bg-gray-100 rounded w-1/3" />
+        <div className="h-8 bg-gray-100 rounded" />
+        <div className="flex gap-2">
+          <div className="flex-1 h-7 bg-gray-200 rounded-lg" />
+          <div className="flex-1 h-7 bg-gray-100 rounded-lg" />
+        </div>
+      </div>
+    ))}
+  </div>
+);
+
+/* ════════════════════════════════════════
+   LEAVE CARD
+════════════════════════════════════════ */
+const LeaveCard = ({ item, onAction, actionLoadingId }) => {
+  const id      = `leave-${item.employeeId}-${item.leaveFrom}`;
+  const loc     = getLocation(item.employeeId || item.empId);
+  const loading = actionLoadingId === id;
 
   return (
     <div className="bg-white border border-gray-200 rounded-xl p-4 space-y-3 hover:border-indigo-200 transition-colors">
-
-      {/* Header */}
       <div className="flex items-start justify-between gap-2">
         <div>
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-sm font-medium text-gray-800">{req.employeeName}</span>
-            <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
-              loc === "Palakkad" ? "bg-green-100 text-green-700" :
-              loc === "Chittoor" ? "bg-orange-100 text-orange-700" :
-              "bg-gray-100 text-gray-500"
-            }`}>{loc}</span>
-            <TypeBadge type={req.requestType} />
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-sm font-medium text-gray-800">{item.empName || item.employeeId}</span>
+            <Badge label={loc} style={LOC_STYLE[loc]} />
+            <Badge label="Leave" style={TYPE_STYLE.Leave} />
           </div>
-          <div className="text-xs text-gray-400 mt-0.5">{req.employeeId} · {req.department}</div>
+          <div className="text-xs text-gray-400 mt-0.5">{item.employeeId || item.empId}</div>
         </div>
-        <StatusBadge status={req.status} />
+        <Badge label={resolveStatus(item.status)} style={STATUS_STYLE[item.status] || "bg-gray-100 text-gray-500"} />
       </div>
 
-      {/* Details */}
-      <div className="grid grid-cols-2 gap-2 text-xs text-gray-500">
-        {req.fromDate && (
-          <div><span className="text-gray-400">From:</span> {req.fromDate}</div>
-        )}
-        {req.toDate && (
-          <div><span className="text-gray-400">To:</span> {req.toDate}</div>
-        )}
-        {req.duration && (
-          <div><span className="text-gray-400">Duration:</span> {req.duration}</div>
-        )}
-        {req.leaveType && (
-          <div><span className="text-gray-400">Type:</span> {req.leaveType}</div>
+      <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-gray-500">
+        <div><span className="text-gray-400">From: </span>{formatDate(item.leaveFrom)}</div>
+        <div><span className="text-gray-400">To: </span>{formatDate(item.leaveTo)}</div>
+        {item.typeOfLeave && (
+          <div className="col-span-2"><span className="text-gray-400">Type: </span>{item.typeOfLeave}</div>
         )}
       </div>
 
-      {/* Reason */}
-      {req.reason && (
+      {item.reasonForLeave && (
         <div className="text-xs text-gray-500 bg-gray-50 rounded-lg px-3 py-2">
-          <span className="text-gray-400">Reason: </span>{req.reason}
+          <span className="text-gray-400">Reason: </span>{item.reasonForLeave}
         </div>
       )}
 
-      {/* Admin info (All Requests tab) */}
-      {req.handledBy && (
-        <div className="text-xs text-gray-400 border-t border-gray-100 pt-2">
-          Handled by: <span className="text-gray-600 font-medium">{req.handledBy}</span>
-        </div>
-      )}
-
-      {/* Actions (Needs Approval tab) */}
-      {actionable && req.status === "Pending" && (
-        <div className="flex gap-2 pt-1 border-t border-gray-100">
-          <button
-            onClick={() => handle("approve")}
-            disabled={acting}
-            className="flex-1 text-xs font-medium py-1.5 rounded-lg bg-green-600 text-white hover:bg-green-700 disabled:opacity-50 transition-colors"
-          >
-            {acting ? "..." : "Approve"}
-          </button>
-          <button
-            onClick={() => handle("reject")}
-            disabled={acting}
-            className="flex-1 text-xs font-medium py-1.5 rounded-lg border border-red-200 text-red-600 hover:bg-red-50 disabled:opacity-50 transition-colors"
-          >
-            {acting ? "..." : "Reject"}
-          </button>
-        </div>
-      )}
+      <div className="flex gap-2 pt-1 border-t border-gray-100">
+        <button
+          onClick={() => onAction(item, "Leave", "Approved", id)}
+          disabled={loading}
+          className="flex-1 text-xs font-medium py-1.5 rounded-lg bg-green-600 text-white hover:bg-green-700 disabled:opacity-50 transition-colors"
+        >
+          {loading ? "..." : "✓ Approve"}
+        </button>
+        <button
+          onClick={() => onAction(item, "Leave", "Rejected", id)}
+          disabled={loading}
+          className="flex-1 text-xs font-medium py-1.5 rounded-lg border border-red-200 text-red-600 hover:bg-red-50 disabled:opacity-50 transition-colors"
+        >
+          {loading ? "..." : "✕ Reject"}
+        </button>
+      </div>
     </div>
   );
 };
 
-/* ─── Main Component ─── */
+/* ════════════════════════════════════════
+   PERMISSION CARD
+════════════════════════════════════════ */
+const PermissionCard = ({ item, onAction, actionLoadingId }) => {
+  const id      = `perm-${item.empId}-${item.Date}`;
+  const loc     = getLocation(item.empId);
+  const loading = actionLoadingId === id;
+
+  return (
+    <div className="bg-white border border-gray-200 rounded-xl p-4 space-y-3 hover:border-indigo-200 transition-colors">
+      <div className="flex items-start justify-between gap-2">
+        <div>
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-sm font-medium text-gray-800">{item.empName || item.empId}</span>
+            <Badge label={loc} style={LOC_STYLE[loc]} />
+            <Badge label="Permission" style={TYPE_STYLE.Permission} />
+          </div>
+          <div className="text-xs text-gray-400 mt-0.5">{item.empId}</div>
+        </div>
+        <Badge label={resolveStatus(item.status)} style={STATUS_STYLE[item.status] || "bg-gray-100 text-gray-500"} />
+      </div>
+
+      <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-gray-500">
+        <div><span className="text-gray-400">Date: </span>{formatDate(item.Date)}</div>
+        {item.permissionType && (
+          <div><span className="text-gray-400">Type: </span>{item.permissionType}</div>
+        )}
+      </div>
+
+      {item.reasonForPermission && (
+        <div className="text-xs text-gray-500 bg-gray-50 rounded-lg px-3 py-2">
+          <span className="text-gray-400">Reason: </span>{item.reasonForPermission}
+        </div>
+      )}
+
+      <div className="flex gap-2 pt-1 border-t border-gray-100">
+        <button
+          onClick={() => onAction(item, "Permission", "Approved", id)}
+          disabled={loading}
+          className="flex-1 text-xs font-medium py-1.5 rounded-lg bg-green-600 text-white hover:bg-green-700 disabled:opacity-50 transition-colors"
+        >
+          {loading ? "..." : "✓ Approve"}
+        </button>
+        <button
+          onClick={() => onAction(item, "Permission", "Rejected", id)}
+          disabled={loading}
+          className="flex-1 text-xs font-medium py-1.5 rounded-lg border border-red-200 text-red-600 hover:bg-red-50 disabled:opacity-50 transition-colors"
+        >
+          {loading ? "..." : "✕ Reject"}
+        </button>
+      </div>
+    </div>
+  );
+};
+
+/* ════════════════════════════════════════
+   OD CARD
+════════════════════════════════════════ */
+const ODCard = ({ item, onAction, actionLoadingId }) => {
+  const id      = `od-${item.empId}-${item.onDutyFrom}`;
+  const loc     = getLocation(item.empId);
+  const loading = actionLoadingId === id;
+
+  return (
+    <div className="bg-white border border-gray-200 rounded-xl p-4 space-y-3 hover:border-indigo-200 transition-colors">
+      <div className="flex items-start justify-between gap-2">
+        <div>
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-sm font-medium text-gray-800">{item.empName || item.empId}</span>
+            <Badge label={loc} style={LOC_STYLE[loc]} />
+            <Badge label="OD" style={TYPE_STYLE.OD} />
+          </div>
+          <div className="text-xs text-gray-400 mt-0.5">{item.empId}</div>
+        </div>
+        <Badge label={resolveStatus(item.status)} style={STATUS_STYLE[item.status] || "bg-gray-100 text-gray-500"} />
+      </div>
+
+      <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-gray-500">
+        <div><span className="text-gray-400">From: </span>{formatDate(item.onDutyFrom)}</div>
+        <div><span className="text-gray-400">To: </span>{formatDate(item.onDutyTo)}</div>
+      </div>
+
+      {item.reason && (
+        <div className="text-xs text-gray-500 bg-gray-50 rounded-lg px-3 py-2">
+          <span className="text-gray-400">Reason: </span>{item.reason}
+        </div>
+      )}
+
+      <div className="flex gap-2 pt-1 border-t border-gray-100">
+        <button
+          onClick={() => onAction(item, "OD", "Approved", id)}
+          disabled={loading}
+          className="flex-1 text-xs font-medium py-1.5 rounded-lg bg-green-600 text-white hover:bg-green-700 disabled:opacity-50 transition-colors"
+        >
+          {loading ? "..." : "✓ Approve"}
+        </button>
+        <button
+          onClick={() => onAction(item, "OD", "Rejected", id)}
+          disabled={loading}
+          className="flex-1 text-xs font-medium py-1.5 rounded-lg border border-red-200 text-red-600 hover:bg-red-50 disabled:opacity-50 transition-colors"
+        >
+          {loading ? "..." : "✕ Reject"}
+        </button>
+      </div>
+    </div>
+  );
+};
+
+/* ════════════════════════════════════════
+   ALL REQUESTS — Table row
+════════════════════════════════════════ */
+const AllRequestRow = ({ item, type }) => {
+  const empId = item.employeeId || item.empId || "—";
+  const loc   = getLocation(empId);
+  const statusLabel = resolveStatus(item.status);
+  const adminid = item.adminEmpId || "—";
+  let fromDate = "—", toDate = null, detail = null;
+
+  if (type === "Leave") {
+    fromDate = formatDate(item.leaveFrom);
+    toDate   = formatDate(item.leaveTo);
+    detail   = item.typeOfLeave || item.reasonForLeave;
+  } else if (type === "Permission") {
+    fromDate = formatDate(item.Date);
+    detail   = item.permissionType || item.reasonForPermission;
+  } else if (type === "OD") {
+    fromDate = formatDate(item.onDutyFrom);
+    toDate   = formatDate(item.onDutyTo);
+    detail   = item.reason;
+  }
+
+  return (
+    <tr className="border-t border-gray-100 hover:bg-gray-50 transition-colors">
+      <td className="px-4 py-3">
+        <div className="text-sm font-medium text-gray-800">{item.empName || empId}</div>
+        <div className="text-xs text-gray-400">{empId}</div>
+      </td>
+      <td className="px-4 py-3 text-sm font-medium text-gray-800">{adminid}</td>
+      <td className="px-4 py-3"><Badge label={loc} style={LOC_STYLE[loc]} /></td>
+      <td className="px-4 py-3"><Badge label={type} style={TYPE_STYLE[type]} /></td>
+      <td className="px-4 py-3 text-xs text-gray-500 whitespace-nowrap">
+        {fromDate}{toDate && toDate !== "—" ? ` → ${toDate}` : ""}
+      </td>
+      <td className="px-4 py-3 text-xs text-gray-400 max-w-[180px] truncate">{detail || "—"}</td>
+      <td className="px-4 py-3">
+        <Badge label={statusLabel} style={STATUS_STYLE[item.status] || "bg-gray-100 text-gray-500"} />
+      </td>
+    </tr>
+  );
+};
+
+/* ════════════════════════════════════════
+   MAIN COMPONENT
+════════════════════════════════════════ */
 const PendingRequests = () => {
-  const [tab, setTab]           = useState("approval"); // "approval" | "all"
-  const [approvalData, setApprovalData] = useState([]);
-  const [allData, setAllData]           = useState([]);
-  const [loading, setLoading]   = useState(false);
-  const [error, setError]       = useState(null);
-  const [reqType, setReqType]   = useState("All");
-  const [location, setLocation] = useState("All");
-  const [search, setSearch]     = useState("");
+  const [tab, setTab] = useState("my");
+
+  /* My Requests */
+  const [pendingLeaves,      setPendingLeaves]      = useState([]);
+  const [pendingPermissions, setPendingPermissions] = useState([]);
+  const [pendingOds,         setPendingOds]         = useState([]);
+  const [loadingMy,          setLoadingMy]          = useState(false);
+  const [errorMy,            setErrorMy]            = useState(null);
+
+  /* All Requests */
+  const [allData,    setAllData]    = useState({});
+  const [loadingAll, setLoadingAll] = useState(false);
+  const [errorAll,   setErrorAll]   = useState(null);
+
+  /* Per-card action loading */
+  const [actionLoadingId, setActionLoadingId] = useState(null);
+
+  /* All tab filters */
+  const [filterType,   setFilterType]   = useState("All");
+  const [filterStatus, setFilterStatus] = useState("All");
+  const [filterLoc,    setFilterLoc]    = useState("All");
+  const [search,       setSearch]       = useState("");
 
   const token = sessionStorage.getItem("authToken");
+  const user  = JSON.parse(sessionStorage.getItem("authUser") || "{}");
 
-  const fetchApproval = useCallback(async () => {
+  /* ─── Fetch My Requests ─── */
+  const fetchMyRequests = useCallback(async () => {
     try {
-      setLoading(true);
-      setError(null);
-      const res = await fetch("http://localhost:9090/getSuperAdminPendingRequests", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      setLoadingMy(true);
+      setErrorMy(null);
+      const res = await fetch(
+        `http://localhost:9090/admin/adminDashBoardDetails?rmEmpId=${user?.employeeId}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
       if (!res.ok) throw new Error(`Server error: ${res.status}`);
       const json = await res.json();
-      setApprovalData(json.requests || []);
+      setPendingLeaves(json.pendingLeaves           || []);
+      setPendingPermissions(json.pendingPermissions || []);
+      setPendingOds(json.pendingOds                 || []);
     } catch (e) {
-      setError(e.message || "Failed to load requests");
+      setErrorMy(e.message || "Failed to load requests");
     } finally {
-      setLoading(false);
+      setLoadingMy(false);
     }
-  }, [token]);
+  }, [token, user?.employeeId]);
 
-  const fetchAll = useCallback(async () => {
+  /* ─── Fetch All Requests ─── */
+  const fetchAllRequests = useCallback(async () => {
     try {
-      setLoading(true);
-      setError(null);
-      const res = await fetch("http://localhost:9090/getAllRequests", {
+      setLoadingAll(true);
+      setErrorAll(null);
+      const res = await fetch("http://localhost:9090/getAllRequest", {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (!res.ok) throw new Error(`Server error: ${res.status}`);
       const json = await res.json();
-      setAllData(json.requests || []);
+      setAllData(json || {});
     } catch (e) {
-      setError(e.message || "Failed to load requests");
+      setErrorAll(e.message || "Failed to load all requests");
     } finally {
-      setLoading(false);
+      setLoadingAll(false);
     }
   }, [token]);
 
   useEffect(() => {
-    if (tab === "approval") fetchApproval();
-    else fetchAll();
-  }, [tab, fetchApproval, fetchAll]);
+    fetchMyRequests();
+    fetchAllRequests();
+  }, [fetchMyRequests, fetchAllRequests]);
 
-  const activeData = tab === "approval" ? approvalData : allData;
+  /* ─── Approve / Reject ─── */
+  const handleAction = useCallback(async (item, type, status, uniqueId) => {
+    try {
+      setActionLoadingId(uniqueId);
+      const endpoint = `http://localhost:9090${APPROVE_API[type]}`;
 
-  const filtered = useMemo(() => {
-    return activeData.filter((r) => {
-      const s = search.toLowerCase();
-      const matchSearch =
-        !search ||
-        r.employeeName?.toLowerCase().includes(s) ||
-        r.employeeId?.toLowerCase().includes(s);
-      const matchType = reqType === "All" || r.requestType === reqType;
-      const matchLoc  = location === "All" || getLocation(r.employeeId) === location;
-      return matchSearch && matchType && matchLoc;
+      // ❗ Send FULL object + updated status
+      let body = {};
+
+    // ✅ COMMON FIELD
+    const empId = item.empId || item.employeeId;
+
+    // ===========================
+    // ✅ LEAVE PAYLOAD
+    // ===========================
+    if (type === "Leave") {
+      body = {
+        adminEmpId: user?.employeeId, // ✅ logged-in admin
+        empId: empId,
+        leaveFrom: item.leaveFrom,
+        leaveTo: item.leaveTo,
+        sessionFrom: item.sessionFrom,
+        sessionTo: item.sessionTo,
+        noOfLeaves: item.noOfLeaves || item.noOfDays,
+        typeOfLeave: item.typeOfLeave,
+        reasonForLeave: item.reasonForLeave,
+        leaveStatus: status,
+      };
+    }
+
+    // ===========================
+    // ✅ PERMISSION PAYLOAD
+    // ===========================
+    else if (type === "Permission") {
+      body = {
+        empId: empId,
+        permissionDate: item.permissionDate || item.Date, // ⚠️ API mismatch fix
+        permissionType: item.permissionType,
+        reasonForPermission: item.reasonForPermission,
+        permissionStatus: status,
+      };
+    }
+
+    // ===========================
+    // ✅ OD PAYLOAD
+    // ===========================
+    else if (type === "OD") {
+      body = {
+        adminEmpId: item.adminEmpId,
+        empId: empId,
+        onDutyFrom: item.onDutyFrom,
+        onDutyTo: item.onDutyTo,
+        sessionFrom: item.sessionFrom,
+        sessionTo: item.sessionTo,
+        noOfDays: item.noOfDays,
+        reason: item.reason,
+        appliedOn: item.appliedOn,
+        status: status,
+      };
+    }
+
+      // ❗ Trim location if present
+      if (body.location) body.location = body.location.trim();
+
+      const res = await fetch(endpoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(body),
+      });
+
+      if (!res.ok) throw new Error(`Failed to ${status.toLowerCase()} request`);
+
+      toast.success(`${type} ${status.toLowerCase()} successfully`);
+
+      // Reload only My Requests after action
+      await fetchMyRequests();
+    } catch (e) {
+      toast.error(e.message || "Action failed");
+    } finally {
+      setActionLoadingId(null);
+    }
+  }, [token, fetchMyRequests,user]);
+
+  /* ─── Flatten All Requests ─── */
+  const flatAll = useMemo(() => {
+    const rows = [];
+    const leaves      = allData.leaves      || allData.pendingLeaves      || [];
+    const permissions = allData.permissions || allData.pendingPermissions || [];
+    const ods         = allData.ods         || allData.pendingOds         || [];
+    leaves.forEach((i)      => rows.push({ ...i, _type: "Leave"      }));
+    permissions.forEach((i) => rows.push({ ...i, _type: "Permission" }));
+    ods.forEach((i)         => rows.push({ ...i, _type: "OD"         }));
+    return rows;
+  }, [allData]);
+
+  const filteredAll = useMemo(() => {
+    return flatAll.filter((r) => {
+      const empId = (r.employeeId || r.empId || "").toLowerCase();
+      const name  = (r.empName || "").toLowerCase();
+      const s     = search.toLowerCase();
+      const matchSearch = !search || name.includes(s) || empId.includes(s);
+      const matchType   = filterType   === "All" || r._type === filterType;
+      const matchLoc    = filterLoc    === "All" || getLocation(r.employeeId || r.empId) === filterLoc;
+      const matchStatus = filterStatus === "All" || resolveStatus(r.status) === filterStatus;
+      return matchSearch && matchType && matchLoc && matchStatus;
     });
-  }, [activeData, search, reqType, location]);
+  }, [flatAll, search, filterType, filterLoc, filterStatus]);
 
-  const handleApprove = async (req) => {
-    try {
-      const res = await fetch("http://localhost:9090/approveRequest", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ requestId: req.requestId, action: "Approved" }),
-      });
-      if (!res.ok) throw new Error("Failed to approve");
-      toast.success(`Approved ${req.employeeName}'s request`);
-      setApprovalData((prev) => prev.filter((r) => r.requestId !== req.requestId));
-    } catch {
-      toast.error("Failed to approve request");
-    }
-  };
-
-  const handleReject = async (req) => {
-    try {
-      const res = await fetch("http://localhost:9090/approveRequest", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ requestId: req.requestId, action: "Rejected" }),
-      });
-      if (!res.ok) throw new Error("Failed to reject");
-      toast.success(`Rejected ${req.employeeName}'s request`);
-      setApprovalData((prev) => prev.filter((r) => r.requestId !== req.requestId));
-    } catch {
-      toast.error("Failed to reject request");
-    }
-  };
-
-  const retry = tab === "approval" ? fetchApproval : fetchAll;
+  const totalPending = pendingLeaves.length + pendingPermissions.length + pendingOds.length;
 
   return (
     <div className="space-y-5">
 
-      {/* ─── Tabs ─── */}
+      {/* ─── Main Tabs ─── */}
       <div className="flex gap-1 border-b border-gray-200">
         <button
-          onClick={() => setTab("approval")}
-          className={`px-4 py-2.5 text-sm font-medium border-b-2 transition-colors ${
-            tab === "approval"
+          onClick={() => setTab("my")}
+          className={`px-4 py-2.5 text-sm font-medium border-b-2 transition-colors flex items-center gap-2 ${
+            tab === "my"
               ? "border-indigo-600 text-indigo-600"
               : "border-transparent text-gray-500 hover:text-gray-700"
           }`}
         >
-          Needs my approval
-          {approvalData.filter((r) => r.status === "Pending").length > 0 && (
-            <span className="ml-2 text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded-full">
-              {approvalData.filter((r) => r.status === "Pending").length}
+          My requests
+          {totalPending > 0 && (
+            <span className="text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded-full font-semibold">
+              {totalPending}
             </span>
           )}
         </button>
@@ -258,86 +511,168 @@ const PendingRequests = () => {
         </button>
       </div>
 
-      {/* ─── Controls ─── */}
-      <div className="flex flex-wrap gap-3 items-center">
-        <input
-          type="text"
-          placeholder="Search name or ID..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="border px-3 py-2 rounded-md text-sm w-48 focus:outline-none focus:ring-2 focus:ring-indigo-300"
-        />
-        <select
-          value={reqType}
-          onChange={(e) => setReqType(e.target.value)}
-          className="border px-3 py-2 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300"
-        >
-          {REQUEST_TYPES.map((t) => <option key={t}>{t}</option>)}
-        </select>
-        <select
-          value={location}
-          onChange={(e) => setLocation(e.target.value)}
-          className="border px-3 py-2 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300"
-        >
-          {LOCATIONS.map((l) => <option key={l}>{l}</option>)}
-        </select>
-        {filtered.length !== activeData.length && (
-          <span className="text-xs text-gray-400 ml-auto">
-            {filtered.length} of {activeData.length} requests
-          </span>
-        )}
-      </div>
+      {/* ════════ MY REQUESTS TAB ════════ */}
+      {tab === "my" && (
+        <div className="space-y-8">
 
-      {/* ─── Error ─── */}
-      {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm flex items-center gap-2">
-          <span>⚠</span> {error}
-          <button onClick={retry} className="ml-auto underline text-xs">Retry</button>
-        </div>
-      )}
+          {errorMy && (
+            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm flex items-center gap-2">
+              <span>⚠</span> {errorMy}
+              <button onClick={fetchMyRequests} className="ml-auto underline text-xs">Retry</button>
+            </div>
+          )}
 
-      {/* ─── Skeleton ─── */}
-      {loading && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="border rounded-xl p-4 animate-pulse space-y-3">
-              <div className="flex justify-between">
-                <div className="h-4 bg-gray-200 rounded w-1/2" />
-                <div className="h-5 bg-gray-100 rounded w-16" />
-              </div>
-              <div className="h-3 bg-gray-100 rounded w-1/3" />
-              <div className="h-8 bg-gray-100 rounded" />
-              <div className="flex gap-2">
-                <div className="flex-1 h-7 bg-gray-200 rounded-lg" />
-                <div className="flex-1 h-7 bg-gray-100 rounded-lg" />
+          {loadingMy && <Skeleton count={6} />}
+
+          {!loadingMy && !errorMy && totalPending === 0 && (
+            <div className="text-center py-20 text-gray-400">
+              <div className="text-4xl mb-3">✅</div>
+              <div className="text-sm">No pending requests assigned to you</div>
+            </div>
+          )}
+
+          {/* Pending Leaves */}
+          {!loadingMy && pendingLeaves.length > 0 && (
+            <div>
+              <SectionHeader label="Leave requests" count={pendingLeaves.length} />
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {pendingLeaves.map((item, i) => (
+                  <LeaveCard
+                    key={`leave-${i}`}
+                    item={item}
+                    onAction={handleAction}
+                    actionLoadingId={actionLoadingId}
+                  />
+                ))}
               </div>
             </div>
-          ))}
+          )}
+
+          {/* Pending Permissions */}
+          {!loadingMy && pendingPermissions.length > 0 && (
+            <div>
+              <SectionHeader label="Permission requests" count={pendingPermissions.length} />
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {pendingPermissions.map((item, i) => (
+                  <PermissionCard
+                    key={`perm-${i}`}
+                    item={item}
+                    onAction={handleAction}
+                    actionLoadingId={actionLoadingId}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Pending ODs */}
+          {!loadingMy && pendingOds.length > 0 && (
+            <div>
+              <SectionHeader label="On duty requests" count={pendingOds.length} />
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {pendingOds.map((item, i) => (
+                  <ODCard
+                    key={`od-${i}`}
+                    item={item}
+                    onAction={handleAction}
+                    actionLoadingId={actionLoadingId}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       )}
 
-      {/* ─── Empty ─── */}
-      {!loading && !error && filtered.length === 0 && (
-        <div className="text-center py-20 text-gray-400">
-          <div className="text-4xl mb-3">✅</div>
-          <div className="text-sm">
-            {tab === "approval" ? "No pending requests to approve" : "No requests found"}
-          </div>
-        </div>
-      )}
+      {/* ════════ ALL REQUESTS TAB ════════ */}
+      {tab === "all" && (
+        <div className="space-y-4">
 
-      {/* ─── Cards ─── */}
-      {!loading && filtered.length > 0 && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filtered.map((req) => (
-            <RequestCard
-              key={req.requestId}
-              req={req}
-              actionable={tab === "approval"}
-              onApprove={handleApprove}
-              onReject={handleReject}
+          {/* Filters */}
+          <div className="flex flex-wrap gap-3 items-center">
+            <input
+              type="text"
+              placeholder="Search name or ID..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="border px-3 py-2 rounded-md text-sm w-48 focus:outline-none focus:ring-2 focus:ring-indigo-300"
             />
-          ))}
+            <select
+              value={filterType}
+              onChange={(e) => setFilterType(e.target.value)}
+              className="border px-3 py-2 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300"
+            >
+              {["All", "Leave", "Permission", "OD"].map((t) => <option key={t}>{t}</option>)}
+            </select>
+            <select
+              value={filterStatus}
+              onChange={(e) => setFilterStatus(e.target.value)}
+              className="border px-3 py-2 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300"
+            >
+              {["All", "Pending", "Approved", "Rejected", "Withdrawn"].map((s) => <option key={s}>{s}</option>)}
+            </select>
+            <select
+              value={filterLoc}
+              onChange={(e) => setFilterLoc(e.target.value)}
+              className="border px-3 py-2 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300"
+            >
+              {["All", "Palakkad", "Chittoor"].map((l) => <option key={l}>{l}</option>)}
+            </select>
+            {filteredAll.length !== flatAll.length && (
+              <span className="text-xs text-gray-400 ml-auto">
+                {filteredAll.length} of {flatAll.length} requests
+              </span>
+            )}
+          </div>
+
+          {errorAll && (
+            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm flex items-center gap-2">
+              <span>⚠</span> {errorAll}
+              <button onClick={fetchAllRequests} className="ml-auto underline text-xs">Retry</button>
+            </div>
+          )}
+
+          {loadingAll && (
+            <div className="space-y-2">
+              {Array.from({ length: 8 }).map((_, i) => (
+                <div key={i} className="h-12 bg-gray-100 rounded-lg animate-pulse" />
+              ))}
+            </div>
+          )}
+
+          {!loadingAll && !errorAll && filteredAll.length === 0 && (
+            <div className="text-center py-20 text-gray-400">
+              <div className="text-4xl mb-3">📋</div>
+              <div className="text-sm">
+                {search || filterType !== "All" || filterStatus !== "All" || filterLoc !== "All"
+                  ? "No requests match your filters"
+                  : "No requests found"}
+              </div>
+            </div>
+          )}
+
+          {!loadingAll && filteredAll.length > 0 && (
+            <div className="overflow-x-auto border border-gray-200 rounded-xl">
+              <table className="w-full text-sm">
+                <thead className="bg-gray-50 border-b border-gray-200 sticky top-0 z-10">
+                  <tr>
+                    <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500">Employee</th>
+                    <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500">Admin</th>
+                    <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500">Location</th>
+                    <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500">Type</th>
+                    <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 whitespace-nowrap">Date / Period</th>
+                    <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500">Details</th>
+                    <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500">Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredAll.map((item, i) => (
+                    <AllRequestRow key={i} item={item} type={item._type} />
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
       )}
     </div>
