@@ -101,6 +101,38 @@ const Sidebar = () => {
   </>
 )}
 
+        {user?.role === "HEAD" && (
+  <>
+    <p className={sectionTitle}>Overview</p>
+
+    <NavLink to="/head/dashboard" className={linkClasses}>
+      <LayoutDashboard size={18} />
+      Dashboard
+    </NavLink>
+    <NavLink to="/head/all-requests" className={linkClasses}>
+      <ClipboardCheck size={18} />
+      All Requests
+    </NavLink>
+
+    <p className={sectionTitle}>Approvals</p>
+
+    <NavLink to="/head/leave-approvals" className={linkClasses}>
+      <ClipboardCheck size={18} />
+      Leave Approvals
+    </NavLink>
+
+    <NavLink to="/head/od-approvals" className={linkClasses}>
+      <ClipboardCheck size={18} />
+      OD Approvals
+    </NavLink>
+
+    <NavLink to="/head/permission-approvals" className={linkClasses}>
+      <ClipboardCheck size={18} />
+      Permission Approvals
+    </NavLink>
+  </>
+)}
+
         {/* ADMIN */}
         {user?.role === "ADMIN" && (
           <>
@@ -116,7 +148,7 @@ const Sidebar = () => {
               <Users size={18} />
               Faculty Profiles
             </NavLink>
-<p className={sectionTitle}>Approvals</p>
+            <p className={sectionTitle}>Approvals</p>
             <NavLink to="/admin/leave-approvals" className={linkClasses}>
               <ClipboardCheck size={18} />
               Leave Approvals

@@ -45,8 +45,7 @@ const [error, setError] = useState("");
     );
 
     if (!res.ok) {
-      const errorText = await res.text();
-      throw new Error(errorText || `Server Error: ${res.status}`);
+      throw new Error(`Network Error: ${res.status}`);
     }
 
     const json = await res.json();

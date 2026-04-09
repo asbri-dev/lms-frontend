@@ -16,6 +16,10 @@ import AdminManagement from "./pages/superadmin/AdminManagement";
 import AttendanceModifier from "./pages/superadmin/AttendanceModifier";
 
 
+import HeadDashboard from "./pages/head/HeadDashboard";
+import AllRequestsPage from "./pages/head/AllRequestsPage";
+
+
 import OdApprovals from "./pages/admin/OdApprovals";
 import PermissionApprovals from "./pages/admin/PermissionApproval"; 
 import AdminDashboard from "./pages/admin/AdminDashboard";
@@ -83,6 +87,25 @@ function App() {
         <Route path="admin-management" element={<AdminManagement />} />
         <Route path="attendance-modifier" element={<AttendanceModifier />} />
       </Route>
+      
+      {/* HEAD */}
+      <Route
+  path="/head"
+  element={
+    <ProtectedRoute allowedRoles={["HEAD"]}>
+      <DashboardLayout />
+    </ProtectedRoute>
+  }
+>
+  {/* ✅ Custom HEAD dashboard */}
+  <Route path="dashboard" element={<HeadDashboard />} />
+  <Route path="all-requests" element={<AllRequestsPage />} />
+
+  {/* ✅ Reusing ADMIN pages */}
+  <Route path="leave-approvals" element={<LeaveApprovals />} />
+  <Route path="od-approvals" element={<OdApprovals />} />
+  <Route path="permission-approvals" element={<PermissionApprovals />} />
+</Route>
      
 
       {/* ADMIN */}

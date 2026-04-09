@@ -109,6 +109,7 @@ const ExcelUploads = () => {
           ? "http://localhost:9090/faculty/excel/upload"
           : uploadType === "admin"
           ? "http://localhost:9090/admin/excel/upload"
+          
           : "http://localhost:9090/attendanceInOut";
 
       const response = await fetch(endpoint, {
