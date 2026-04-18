@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback, useMemo } from "react";
 import toast from "react-hot-toast";
+import { API_BASE_URL } from "../../../config/api";
 
 
 /* ─── Helpers ─── */
@@ -328,7 +329,7 @@ const PendingRequests = () => {
       setLoadingMy(true);
       setErrorMy(null);
       const res = await fetch(
-        `http://localhost:9090/admin/adminDashBoardDetails?rmEmpId=${user?.employeeId}`,
+        `${API_BASE_URL}/admin/adminDashBoardDetails?rmEmpId=${user?.employeeId}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       if (!res.ok) throw new Error(`Server error: ${res.status}`);
@@ -348,7 +349,7 @@ const PendingRequests = () => {
     try {
       setLoadingAll(true);
       setErrorAll(null);
-      const res = await fetch("http://localhost:9090/getAllRequest", {
+      const res = await fetch(`${API_BASE_URL}/getAllRequest`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (!res.ok) throw new Error(`Server error: ${res.status}`);
@@ -370,7 +371,7 @@ const PendingRequests = () => {
   const handleAction = useCallback(async (item, type, status, uniqueId) => {
     try {
       setActionLoadingId(uniqueId);
-      const endpoint = `http://localhost:9090${APPROVE_API[type]}`;
+      const endpoint = `${API_BASE_URL}${APPROVE_API[type]}`;
 
       // ❗ Send FULL object + updated status
       let body = {};

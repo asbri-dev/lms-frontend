@@ -1,14 +1,15 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../../auth/AuthContext";
+import { AuthProvider } from "../../auth/AuthProvider";
 import "./OtpVerify.css";
+import { API_BASE_URL } from "../../config/api";
 
 const OTP_LENGTH = 6;
 const RESEND_TIME = 30;
 
 const OtpVerify = () => {
   const navigate = useNavigate();
-  const { handleLoginSuccess } = useAuth();
+  const { handleLoginSuccess } = AuthProvider();
 
   const inputRefs = useRef([]);
   const timerRef = useRef(null);
@@ -90,7 +91,7 @@ const handleVerifyOtp = async () => {
     }
 
     const response = await fetch(
-      `http://localhost:9090/verify-otp?enteredOtp=${enteredOtp}`,
+      `${API_BASE_URL}/verify-otp?enteredOtp=${enteredOtp}`,
       {
         method: "POST",
         headers: {
@@ -171,7 +172,7 @@ const handleResendOtp = async () => {
     }
 
     const response = await fetch(
-      `http://localhost:9090/resendOtp?mobileNumber=${mobileNumber}`,
+      `${API_BASE_URL}/resendOtp?mobileNumber=${mobileNumber}`,
       {
         method: "GET", // confirm backend
         headers: {

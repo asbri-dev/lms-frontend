@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { useAuth } from "../auth/AuthContext";
+import { AuthProvider } from "../auth/AuthProvider";
 import ProfileDetails from "../components/profile/ProfileDetails";
+import { API_BASE_URL } from "../config/api";
 
 const Header = () => {
-  const { user, token } = useAuth();
+  const { user, token } = AuthProvider();
 
   const [showProfile, setShowProfile] = useState(false);
   const [profileData, setProfileData] = useState(null);
@@ -31,7 +32,7 @@ const Header = () => {
       setShowProfile(true);
 
       const response = await fetch(
-        `http://localhost:9090/faculty/getAllFacultyDetails?empId=${empId}`,
+        `${API_BASE_URL}/faculty/getAllFacultyDetails?empId=${empId}`,
         {
           headers: {
             "Content-Type": "application/json",

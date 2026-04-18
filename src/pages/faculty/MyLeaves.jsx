@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
-import { useAuth } from "../../auth/AuthContext";
+import { AuthProvider } from "../../auth/AuthProvider";
 import { Filter } from "lucide-react";
+import { API_BASE_URL } from "../../config/api";
 
 
 
 const MyLeaves = () => {
-  const { user } = useAuth();
+  const { user } = AuthProvider();
 
   const [data, setData] = useState(null);
   const [activeStatus, setActiveStatus] = useState("PENDING");
@@ -23,7 +24,7 @@ const [messageType, setMessageType] = useState(""); // success | error
       setError("");
 
       const res = await fetch(
-        `http://localhost:9090/getDashboardDetails?empId=${user.employeeId}`
+        `${API_BASE_URL}/getDashboardDetails?empId=${user.employeeId}`
       );
 
       const json = await res.json();
@@ -155,7 +156,7 @@ const [messageType, setMessageType] = useState(""); // success | error
       let payload = {};
 
       if (item.type === "LEAVE") {
-        url = "http://localhost:9090/withDrawnLeave";
+        url = `${API_BASE_URL}/withDrawnLeave`;
         payload = {
           empId: item.meta.employeeId,
           typeOfLeave: item.meta.typeOfLeave,
@@ -172,7 +173,7 @@ const [messageType, setMessageType] = useState(""); // success | error
       }
 
       if (item.type === "PERMISSION") {
-        url = "http://localhost:9090/withdrawnPermission";
+        url = `${API_BASE_URL}/withdrawnPermission`;
         payload = {
           empId: user.employeeId,
           permissionType: item.meta.permissionType,
@@ -183,7 +184,7 @@ const [messageType, setMessageType] = useState(""); // success | error
       }
 
       if (item.type === "OD") {
-        url = "http://localhost:9090/withdrawnOd";
+        url = `${API_BASE_URL}/withdrawnOd`;
         payload = {
           adminEmpId: item.meta.adminEmpId,
           empId: item.meta.empId,

@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useState, useCallback } from "react";
 import { format, startOfMonth, endOfMonth, eachDayOfInterval } from "date-fns";
-import { exportAttendanceExcel } from "../../utils/excel";
+//import { exportAttendanceExcel } from "../../utils/excel";
 import { Search, MapPin, Building2, Calendar, Download } from "lucide-react";
+import toast from "react-hot-toast";
+import { API_BASE_URL } from "../../config/api";
 
 /* ─── Status Map ─── */
 const STATUS_MAP = {
@@ -84,7 +86,7 @@ const AttendanceMuster = () => {
       setError(null);
 
       const res = await fetch(
-        `http://localhost:9090/getAttendanceMuster?fromDate=${fromDate}&endDate=${endDate}`,
+        `${API_BASE_URL}/getAttendanceMuster?fromDate=${fromDate}&endDate=${endDate}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
@@ -140,6 +142,27 @@ useEffect(() => {
 
     return result;
   }, [data, search, department, location, sortField, sortDir]);
+
+
+ const exportAttendanceExcel = async (fromdate, todate, location) => {
+  try {
+    const res = await fetch(
+      `${API_BASE_URL}/downloadAttendanceMusterExcel?fromDate=${fromdate}&toDate=${todate}&collegeLocation=${location}`,
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
+
+    if (res.status === 200) {
+      toast.success("C:/Downloads/Attendance_Muster");
+    } else {
+      toast.error("Failed to export attendance muster.");
+    }
+  } catch (error) {
+    console.error(error);
+    toast.error("Something went wrong!");
+  }
+};
 
   /* ─── Summary bar totals ─── */
   const summary = useMemo(() => {
@@ -236,7 +259,7 @@ useEffect(() => {
 
   {/* ⬇ Export */}
   <button
-    onClick={() => exportAttendanceExcel(filtered, days)}
+    onClick={() => exportAttendanceExcel(fromDate, endDate, location)}
     disabled={filtered.length === 0 || loading}
     className="flex items-center gap-2 px-4 py-2 rounded-lg 
                bg-gradient-to-r from-[#2b3c6b] to-[#3f548f] 

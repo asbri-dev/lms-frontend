@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useState, useCallback } from "react";
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, parseISO } from "date-fns";
-import { useAuth } from "../../auth/AuthContext";
+import { AuthProvider } from "../../auth/AuthProvider";
 import toast from "react-hot-toast";
+import { API_BASE_URL } from "../../config/api";
 
 
 const HolidayPage = () => {
-  const { user } = useAuth();
+  const { user } = AuthProvider();
 
   const [month, setMonth] = useState(format(new Date(), "yyyy-MM"));
   const [location, setLocation] = useState("Palakkad");
@@ -48,7 +49,7 @@ const HolidayPage = () => {
     try {
        setError("");
       const res = await fetch(
-        `http://localhost:9090/getHolidays?fromDate=${fromDate}&toDate=${toDate}&collegeLocation=${location}`
+        `${API_BASE_URL}/getHolidays?fromDate=${fromDate}&toDate=${toDate}&collegeLocation=${location}`
       );
 
       const data = await res.json();
@@ -133,7 +134,7 @@ const HolidayPage = () => {
 
       const noOfDays = calculateDays(formData.fromDate, formData.toDate);
 
-      const res = await fetch("http://localhost:9090/createHoliday", {
+      const res = await fetch(`${API_BASE_URL}/createHoliday`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -182,7 +183,7 @@ const HolidayPage = () => {
 
   try {
     const response = await fetch(
-      `http://localhost:9090/deleteHoliday?date=${format(
+      `${API_BASE_URL}/deleteHoliday?date=${format(
         new Date(date),
         "dd-MMM-yyyy"
       )}&location=${location}`,

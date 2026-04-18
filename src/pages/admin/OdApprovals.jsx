@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
-import { useAuth } from "../../auth/AuthContext";
+import { AuthProvider  } from "../../auth/AuthProvider";
+import { API_BASE_URL } from "../../config/api";
 
 const ITEMS_PER_PAGE = 5;
 
 const OdApprovals = () => {
-  const { user } = useAuth();
+  const { user } = AuthProvider();
 
   const [dashboardData, setDashboardData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -16,13 +17,19 @@ const OdApprovals = () => {
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [actionMessage, setActionMessage] = useState("");
+  const [rejectModal, setRejectModal] = useState({
+  open: false,
+  od: null
+});
+
+const [rejectReason, setRejectReason] = useState("");
 
   /* 🔹 Fetch Dashboard */
   const fetchDashboard = async () => {
     try {
       setLoading(true);
       const response = await fetch(
-        `http://localhost:9090/admin/adminDashBoardDetails?rmEmpId=${user.employeeId}`
+        `${API_BASE_URL}/admin/adminDashBoardDetails?rmEmpId=${user.employeeId}`
       );
 
       if (!response.ok) throw new Error("Failed to load data");
@@ -43,12 +50,17 @@ const OdApprovals = () => {
   }, [user]);
 
   /* 🔹 Approve / Reject */
-  const handleAction = async (od, status) => {
+  const handleAction = async (od, status,reason) => {
+    if (status === "Rejected" && !reason.trim()) {
+  setActionMessage("Reason is required");
+  setTimeout(() => setActionMessage(""), 3000);
+  return;
+}
     const key = (od.empId || "") + od.appliedOn;
     setActionLoading(key);
 
     try {
-      const response = await fetch("http://localhost:9090/odApprove", {
+      const response = await fetch(`${API_BASE_URL}/odApprove`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -64,6 +76,7 @@ const OdApprovals = () => {
           noOfDays: od.noOfDays,
           reason: od.reason,
           status: status,
+          reasonForRejection: reason,
         }),
       });
 
@@ -253,7 +266,10 @@ const OdApprovals = () => {
     </button>
 
     <button
-      onClick={() => handleAction(od, "Rejected")}
+      onClick={() => {
+  setRejectModal({ open: true, od });
+  setRejectReason("");
+}}
       disabled={isLoading}
       className="bg-red-600 hover:bg-red-700 text-white text-xs font-medium px-3 py-1.5 rounded-lg transition disabled:opacity-50"
     >
@@ -338,6 +354,47 @@ const OdApprovals = () => {
           </div>
         </div>
       )}
+      {rejectModal.open && (
+  <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
+    
+    <div className="bg-white p-6 rounded-xl w-full max-w-md shadow-lg">
+
+      <h3 className="text-lg font-semibold mb-3">
+        Reject OD Request
+      </h3>
+
+      <textarea
+        value={rejectReason}
+        onChange={(e) => setRejectReason(e.target.value)}
+        placeholder="Enter rejection reason..."
+        className="w-full border p-2 rounded-md mb-4"
+        rows={4}
+      />
+
+      <div className="flex justify-end gap-2">
+
+        <button
+          onClick={() => setRejectModal({ open: false, od: null })}
+          className="px-4 py-2 bg-gray-300 rounded"
+        >
+          Cancel
+        </button>
+
+        <button
+          disabled={!rejectReason.trim()}
+          onClick={() => {
+            handleAction(rejectModal.od, "Rejected", rejectReason);
+            setRejectModal({ open: false, od: null });
+          }}
+          className="px-4 py-2 bg-red-600 text-white rounded disabled:opacity-50"
+        >
+          Submit
+        </button>
+
+      </div>
+    </div>
+  </div>
+)}
     </div>
   );
 };

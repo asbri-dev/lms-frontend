@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
-import { useAuth } from "../../auth/AuthContext";
+import { AuthProvider } from "../../auth/AuthProvider";
 import { useNavigate } from "react-router-dom";
+import { API_BASE_URL } from "../../config/api";
 import {
   CalendarDays,
   FileText,
@@ -21,7 +22,7 @@ import permission from "../../assets/permisson.jpeg";
 
 
 const FacultyDashboard = () => {
-  const { user } = useAuth();
+  const { user } = AuthProvider();
   const navigate = useNavigate();
 
   const [data, setData] = useState(null);
@@ -31,6 +32,8 @@ const [actionLoading, setActionLoading] = useState(null);
 const [attendanceSummary, setAttendanceSummary] = useState(null);
 const [selectedMonth, setSelectedMonth] = useState(new Date());
 const [error, setError] = useState("");
+const [todayLeaves, setTodayLeaves] = useState([]);
+const [birthdays, setBirthdays] = useState([]);
 
 
   /* ================= FETCH ================= */
@@ -41,7 +44,7 @@ const [error, setError] = useState("");
     setActionMessage("");
 
     const res = await fetch(
-      `http://localhost:9090/getDashboardDetails?empId=${user.employeeId}`
+      `${API_BASE_URL}/getDashboardDetails?empId=${user.employeeId}`
     );
 
     if (!res.ok) {
@@ -96,7 +99,7 @@ const handleNextMonth = () => {
     const toDate = format(to, "dd-MMM-yyyy");
 
     const res = await fetch(
-      `http://localhost:9090/attendanceSummary?empId=${user.employeeId}&fromDate=${fromDate}&toDate=${toDate}`
+      `${API_BASE_URL}/attendanceSummary?empId=${user.employeeId}&fromDate=${fromDate}&toDate=${toDate}`
     );
 
     const data = await res.json();
@@ -107,10 +110,30 @@ const handleNextMonth = () => {
     console.error("Attendance summary failed", err);
   }
 };
+const fetchExtraData = async () => {
+  try {
+    // 🔹 Today Leave
+    const leaveRes = await fetch(`${API_BASE_URL}/todayLeaves`);
+    const leaveData = await leaveRes.json();
+
+    // ⚠️ flatten array
+    setTodayLeaves(leaveData?.flat() || []);
+
+    // 🔹 Birthday
+    const bdayRes = await fetch(`${API_BASE_URL}/isBirthday`);
+    const bdayData = await bdayRes.json();
+
+    setBirthdays(bdayData || []);
+
+  } catch (err) {
+    console.error("Extra data fetch failed", err);
+  }
+};
 useEffect(() => {
   if (user?.employeeId) {
     fetchDashboard();
     fetchAttendanceSummary();
+    fetchExtraData();
   }
 }, [user?.employeeId, selectedMonth]); // 🔥 ADD selectedMonth
 
@@ -129,7 +152,7 @@ useEffect(() => {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 5000);
 
-    const response = await fetch("http://localhost:9090/withDrawnLeave", {
+    const response = await fetch(`${API_BASE_URL}/withDrawnLeave`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -350,6 +373,8 @@ const mlAvailed = data.approvedLeaveList?.filter(l => l.typeOfLeave === "ml").le
   onPrev={handlePrevMonth}
   onNext={handleNextMonth}
 />
+<TodayLeaveCard data={todayLeaves} />
+<BirthdayCard data={birthdays} />
 
   {/* Existing */}
   <QuickActions navigate={navigate} />
@@ -550,3 +575,64 @@ const QuickItem = ({ text, onClick }) => (
     {text}
   </button>
 );
+
+
+const TodayLeaveCard = ({ data }) => {
+  return (
+    <div className="bg-white p-5 rounded-2xl shadow-md space-y-3">
+
+      <h3 className="text-sm font-semibold text-gray-700">
+        Today Leave
+      </h3>
+
+      {data.length === 0 ? (
+        <p className="text-xs text-gray-400">No one on leave</p>
+      ) : (
+        data.map((emp, i) => (
+          <div key={i} className="flex justify-between text-sm">
+
+            <span className="font-medium text-gray-800">
+              {emp.empName} - {emp.empId}
+            </span>
+
+            <span className="text-xs px-2 py-1 bg-yellow-100 text-yellow-700 rounded">
+              {emp.leaveType.toUpperCase()}
+            </span>
+
+          </div>
+        ))
+      )}
+
+    </div>
+  );
+};
+const BirthdayCard = ({ data }) => {
+  return (
+    <div className="bg-white p-5 rounded-2xl shadow-md space-y-3">
+
+      <h3 className="text-sm font-semibold text-gray-700">
+        🎉 Birthdays Today
+      </h3>
+
+      {data.length === 0 ? (
+        <p className="text-xs text-gray-400">No birthdays today</p>
+      ) : (
+        data.map((emp, i) => (
+          <div key={i} className="flex items-center gap-2 text-sm">
+
+            <span className="text-pink-500">🎂</span>
+
+            <span className="font-medium text-gray-800">
+              {emp.empName} - {emp.empId}
+            </span>
+            <span className="text-xs px-2 py-1 bg-yellow-100 text-blue-700 rounded">
+              {emp.location}
+            </span>
+
+          </div>
+        ))
+      )}
+
+    </div>
+  );
+};

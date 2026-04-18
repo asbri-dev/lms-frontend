@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect } from "react";
 import toast from "react-hot-toast";
+import { API_BASE_URL } from "../../../config/api";
 
 const getLocation = (employeeId) => {
   if (!employeeId) return "Unknown";
@@ -190,6 +191,7 @@ const EmployeeExitManagement = () => {
   const [activeExits, setActiveExits] = useState([]);
   const [exitHistory, setExitHistory] = useState([]);
   const [loadingActive, setLoadingActive] = useState(false);
+  
 
   const token = sessionStorage.getItem("authToken");
 
@@ -198,7 +200,7 @@ const EmployeeExitManagement = () => {
     try {
       setSearching(true);
       const res = await fetch(
-        `http://localhost:9090/getAllEmployees?search=${encodeURIComponent(search)}`,
+        `${API_BASE_URL}/getAllEmployees?search=${encodeURIComponent(search)}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       if (!res.ok) throw new Error("Search failed");
@@ -214,7 +216,7 @@ const EmployeeExitManagement = () => {
   const fetchActiveExits = useCallback(async () => {
     try {
       setLoadingActive(true);
-      const res = await fetch("http://localhost:9090/getActiveExits", {
+      const res = await fetch(`${API_BASE_URL}/getActiveExits`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (!res.ok) throw new Error();
@@ -229,7 +231,7 @@ const EmployeeExitManagement = () => {
 
   const fetchExitHistory = useCallback(async () => {
     try {
-      const res = await fetch("http://localhost:9090/getExitHistory", {
+      const res = await fetch(`${API_BASE_URL}/getExitHistory`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (!res.ok) throw new Error();
@@ -247,7 +249,7 @@ const EmployeeExitManagement = () => {
 
   const handleExitSubmit = async (payload) => {
     try {
-      const res = await fetch("http://localhost:9090/initiateExit", {
+      const res = await fetch(`${API_BASE_URL}/initiateExit`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

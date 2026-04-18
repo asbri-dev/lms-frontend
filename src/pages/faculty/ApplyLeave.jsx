@@ -4,7 +4,7 @@
 
 import { useState, useEffect, useMemo, useCallback,  } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../../auth/AuthContext";
+import { AuthProvider } from "../../auth/AuthProvider";
 import { CalendarDays, FileText, User } from "lucide-react";
 import DatePicker from "react-datepicker";
 import {
@@ -14,10 +14,11 @@ import {
 
 } from "date-fns";
 import "react-datepicker/dist/react-datepicker.css";
+import { API_BASE_URL } from "../../config/api";
 
 const ApplyLeave = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user } = AuthProvider();
 
   /* ================= STATE ================= */
 
@@ -59,7 +60,7 @@ const checkLeaveBalance = useCallback(() => {
     const fetchDashboard = async () => {
       try {
         const res = await fetch(
-          `http://localhost:9090/getDashboardDetails?empId=${user.employeeId}`
+          `${API_BASE_URL}/getDashboardDetails?empId=${user.employeeId}`
         );
         const data = await res.json();
 
@@ -126,7 +127,7 @@ const checkLeaveBalance = useCallback(() => {
       setEligible(false);
 
       const response = await fetch(
-        "http://localhost:9090/checkLeaveEligibe",
+        `${API_BASE_URL}/checkLeaveEligibe`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -233,7 +234,7 @@ const checkLeaveBalance = useCallback(() => {
       setLoading(true);
 
       const response = await fetch(
-        "http://localhost:9090/applyLeaves",
+        `${API_BASE_URL}/applyLeaves`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
