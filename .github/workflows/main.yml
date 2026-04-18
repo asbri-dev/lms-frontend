@@ -1,0 +1,71 @@
+name: Build, Push and Deploy Frontend to Cloud Run
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # ── 1. Checkout code ──────────────────────────────────
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      # ── 2. Setup Node ─────────────────────────────────────
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      # ── 3. Install dependencies ───────────────────────────
+      - name: Install dependencies
+        run: npm ci
+
+      # ── 4. Build Vite app ─────────────────────────────────
+      - name: Build React App
+        run: npm run build
+        env:
+          # If you have a .env variable for your backend URL, set it here
+          VITE_API_URL: ${{ secrets.VITE_API_URL }}
+
+      # ── 5. Login to Docker Hub ────────────────────────────
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      # ── 6. Build Docker Image ─────────────────────────────
+      - name: Build Docker Image
+        run: docker build -t ${{ secrets.DOCKER_USERNAME }}/lms-frontend:latest .
+
+      # ── 7. Push Docker Image ──────────────────────────────
+      - name: Push Docker Image
+        run: docker push ${{ secrets.DOCKER_USERNAME }}/lms-frontend:latest
+
+      # ── 8. Authenticate to GCP ────────────────────────────
+      - name: Authenticate to GCP
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      # ── 9. Set up gcloud CLI ──────────────────────────────
+      - name: Set up gcloud
+        uses: google-github-actions/setup-gcloud@v2
+
+      # ── 10. Deploy to Cloud Run ───────────────────────────
+      - name: Deploy to Cloud Run
+        run: |
+          gcloud run deploy lms-frontend \
+            --image docker.io/${{ secrets.DOCKER_USERNAME }}/lms-frontend:latest \
+            --platform managed \
+            --region asia-south1 \
+            --service-account github-deployer@lms-aries.iam.gserviceaccount.com \
+            --allow-unauthenticated \
+            --port 8080 \
+            --set-env-vars "VITE_API_URL=${{ secrets.VITE_API_URL }}"
