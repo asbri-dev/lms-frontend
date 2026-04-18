@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import CreateAdminModal from "../../components/admin/CreateAdminModal";
 import DeleteAdminModal from "../../components/admin/DeleteAdminModal";
-import { useAuth } from "../../auth/AuthContext";
+import { AuthProvider } from "../../auth/AuthProvider";
+import { API_BASE_URL } from "../../config/api";
 //import toast from "react-hot-toast";
 
 
@@ -9,7 +10,7 @@ import { useAuth } from "../../auth/AuthContext";
    MAIN COMPONENT
 ============================== */
 const AdminManagement = () => {
-    const { user } = useAuth();
+    const { user } = AuthProvider();
   const [tab, setTab] = useState("ADMIN");
 
   const [data, setData] = useState(null);
@@ -34,7 +35,7 @@ const AdminManagement = () => {
       setLoading(true);
       setError("");
 
-      const res = await fetch(`http://localhost:9090/getFacultyAndAdmin?rmEmpId=${user.employeeId}`);
+      const res = await fetch(`${API_BASE_URL}/getFacultyAndAdmin?rmEmpId=${user.employeeId}`);
       setData(res);
       const text = await res.text();
 
@@ -99,7 +100,7 @@ const AdminManagement = () => {
     try {
       setActionLoading("create");
 
-      const res = await fetch("http://localhost:9090/createAdmin", {
+      const res = await fetch(`${API_BASE_URL}/createAdmin`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
@@ -139,7 +140,7 @@ const AdminManagement = () => {
     setActionLoading(empId); // ✅ ADD THIS
 
     const res = await fetch(
-      `http://localhost:9090/deleteAdmin?empId=${empId}&newEmpId=${newEmpId}`,
+      `${API_BASE_URL}/deleteAdmin?empId=${empId}&newEmpId=${newEmpId}`,
       { method: "DELETE" }
     );
 

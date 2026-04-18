@@ -1,8 +1,9 @@
 import { useEffect, useState, useCallback,useRef} from "react";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
-import { useAuth } from "../../auth/AuthContext";
-import { Toaster } from "react-hot-toast";
+import { AuthProvider } from "../../auth/AuthProvider";
+import { API_BASE_URL } from "../../config/api";
+//import { Toaster } from "react-hot-toast";
 import {
   getMonthRange,
   transformAttendanceData,
@@ -11,7 +12,7 @@ import { ChevronLeft, ChevronRight, CalendarDays } from "lucide-react";
 
 const AttendanceInfo = ({ employeeId }) => {
 
-  const { user } = useAuth();
+  const { user } = AuthProvider();
 
   // 👇 Decide which employeeId to use
   const empId = employeeId || user?.employeeId;
@@ -61,7 +62,7 @@ const AttendanceInfo = ({ employeeId }) => {
       const { fromDate, toDate } = getMonthRange(currentMonth);
 
       const response = await fetch(
-        `http://localhost:9090/getAttedanceInfo?empId=${empId}&fromDate=${fromDate}&toDate=${toDate}`
+        `${API_BASE_URL}/getAttedanceInfo?empId=${empId}&fromDate=${fromDate}&toDate=${toDate}`
       );
 
       let data = null;

@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
+import { API_BASE_URL } from "../../config/api";
 
 // ── Status config ─────────────────────────────────────────────────────────────
 const STATUS_STYLES = {
@@ -239,7 +240,7 @@ export default function AllRequestsPage() {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch("http://localhost:9090/getAllRequest");
+      const res = await fetch(`${API_BASE_URL}/getAllRequest`);
       if (!res.ok) throw new Error(`Server error ${res.status}`);
       const json = await res.json();
       setData(json);

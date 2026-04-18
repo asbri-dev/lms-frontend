@@ -1,5 +1,6 @@
 import { useRef, useState } from "react";
 import toast from "react-hot-toast";
+import { API_BASE_URL } from "../../../config/api";
 
 const UPLOAD_TYPES = [
   { key: "employee",   label: "Employee data",   desc: "Bulk import employee records"    },
@@ -46,9 +47,9 @@ const ExcelUpload = () => {
     let url = "";
 
     if (uploadType === "employee") {
-      url = "http://localhost:9090/faculty/excel/upload";
+      url = `${API_BASE_URL}/faculty/excel/upload`;
     } else if (uploadType === "attendance") {
-      url = "http://localhost:9090/attendanceInOut";
+      url = `${API_BASE_URL}/attendanceInOut`;
     }
 
     const formData = new FormData();
@@ -89,7 +90,7 @@ const ExcelUpload = () => {
   const handleDownloadTemplate = async (type) => {
     try {
       const res = await fetch(
-        `http://localhost:9090/downloadTemplate?type=${type}`,
+        `${API_BASE_URL}/downloadTemplate?type=${type}`,
         { headers: { Authorization: `Bearer ${token}` } }  //
       );
       if (!res.ok) throw new Error("Failed to download");

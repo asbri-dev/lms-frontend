@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./ForgotPassword.css";
+import { API_BASE_URL } from "../../config/api";
 
 const ForgotPassword = () => {
   const navigate = useNavigate();
@@ -23,7 +24,7 @@ const ForgotPassword = () => {
       setIsLoading(true);
 
       const response = await fetch(
-        `http://localhost:9090/resetOrForgotPassword?empId=${empId}`,
+        `${API_BASE_URL}/resetOrForgotPassword?empId=${empId}`,
         {
           method: "POST",
         }

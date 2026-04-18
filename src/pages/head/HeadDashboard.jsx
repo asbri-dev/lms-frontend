@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
+import { API_BASE_URL } from "../../config/api";
 import {
   PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer,
 } from "recharts";
@@ -128,10 +129,13 @@ function DeptPieChart({ title, faculty, colors, loading }) {
               }}
             />
             <Legend
-              iconType="circle"
-              iconSize={8}
-              wrapperStyle={{ fontSize: 11, color: C.textSecond, paddingTop: 8 }}
-            />
+  iconType="circle"
+  iconSize={8}
+  wrapperStyle={{ fontSize: 11, paddingTop: 8 }}
+  formatter={(value) => (
+    <span style={{ color: "#000" }}>{value}</span> // ✅ FORCE BLACK TEXT
+  )}
+/>
           </PieChart>
         </ResponsiveContainer>
       )}
@@ -456,7 +460,7 @@ export default function HeadDashboard() {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch("http://localhost:9090/head/dashboard");
+      const res = await fetch(`${API_BASE_URL}/head/dashboard`);
       if (!res.ok) throw new Error(`Server responded with ${res.status}`);
       const json = await res.json();
       setData(json);

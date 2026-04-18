@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../../auth/AuthContext";
+import { AuthProvider } from "../../auth/AuthProvider";
+import { API_BASE_URL } from "../../config/api";
 import DatePicker from "react-datepicker";
 import { format } from "date-fns";
 import "react-datepicker/dist/react-datepicker.css";
@@ -28,7 +29,7 @@ const getCampusFromEmpId = (empId) => {
 
 const ApplyPermission = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user } = AuthProvider();
 
   /* ================= STATE ================= */
   const [permissionType, setPermissionType] = useState("lateIn");
@@ -97,7 +98,7 @@ const ApplyPermission = () => {
         setMessage("");
 
         const response = await fetch(
-          "http://localhost:9090/permissionRequestCheck",
+          `${API_BASE_URL}/permissionRequestCheck`,
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -159,7 +160,7 @@ const ApplyPermission = () => {
       setLoading(true);
 
       const response = await fetch(
-        "http://localhost:9090/applyPermission",
+        `${API_BASE_URL}/applyPermission`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

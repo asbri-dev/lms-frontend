@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Upload, FileCheck, AlertCircle } from "lucide-react";
+import { API_BASE_URL } from "../../config/api";
 
 const UploadCard = ({ title, type, icon, uploads, uploadStatus, handleFileChange, handleUpload }) => {
   const IconComponent = icon;
@@ -106,11 +107,10 @@ const ExcelUploads = () => {
       // API endpoints based on upload type
       const endpoint =
         uploadType === "faculty"
-          ? "http://localhost:9090/faculty/excel/upload"
+          ? `${API_BASE_URL}/faculty/excel/upload`
           : uploadType === "admin"
-          ? "http://localhost:9090/admin/excel/upload"
-          
-          : "http://localhost:9090/attendanceInOut";
+          ? `${API_BASE_URL}/admin/excel/upload`
+          : `${API_BASE_URL}/attendanceInOut`;
 
       const response = await fetch(endpoint, {
         method: "POST",

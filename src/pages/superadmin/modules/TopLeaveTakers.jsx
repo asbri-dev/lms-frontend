@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState, useCallback } from "react";
 import toast from "react-hot-toast";
+import { API_BASE_URL } from "../../../config/api";
 
 const QUOTA = 12;
 
@@ -16,7 +17,7 @@ const TopLeaveTakers = () => {
       setLoading(true);
       setError("");
 
-      const res = await fetch("http://localhost:9090/getAllRequest", {
+      const res = await fetch(`${API_BASE_URL}/getAllRequest`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

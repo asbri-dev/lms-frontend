@@ -1,13 +1,14 @@
 import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../../auth/AuthContext";
+import { AuthProvider } from "../../auth/AuthProvider";
+import { API_BASE_URL } from "../../config/api";
 import DatePicker from "react-datepicker";
 import { format, eachDayOfInterval, isSunday } from "date-fns";
 import "react-datepicker/dist/react-datepicker.css";
 import { CalendarDays, FileText, Upload } from "lucide-react";
 
 const ApplyOd = () => {
-  const { user } = useAuth();
+  const { user } = AuthProvider();
   const navigate = useNavigate();
 
   /* ================= STATE ================= */
@@ -89,7 +90,7 @@ const ApplyOd = () => {
         setMessage("");
 
         const response = await fetch(
-          "http://localhost:9090/checkOdEligible", // 🔥 if backend exists (optional)
+          `${API_BASE_URL}/checkOdEligible`, // 🔥 if backend exists (optional)
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -179,7 +180,7 @@ const ApplyOd = () => {
       if (reason) formData.append("reason", reason);
       if (file) formData.append("file", file);
 
-      const response = await fetch("http://localhost:9090/applyOd", {
+      const response = await fetch(`${API_BASE_URL}/applyOd`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

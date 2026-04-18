@@ -1,5 +1,5 @@
 import { NavLink } from "react-router-dom";
-import { useAuth } from "../auth/AuthContext";
+import { AuthProvider  } from "../auth/AuthProvider";
 import { LogOut } from "lucide-react";
 import {
   LayoutDashboard,
@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 
 const Sidebar = () => {
-  const { user, logout } = useAuth();
+  const { user, logout } = AuthProvider ();
 
   const linkClasses = ({ isActive }) =>
     `flex items-center gap-3 px-4 py-2 rounded-lg text-sm font-medium transition ${

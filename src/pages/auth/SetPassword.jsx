@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { API_BASE_URL } from "../../config/api";
 
 const SetPassword = () => {
   const navigate = useNavigate();
@@ -57,7 +58,7 @@ const SetPassword = () => {
       setLoading(true);
 
       const response = await fetch(
-        `http://localhost:9090/set-password?domain=${domain}&guid=${guid}`,
+        `${API_BASE_URL}/set-password?domain=${domain}&guid=${guid}`,
         {
           method: "POST",
           headers: {

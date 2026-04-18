@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
-import { useAuth } from "../../auth/AuthContext";
+import { AuthProvider  } from "../../auth/AuthProvider";
 import { CheckCircle, XCircle, Eye } from "lucide-react";
 import AdminDonutChart from "../../components/dashboard/AdminDonutChart";
+import { API_BASE_URL } from "../../config/api";
 
 
 const AdminDashboard = () => {
-  const { user } = useAuth();
+  const { user } = AuthProvider ();
 
   const [dashboardData, setDashboardData] = useState(null);
   const [selectedRequest, setSelectedRequest] = useState(null);
@@ -17,7 +18,7 @@ const AdminDashboard = () => {
     try {
       setLoading(true);
       const res = await fetch(
-        `http://localhost:9090/admin/adminDashBoardDetails?rmEmpId=${user?.employeeId}`
+        `${API_BASE_URL}/admin/adminDashBoardDetails?rmEmpId=${user?.employeeId}`
       );
       if (!res.ok) throw new Error("Failed to load dashboard");
       const data = await res.json();

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState, useCallback } from "react";
-import { useAuth } from "../../../auth/AuthContext";
+import { AuthProvider } from "../../../auth/AuthProvider";
 import { Search, X } from "lucide-react";
+import { API_BASE_URL } from "../../../config/api";
 
 // ✅ Helpers
 const getInitials = (name = "") =>
@@ -39,7 +40,7 @@ const EmployeeDirectory = () => {
   const [detailsLoading, setDetailsLoading] = useState(false);
 
   const token = sessionStorage.getItem("authToken");
-  const { user } = useAuth();
+  const { user } = AuthProvider();
 
   const toggleSort = (field) => {
     if (sortField === field) {
@@ -57,7 +58,7 @@ const EmployeeDirectory = () => {
       setError(null);
 
       const res = await fetch(
-        `http://localhost:9090/getFacultyAndAdmin?rmEmpId=${user.employeeId}`,
+        `${API_BASE_URL}/getFacultyAndAdmin?rmEmpId=${user.employeeId}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -107,7 +108,7 @@ const EmployeeDirectory = () => {
       setDetailsLoading(true);
 
       const res = await fetch(
-        `http://localhost:9090/faculty/getAllFacultyDetails?empId=${empId}`,
+        `${API_BASE_URL}/faculty/getAllFacultyDetails?empId=${empId}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }

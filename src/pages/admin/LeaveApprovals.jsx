@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
-import { useAuth } from "../../auth/AuthContext";
+import { AuthProvider  } from "../../auth/AuthProvider";
+import { API_BASE_URL } from "../../config/api";
 
 const ITEMS_PER_PAGE = 5;
 
 const LeaveApprovals = () => {
-  const { user } = useAuth();
+  const { user } = AuthProvider();
 
   const [dashboardData, setDashboardData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -16,6 +17,9 @@ const LeaveApprovals = () => {
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [actionMessage, setActionMessage] = useState("");
+  const [showRejectModal, setShowRejectModal] = useState(false);
+const [selectedLeave, setSelectedLeave] = useState(null);
+const [rejectReason, setRejectReason] = useState("");
   
 
   // 🔹 Fetch Data
@@ -24,7 +28,7 @@ const LeaveApprovals = () => {
       try {
         setLoading(true);
         const response = await fetch(
-          `http://localhost:9090/admin/adminDashBoardDetails?rmEmpId=${user.employeeId}`
+          `${API_BASE_URL}/admin/adminDashBoardDetails?rmEmpId=${user.employeeId}`
         );
 
         const data = await response.json();
@@ -48,7 +52,7 @@ const LeaveApprovals = () => {
     try {
       setActionLoading((leave.employeeId || "") + leave.leaveFrom);
 
-      const response = await fetch("http://localhost:9090/approveLeaves", {
+      const response = await fetch(`${API_BASE_URL}/approveLeaves`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -88,7 +92,7 @@ const LeaveApprovals = () => {
 
       // Refresh
       const refresh = await fetch(
-        `http://localhost:9090/admin/adminDashBoardDetails?rmEmpId=${user.employeeId}`
+        `${API_BASE_URL}/admin/adminDashBoardDetails?rmEmpId=${user.employeeId}`
       );
       const refreshedData = await refresh.json();
       setDashboardData(refreshedData);
@@ -139,6 +143,71 @@ const LeaveApprovals = () => {
     (currentPage - 1) * ITEMS_PER_PAGE,
     currentPage * ITEMS_PER_PAGE
   );
+  const handleRejectSubmit = async () => {
+  if (!rejectReason.trim()) {
+    setActionMessage("Reason is required");
+    return;
+  }
+
+  try {
+    setActionLoading(
+      (selectedLeave.employeeId || "") + selectedLeave.leaveFrom
+    );
+
+    const response = await fetch(
+      `${API_BASE_URL}/approveLeaves`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          empId: selectedLeave.employeeId,
+          leaveStatus: "Rejected",
+          adminEmpId: user.employeeId,
+          typeOfLeave: selectedLeave.typeOfLeave,
+          noOfLeaves: selectedLeave.noOfDays,
+          leaveFrom: selectedLeave.leaveFrom,
+          leaveTo: selectedLeave.leaveTo,
+          reasonForLeave: selectedLeave.reasonForLeave,
+          sessionFrom: selectedLeave.sessionFrom,
+          sessionTo: selectedLeave.sessionTo,
+
+          // 🔥 IMPORTANT ADD THIS
+          reasonForRejection: rejectReason
+        })
+      }
+    );
+
+    let data;
+    try {
+      data = await response.json();
+    } catch {
+      data = null;
+    }
+
+    if (!response.ok) {
+      throw new Error(data?.message || "Reject failed");
+    }
+
+    setActionMessage(data?.message || "Rejected successfully");
+
+    setShowRejectModal(false);
+    setSelectedLeave(null);
+
+    // Refresh
+    const refresh = await fetch(
+      `${API_BASE_URL}/admin/adminDashBoardDetails?rmEmpId=${user.employeeId}`
+    );
+    const refreshedData = await refresh.json();
+    setDashboardData(refreshedData);
+
+  } catch (err) {
+    setActionMessage(err.message);
+  } finally {
+    setActionLoading(null);
+  }
+};
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen space-y-6">
@@ -276,7 +345,11 @@ const LeaveApprovals = () => {
     </button>
 
     <button
-      onClick={() => handleAction(leave, "Rejected")}
+      onClick={() => {
+  setSelectedLeave(leave);
+  setRejectReason("");
+  setShowRejectModal(true);
+}}
       disabled={isLoading}
       className="bg-red-600 hover:bg-red-700 text-white text-xs font-medium px-3 py-1.5 rounded-lg transition disabled:opacity-50"
     >
@@ -373,6 +446,40 @@ const LeaveApprovals = () => {
 
         </div>
       )}
+      {showRejectModal && (
+  <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+    <div className="bg-white p-6 rounded-xl w-full max-w-md shadow-lg">
+
+      <h3 className="text-lg font-semibold mb-4">
+        Enter Reject Reason
+      </h3>
+
+      <textarea
+        value={rejectReason}
+        onChange={(e) => setRejectReason(e.target.value)}
+        placeholder="Enter reason..."
+        className="w-full border p-2 rounded-md mb-4"
+      />
+
+      <div className="flex justify-end gap-2">
+        <button
+          onClick={() => setShowRejectModal(false)}
+          className="px-4 py-2 bg-gray-200 rounded"
+        >
+          Cancel
+        </button>
+
+        <button
+          onClick={() => handleRejectSubmit()}
+          className="px-4 py-2 bg-red-600 text-white rounded"
+        >
+          Submit
+        </button>
+      </div>
+
+    </div>
+  </div>
+)}
     </div>
   );
 };

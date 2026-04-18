@@ -77,6 +77,7 @@ const AttendanceDonutChart = ({ summary, selectedMonth, onPrev, onNext }) => {
       {/* CENTER INFO */}
       <p className="text-center text-xs text-gray-500 mt-2">
         {summary.summaryFor}
+        
       </p>
 
       {/* LEGEND */}

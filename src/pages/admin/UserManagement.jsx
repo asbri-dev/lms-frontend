@@ -1,9 +1,10 @@
 import React, { useEffect, useState, useMemo, useRef, useCallback } from "react";
 import { AgGridReact } from "ag-grid-react";
 import { Download } from "lucide-react";
-import { useAuth } from "../../auth/AuthContext";
-import * as XLSX from "xlsx";
-import { saveAs } from "file-saver";
+import { AuthProvider  } from "../../auth/AuthProvider";
+import { API_BASE_URL } from "../../config/api";
+
+
 
 import { ModuleRegistry, AllCommunityModule } from "ag-grid-community";
 ModuleRegistry.registerModules([AllCommunityModule]);
@@ -72,7 +73,7 @@ const EmployeeDetailsModal = ({ selectedUser, setSelectedUser }) => {
 
 /* ---------- MAIN ---------- */
 export function UserManagement() {
-  const { user } = useAuth();
+  const { user } = AuthProvider ();
   const gridRef = useRef();
   const dropdownRef = useRef();
 
@@ -87,7 +88,7 @@ export function UserManagement() {
   useEffect(() => {
     const fetchData = async () => {
       const res = await fetch(
-        `http://localhost:9090/faculty/getAllRegFacultyDetails?rmEmpId=${user?.employeeId}`
+        `${API_BASE_URL}/faculty/getAllRegFacultyDetails?rmEmpId=${user?.employeeId}`
       );
       const data = await res.json();
       const list = Array.isArray(data) ? data : [data];
@@ -194,13 +195,7 @@ export function UserManagement() {
   const unselectAllColumns = () => setVisibleCols([]);
 
   /* ---------- EXPORT ---------- */
-  const exportExcel = () => {
-    const ws = XLSX.utils.json_to_sheet(rowData);  //
-    const wb = XLSX.utils.book_new();              
-    XLSX.utils.book_append_sheet(wb, ws, "Faculty");  
-    const buf = XLSX.write(wb, { bookType: "xlsx", type: "array" });
-    saveAs(new Blob([buf]), "Faculty.xlsx");
-  };
+ 
 
   /* ---------- FILTERED COLUMNS ---------- */
   const filteredCols = allColumns.filter((c) =>
@@ -302,7 +297,7 @@ export function UserManagement() {
 
         {/* EXPORT */}
         <button
-          onClick={exportExcel}
+         // onClick={}
           className="flex items-center gap-2 px-4 py-2 rounded-xl 
                      bg-[#2b3c6b] text-white hover:bg-[#3f548f] transition shadow-sm"
         >

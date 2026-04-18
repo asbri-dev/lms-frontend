@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
-import { useAuth } from "../../auth/AuthContext";
+import { AuthProvider } from "../../auth/AuthProvider";
 import toast from "react-hot-toast";
+import { API_BASE_URL } from "../../config/api";
 
 
 
@@ -202,7 +203,7 @@ function ToggleSwitch({ value, onChange, disabled }) {
 }
 
 function AttendanceRow({ record, empName, empId, onSave, isSaving }) {
-   const { user } = useAuth();
+   const { user } = AuthProvider();
   const locked = isLocked(record.AttendanceDetails?.status);
   const originalStatus = record.AttendanceDetails?.status || "";
   const originalS1 = record.AttendanceDetails?.sessionOne;
@@ -378,7 +379,7 @@ function AttendanceRow({ record, empName, empId, onSave, isSaving }) {
 
 // ─── Main Page ────────────────────────────────────────────────────────────────
 export default function AttendanceModifier() {
-  const { user } = useAuth();
+  const { user } = AuthProvider();
 
   // Employee list state
   const [allEmployees, setAllEmployees] = useState([]);
@@ -404,7 +405,7 @@ export default function AttendanceModifier() {
     const load = async () => {
       try {
         const res = await fetch(
-          `http://localhost:9090/getFacultyAndAdmin?rmEmpId=${user.employeeId}`
+          `${API_BASE_URL}/getFacultyAndAdmin?rmEmpId=${user.employeeId}`
         );
         const data = await res.json();
         const faculty = (data.FacultyDetails || []).map((f) => ({ ...f, _isAdmin: false }));
@@ -446,7 +447,7 @@ export default function AttendanceModifier() {
       const fmtFrom = formatDateForApi(from);
       const fmtTo   = formatDateForApi(to);
       const res = await fetch(
-        `http://localhost:9090/getAttedanceInfo?empId=${empId}&fromDate=${fmtFrom}&toDate=${fmtTo}`
+        `${API_BASE_URL}/getAttedanceInfo?empId=${empId}&fromDate=${fmtFrom}&toDate=${fmtTo}`
       );
       const data = await res.json();
       setRecords(Array.isArray(data) ? data : []);
@@ -495,7 +496,7 @@ export default function AttendanceModifier() {
   const handleSave = async (payload) => {
     setSavingRow(payload.date);
     try {
-      const res = await fetch("http://localhost:9090/attendanceManualOverride", {
+      const res = await fetch(`${API_BASE_URL}/attendanceManualOverride`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
