@@ -65,7 +65,7 @@ if (!response.ok) {
       sessionStorage.setItem("mobileNumber", mobileNumber);  // ← Add this line
 
 
-      navigate("/otp");
+      navigate("/otp"); //
     } catch (err) {
 
   if (err.message === "Failed to fetch") {

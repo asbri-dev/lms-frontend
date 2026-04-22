@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { AuthProvider } from "../../auth/AuthProvider";
+import { useAuth } from "../../auth/useAuth";
 import "./OtpVerify.css";
 import { API_BASE_URL } from "../../config/api";
 
@@ -9,7 +9,7 @@ const RESEND_TIME = 30;
 
 const OtpVerify = () => {
   const navigate = useNavigate();
-  const { handleLoginSuccess } = AuthProvider();
+  const { handleLoginSuccess } = useAuth();
 
   const inputRefs = useRef([]);
   const timerRef = useRef(null);

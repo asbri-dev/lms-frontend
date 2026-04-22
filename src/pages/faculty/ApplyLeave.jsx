@@ -4,7 +4,7 @@
 
 import { useState, useEffect, useMemo, useCallback,  } from "react";
 import { useNavigate } from "react-router-dom";
-import { AuthProvider } from "../../auth/AuthProvider";
+import { useAuth } from "../../auth/useAuth";
 import { CalendarDays, FileText, User } from "lucide-react";
 import DatePicker from "react-datepicker";
 import {
@@ -18,7 +18,7 @@ import { API_BASE_URL } from "../../config/api";
 
 const ApplyLeave = () => {
   const navigate = useNavigate();
-  const { user } = AuthProvider();
+  const { user } = useAuth();
 
   /* ================= STATE ================= */
 

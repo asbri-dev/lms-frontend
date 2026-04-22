@@ -1,12 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
-import { AuthProvider } from "../../auth/AuthProvider";
+import { useAuth } from "../../auth/useAuth";
 import { Filter } from "lucide-react";
 import { API_BASE_URL } from "../../config/api";
 
 
 
 const MyLeaves = () => {
-  const { user } = AuthProvider();
+  const { user } = useAuth();
 
   const [data, setData] = useState(null);
   const [activeStatus, setActiveStatus] = useState("PENDING");

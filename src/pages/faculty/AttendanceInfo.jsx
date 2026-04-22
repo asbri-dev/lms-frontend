@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback,useRef} from "react";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
-import { AuthProvider } from "../../auth/AuthProvider";
+import { useAuth } from "../../auth/useAuth";
 import { API_BASE_URL } from "../../config/api";
 //import { Toaster } from "react-hot-toast";
 import {
@@ -12,7 +12,7 @@ import { ChevronLeft, ChevronRight, CalendarDays } from "lucide-react";
 
 const AttendanceInfo = ({ employeeId }) => {
 
-  const { user } = AuthProvider();
+  const { user } = useAuth();
 
   // 👇 Decide which employeeId to use
   const empId = employeeId || user?.employeeId;

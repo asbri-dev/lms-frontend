@@ -6,7 +6,7 @@
 // Determine the API URL based on environment
 const API_CONFIG = {
   development: {
-    baseURL: "https://lms-app-792341416101.asia-south1.run.app",
+    baseURL: "http://localhost:8080",
     timeout: 10000,
     headers: {
       "Content-Type": "application/json",

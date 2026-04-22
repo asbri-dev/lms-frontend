@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { AuthProvider } from "../../auth/AuthProvider";
+import { useAuth } from "../../auth/useAuth";
 import { useNavigate } from "react-router-dom";
 import { API_BASE_URL } from "../../config/api";
 import {
@@ -22,7 +22,7 @@ import permission from "../../assets/permisson.jpeg";
 
 
 const FacultyDashboard = () => {
-  const { user } = AuthProvider();
+  const { user } = useAuth();
   const navigate = useNavigate();
 
   const [data, setData] = useState(null);

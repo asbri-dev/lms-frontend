@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import CreateAdminModal from "../../components/admin/CreateAdminModal";
 import DeleteAdminModal from "../../components/admin/DeleteAdminModal";
-import { AuthProvider } from "../../auth/AuthProvider";
+import { useAuth } from "../../auth/useAuth";
 import { API_BASE_URL } from "../../config/api";
 //import toast from "react-hot-toast";
 
@@ -10,7 +10,7 @@ import { API_BASE_URL } from "../../config/api";
    MAIN COMPONENT
 ============================== */
 const AdminManagement = () => {
-    const { user } = AuthProvider();
+    const { user } = useAuth();
   const [tab, setTab] = useState("ADMIN");
 
   const [data, setData] = useState(null);

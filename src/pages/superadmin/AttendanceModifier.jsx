@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
-import { AuthProvider } from "../../auth/AuthProvider";
+import { useAuth } from "../../auth/useAuth";
 import toast from "react-hot-toast";
 import { API_BASE_URL } from "../../config/api";
 
@@ -203,7 +203,7 @@ function ToggleSwitch({ value, onChange, disabled }) {
 }
 
 function AttendanceRow({ record, empName, empId, onSave, isSaving }) {
-   const { user } = AuthProvider();
+   const { user } = useAuth();
   const locked = isLocked(record.AttendanceDetails?.status);
   const originalStatus = record.AttendanceDetails?.status || "";
   const originalS1 = record.AttendanceDetails?.sessionOne;
@@ -379,7 +379,7 @@ function AttendanceRow({ record, empName, empId, onSave, isSaving }) {
 
 // ─── Main Page ────────────────────────────────────────────────────────────────
 export default function AttendanceModifier() {
-  const { user } = AuthProvider();
+  const { user } = useAuth();
 
   // Employee list state
   const [allEmployees, setAllEmployees] = useState([]);

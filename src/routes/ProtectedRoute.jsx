@@ -1,5 +1,5 @@
 import { Navigate, useLocation } from "react-router-dom";
-import { AuthProvider } from "../auth/AuthProvider";
+import { useAuth } from "../auth/useAuth";
 
 /**
  * ProtectedRoute
@@ -12,7 +12,7 @@ import { AuthProvider } from "../auth/AuthProvider";
  * </ProtectedRoute>
  */
 const ProtectedRoute = ({ children, allowedRoles }) => {
-  const { isAuthenticated, user } = AuthProvider();
+  const { isAuthenticated, user } = useAuth();
   const location = useLocation();
 
   // 🔐 Not logged in → redirect to login
