@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { AuthProvider } from "../../auth/AuthProvider";
+import { useAuth } from "../../auth/useAuth";
 import { API_BASE_URL } from "../../config/api";
 import DatePicker from "react-datepicker";
 import { format, eachDayOfInterval, isSunday } from "date-fns";
@@ -8,7 +8,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import { CalendarDays, FileText, Upload } from "lucide-react";
 
 const ApplyOd = () => {
-  const { user } = AuthProvider();
+  const { user } = useAuth();
   const navigate = useNavigate();
 
   /* ================= STATE ================= */

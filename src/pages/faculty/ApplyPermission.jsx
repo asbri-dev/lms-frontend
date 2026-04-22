@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { AuthProvider } from "../../auth/AuthProvider";
+import { useAuth } from "../../auth/useAuth";
 import { API_BASE_URL } from "../../config/api";
 import DatePicker from "react-datepicker";
 import { format } from "date-fns";
@@ -29,7 +29,7 @@ const getCampusFromEmpId = (empId) => {
 
 const ApplyPermission = () => {
   const navigate = useNavigate();
-  const { user } = AuthProvider();
+  const { user } = useAuth();
 
   /* ================= STATE ================= */
   const [permissionType, setPermissionType] = useState("lateIn");

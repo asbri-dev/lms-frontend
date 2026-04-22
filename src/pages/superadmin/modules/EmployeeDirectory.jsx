@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, useCallback } from "react";
-import { AuthProvider } from "../../../auth/AuthProvider";
+import { useAuth } from "../../../auth/useAuth";
 import { Search, X } from "lucide-react";
 import { API_BASE_URL } from "../../../config/api";
 
@@ -40,7 +40,7 @@ const EmployeeDirectory = () => {
   const [detailsLoading, setDetailsLoading] = useState(false);
 
   const token = sessionStorage.getItem("authToken");
-  const { user } = AuthProvider();
+  const { user } = useAuth();
 
   const toggleSort = (field) => {
     if (sortField === field) {

@@ -1,10 +1,10 @@
 import { useState } from "react";
-import { AuthProvider } from "../auth/AuthProvider";
+import { useAuth } from "../auth/useAuth";
 import ProfileDetails from "../components/profile/ProfileDetails";
 import { API_BASE_URL } from "../config/api";
 
 const Header = () => {
-  const { user, token } = AuthProvider();
+  const { user, token } = useAuth();
 
   const [showProfile, setShowProfile] = useState(false);
   const [profileData, setProfileData] = useState(null);

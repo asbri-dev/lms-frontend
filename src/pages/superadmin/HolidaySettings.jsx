@@ -1,12 +1,12 @@
 import { useEffect, useMemo, useState, useCallback } from "react";
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, parseISO } from "date-fns";
-import { AuthProvider } from "../../auth/AuthProvider";
+import { useAuth } from "../../auth/useAuth";
 import toast from "react-hot-toast";
 import { API_BASE_URL } from "../../config/api";
 
 
 const HolidayPage = () => {
-  const { user } = AuthProvider();
+  const { user } = useAuth();
 
   const [month, setMonth] = useState(format(new Date(), "yyyy-MM"));
   const [location, setLocation] = useState("Palakkad");
