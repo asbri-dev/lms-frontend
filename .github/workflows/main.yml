@@ -68,4 +68,3 @@ jobs:
             --service-account github-deployer@lms-aries.iam.gserviceaccount.com \
             --allow-unauthenticated \
             --port 8080 \
-            --set-env-vars "VITE_API_BASE_URL=${{ secrets.VITE_API_BASE_URL }}"
