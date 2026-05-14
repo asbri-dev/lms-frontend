@@ -16,7 +16,6 @@
     "ag-grid-community": "^35.2.0",
     "ag-grid-react": "^35.2.0",
     "date-fns": "^4.1.0",
-    "exceljs": "^4.4.0",
     "file-saver": "^2.0.5",
     "lucide-react": "^0.563.0",
     "react": "^19.2.0",
