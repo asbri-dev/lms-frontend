@@ -42,11 +42,11 @@ jobs:
 
       # ── 6. Build Docker Image ─────────────────────────────
       - name: Build Docker Image
-        run: docker build -t ${{ secrets.DOCKER_USERNAME }}/lms-frontend:uat .
+        run: docker build -t ${{ secrets.DOCKER_USERNAME }}/lms-frontend-uat:latest .
 
       # ── 7. Push Docker Image ──────────────────────────────
       - name: Push Docker Image
-        run: docker push ${{ secrets.DOCKER_USERNAME }}/lms-frontend:uat
+        run: docker push ${{ secrets.DOCKER_USERNAME }}/lms-frontend-uat:latest
 
       # ── 8. Authenticate to GCP ────────────────────────────
       - name: Authenticate to GCP
@@ -62,7 +62,7 @@ jobs:
       - name: Deploy to Cloud Run
         run: |
           gcloud run deploy lms-frontend-uat \
-            --image docker.io/${{ secrets.DOCKER_USERNAME }}/lms-frontend:uat \
+            --image docker.io/${{ secrets.DOCKER_USERNAME }}/lms-frontend-uat:latest \
             --platform managed \
             --region asia-south1 \
             --service-account github-deployer@lms-aries.iam.gserviceaccount.com \
