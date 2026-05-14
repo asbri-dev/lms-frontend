@@ -31,7 +31,7 @@ jobs:
       - name: Build React App
         run: npm run build
         env:
-          VITE_API_URL: ${{ secrets.VITE_API_URL }}
+          VITE_API_URL: ${{ secrets.VITE_API_BASE_URL }}
 
       # ── 5. Login to Docker Hub ────────────────────────────
       - name: Login to Docker Hub
@@ -68,4 +68,4 @@ jobs:
             --service-account github-deployer@lms-aries.iam.gserviceaccount.com \
             --allow-unauthenticated \
             --port 8080 \
-            --set-env-vars "VITE_API_URL=${{ secrets.VITE_API_URL }}"
+            --set-env-vars "VITE_API_URL=${{ secrets.VITE_API_BASE_URL }}"
