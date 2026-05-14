@@ -4,6 +4,7 @@ import { Toaster } from "react-hot-toast";
 
 
 import Login from "./pages/auth/Login";
+import LoginPage from "./finance/authi/LoginPage";
 import OtpVerify from "./pages/auth/OtpVerify";
 import SetPassword from "./pages/auth/SetPassword";
 import ForgotPassword from "./pages/auth/ForgotPassword";
@@ -33,6 +34,20 @@ import MyLeaves from "./pages/faculty/MyLeaves";
 import AttendanceInfo from "./pages/faculty/AttendanceInfo";
 import ApplyPermission from "./pages/faculty/ApplyPermission";
 import ApplyOd from "./pages/faculty/ApplyOd";
+
+
+import HeadAdminDashboard from "./finance/headadmin/FHAdminDashboard";
+
+
+
+import FAdminDashboard from "./finance/fadmin/FAdminDashboard";
+
+
+
+
+import StudentDashboard from "./finance/student/StudentDashboard";
+import StudentProfile from "./finance/student/StudentProfile";
+import MyFee from "./finance/student/Myfee";
 
 
 
@@ -65,6 +80,7 @@ function App() {
       {/* PUBLIC */}
       <Route path="/" element={<OpeningPage />} />
       <Route path="/login" element={<Login />} />
+      <Route path="/login-page" element={<LoginPage />} />
       <Route path="/otp" element={<OtpVerify />} />
       <Route path="/set-password" element={<SetPassword />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
@@ -136,10 +152,51 @@ function App() {
   <Route path="dashboard" element={<FacultyDashboard />} />
   <Route path="apply-leave" element={<ApplyLeave />} />
   <Route path="my-leaves" element={<MyLeaves />} />
-  <Route path="/faculty/attendance" element={<AttendanceInfo />} />
-  <Route path="/faculty/apply-permission" element={<ApplyPermission />} />
-  <Route path="/faculty/apply-od" element={<ApplyOd />} />
+  <Route path="attendance" element={<AttendanceInfo />} />
+  <Route path="apply-permission" element={<ApplyPermission />} />
+  <Route path="apply-od" element={<ApplyOd />} />
 </Route>
+
+      {/* FINANCE */} 
+      {/* FINANCE HEAD ADMIN */}
+      
+   
+      <Route
+        path="headadmin"
+        element={
+          <ProtectedRoute allowedRoles={["FHADMIN"]}>
+            <DashboardLayout />
+          </ProtectedRoute>
+        }
+      >  
+        <Route path="dashboard" element={<HeadAdminDashboard />} />
+      </Route>
+      
+      {/* FINANCE ADMIN */}
+      <Route
+        path="fadmin"
+        element={
+          <ProtectedRoute allowedRoles={["FADMIN"]}>
+            <DashboardLayout />
+          </ProtectedRoute>
+        }
+      >  
+        <Route path="dashboard" element={<FAdminDashboard />} />
+      </Route>
+
+      {/* STUDENT */}
+      <Route
+        path="student"
+        element={
+          <ProtectedRoute allowedRoles={["STUDENT"]}>
+            <DashboardLayout />
+          </ProtectedRoute>
+        }
+      >  
+        <Route path="dashboard" element={<StudentDashboard />} />
+        <Route path="profile" element={<StudentProfile />} />
+        <Route path="fees" element={<MyFee />} />
+      </Route>  
 
 
       <Route path="/unauthorized" element={<Unauthorized />} />

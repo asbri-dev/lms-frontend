@@ -11,10 +11,10 @@ export const AuthProvider = ({ children }) => {
   });
 
   const handleLoginSuccess = useCallback((jwtToken, userData) => {
-    setToken(jwtToken);
+    setToken(jwtToken); 
     setUser(userData);
-    sessionStorage.setItem("authToken", jwtToken);
-    sessionStorage.setItem("authUser", JSON.stringify(userData));
+    sessionStorage.setItem("authToken", jwtToken);//
+    sessionStorage.setItem("authUser", JSON.stringify(userData)); //
   }, []);
 
   const logout = useCallback(() => {
