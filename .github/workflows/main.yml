@@ -1,14 +1,15 @@
-name: Build, Push and Deploy Frontend to Cloud Run
+name: Build, Push and Deploy Frontend to Cloud Run - UAT
 
 on:
   push:
     branches:
-      - main
+      - lmsUat-13-05-2026
   workflow_dispatch:
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    environment: uat
 
     steps:
       # ── 1. Checkout code ──────────────────────────────────
@@ -30,8 +31,7 @@ jobs:
       - name: Build React App
         run: npm run build
         env:
-          # If you have a .env variable for your backend URL, set it here
-          VITE_API_URL: ${{ secrets.VITE_API_URL }}
+          VITE_API_BASE_URL: ${{ secrets.VITE_API_BASE_URL }}
 
       # ── 5. Login to Docker Hub ────────────────────────────
       - name: Login to Docker Hub
@@ -42,11 +42,11 @@ jobs:
 
       # ── 6. Build Docker Image ─────────────────────────────
       - name: Build Docker Image
-        run: docker build -t ${{ secrets.DOCKER_USERNAME }}/lms-frontend:latest .
+        run: docker build -t ${{ secrets.DOCKER_USERNAME }}/lms-frontend-uat:latest .
 
       # ── 7. Push Docker Image ──────────────────────────────
       - name: Push Docker Image
-        run: docker push ${{ secrets.DOCKER_USERNAME }}/lms-frontend:latest
+        run: docker push ${{ secrets.DOCKER_USERNAME }}/lms-frontend-uat:latest
 
       # ── 8. Authenticate to GCP ────────────────────────────
       - name: Authenticate to GCP
@@ -61,11 +61,11 @@ jobs:
       # ── 10. Deploy to Cloud Run ───────────────────────────
       - name: Deploy to Cloud Run
         run: |
-          gcloud run deploy lms-frontend \
-            --image docker.io/${{ secrets.DOCKER_USERNAME }}/lms-frontend:latest \
+          gcloud run deploy lms-frontend-uat \
+            --image docker.io/${{ secrets.DOCKER_USERNAME }}/lms-frontend-uat:latest \
             --platform managed \
             --region asia-south1 \
             --service-account github-deployer@lms-aries.iam.gserviceaccount.com \
             --allow-unauthenticated \
             --port 8080 \
-            --set-env-vars "VITE_API_URL=${{ secrets.VITE_API_URL }}"
+            --set-env-vars "VITE_API_BASE_URL=${{ secrets.VITE_API_BASE_URL }}"
