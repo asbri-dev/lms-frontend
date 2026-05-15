@@ -28,6 +28,7 @@ export const API_BASE_URL = currentConfig.baseURL;
 export const API_TIMEOUT = currentConfig.timeout;
 export const API_HEADERS = currentConfig.headers;
 
+
 export default {
   API_BASE_URL,
   API_TIMEOUT,
