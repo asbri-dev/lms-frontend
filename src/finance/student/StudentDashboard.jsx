@@ -5,6 +5,7 @@ import {
   Wallet,
   Bell,
   FileText,
+  Snowflake,
 } from "lucide-react";
 import { useAuth } from "../../auth/useAuth";
 
@@ -37,16 +38,24 @@ export default function StudentDashboard() {
   return (
     <div className="space-y-6">
       {/* Welcome */}
+      
+<div className="bg-[#3d7dfc] rounded-3xl p-8 text-white flex items-center justify-between">
+  
+  <div>
+    <h1 className="text-3xl font-bold">
+      Welcome Back {user.admissionNumber} 👋
+    </h1>
 
-      <div className="bg-gradient-to-r from-black to-gray-800 rounded-3xl p-8 text-white">
-        <h1 className="text-3xl font-bold">
-          Welcome Back {user.admissionNumber} 👋 
-        </h1>
+    <p className="mt-2 text-gray-300">
+      Here is your latest fee and payment summary.
+    </p>
+  </div>
 
-        <p className="mt-2 text-gray-300">
-          Here is your latest fee and payment summary.
-        </p>
-      </div>
+  <div className="h-16 w-16 rounded-full bg-white/20 backdrop-blur grid place-items-center">
+    <Snowflake size={32} />
+  </div>
+
+</div>
 
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">

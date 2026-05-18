@@ -79,6 +79,7 @@ const SuperAdminDashboard = () => {
         <div>
           <h1 className="text-lg font-semibold text-gray-800">Super Admin Dashboard</h1>
           <p className="text-xs text-gray-400 mt-0.5">System-level control panel</p>
+          
         </div>
         <span className="text-xs font-medium px-3 py-1 rounded-full bg-indigo-100 text-indigo-700">
           Super Admin

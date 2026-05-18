@@ -122,7 +122,7 @@ const StudentProfile = () => {
         {/* ── hero card ── */}
         <div className="relative bg-white rounded-3xl border border-slate-100 shadow-md overflow-hidden">
           {/* decorative band */}
-          <div className="absolute inset-x-0 top-0 h-28 bg-[#0e273c]" />
+          <div className="absolute inset-x-0 top-0 h-28 bg-blue-500" />
 
           <div className="relative px-6 pt-6 pb-6 md:px-8 md:pt-8">
             {/* top-right badges */}
@@ -136,7 +136,7 @@ const StudentProfile = () => {
             <div className="flex items-end gap-5 mt-10">
               {/* avatar circle */}
               <div className="shrink-0 w-20 h-20 md:w-24 md:h-24 rounded-2xl bg-white shadow-lg ring-4 ring-white flex items-center justify-center">
-                <span className="text-2xl md:text-3xl font-black text-[#0e273c]select-none">
+                <span className="text-2xl md:text-3xl font-black text-blue-500 select-none">
                   {initials}
                 </span>
               </div>

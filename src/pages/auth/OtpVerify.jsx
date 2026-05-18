@@ -151,7 +151,7 @@ const handleVerifyOtp = async () => {
         navigate("/student/dashboard");
         break;
       case "FHADMIN":
-        navigate("/fhadmin/dashboard");
+        navigate("/headadmin/dashboard");
         break;
       case "FADMIN":
         navigate("/fadmin/dashboard");
