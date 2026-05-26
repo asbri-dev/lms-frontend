@@ -87,7 +87,7 @@ export default function LoginPage() {
 
   return (
     <>
-      <Toaster position="top-right" />
+      <Toaster />
 
       <div className="min-h-screen grid lg:grid-cols-2 bg-white">
 
@@ -239,6 +239,16 @@ export default function LoginPage() {
                     </button>
                   </div>
                 </div>
+                 {/* Forgot Password */}
+              <div className="flex justify-end">
+                <button
+                  type="button"
+                  onClick={() => navigate("/forgot-password")}
+                  className="text-sm font-medium text-[#1e3a8a] hover:text-[#3b82f6] hover:underline"
+                >
+                  Forgot Password?
+                </button>
+              </div>
 
                 {/* Submit */}
                 <button

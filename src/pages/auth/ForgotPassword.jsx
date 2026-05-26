@@ -63,14 +63,14 @@ const ForgotPassword = () => {
 
         <form onSubmit={handleSubmit}>
           <div className="form-group">
-            <label>Employee ID</label>
+            <label>Employee ID or Admission Number</label>
             <input
               type="text"
               className="input"
               value={empId}
               onChange={(e) => setEmpId(e.target.value)}
               disabled={isLoading}
-              placeholder="Enter Employee ID"
+              placeholder="Enter Employee ID or Admission Number"
             />
           </div>
 

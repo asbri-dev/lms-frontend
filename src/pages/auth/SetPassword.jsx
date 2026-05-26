@@ -77,7 +77,7 @@ const SetPassword = () => {
       setSuccess("Password set successfully! Redirecting to login...");
 
       setTimeout(() => {
-        navigate("/login");
+        navigate("/");
       }, 2000);
     } catch (err) {
       setError(err.message || "Something went wrong");

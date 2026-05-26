@@ -41,13 +41,15 @@ import HeadAdminDashboard from "./finance/headadmin/FHAdminDashboard";
 
 
 import FAdminDashboard from "./finance/fadmin/FAdminDashboard";
+import AdminFeeStructurePage from "./finance/fadmin/AdminFeeStructurePage";
 
 
 
 
 import StudentDashboard from "./finance/student/StudentDashboard";
 import StudentProfile from "./finance/student/StudentProfile";
-import MyFee from "./finance/student/Myfee";
+import MyFeePage from "./finance/student/MyFeePage";
+import MakePayment from "./finance/student/MakePayment";
 
 
 
@@ -182,6 +184,7 @@ function App() {
         }
       >  
         <Route path="dashboard" element={<FAdminDashboard />} />
+        <Route path="fee-structure" element={<AdminFeeStructurePage />} />
       </Route>
 
       {/* STUDENT */}
@@ -195,7 +198,8 @@ function App() {
       >  
         <Route path="dashboard" element={<StudentDashboard />} />
         <Route path="profile" element={<StudentProfile />} />
-        <Route path="fees" element={<MyFee />} />
+        <Route path="fees-page" element={<MyFeePage />} />
+        <Route path="make-payment" element={<MakePayment />} />
       </Route>  
 
 
