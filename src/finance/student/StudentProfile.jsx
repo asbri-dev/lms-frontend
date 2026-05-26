@@ -40,7 +40,7 @@ const Badge = ({ children, color = "slate" }) => {
 const Field = ({ icon: Icon, label, value, full = false }) => (
   <div className={`flex flex-col gap-1 ${full ? "col-span-2" : ""}`}>
     <span className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-widest text-slate-400">
-      <Icon size={11} />
+      {Icon && <Icon size={11} />}
       {label}
     </span>
     <span className="text-sm font-medium text-slate-800 leading-snug">{fmt(value)}</span>
@@ -146,7 +146,7 @@ const StudentProfile = () => {
                   {fmt(s.studentFullName)}
                 </h1>
                 <p className="text-sm text-slate-500 mt-0.5 font-medium">
-                  {fmt(s.department)} &nbsp;·&nbsp; {fmt(s.academicYear)}
+                  {fmt(s.department)} &nbsp;·&nbsp; {fmt(s.currentAcademicYear)}
                 </p>
 
                 <div className="flex flex-wrap gap-2 mt-2.5">
@@ -173,7 +173,7 @@ const StudentProfile = () => {
                   className="bg-slate-50 rounded-xl px-4 py-3 border border-slate-100"
                 >
                   <p className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">
-                    <Icon size={11} className={accent} />
+                    {Icon && <Icon size={11} className={accent} />}
                     {label}
                   </p>
                   <p className="text-sm font-semibold text-slate-700 truncate">{fmt(value)}</p>
@@ -208,10 +208,11 @@ const StudentProfile = () => {
           {/* academic */}
           <Section title="Academic Details">
             <Field icon={GraduationCap} label="Department" value={s.department} />
-            <Field icon={BookOpen} label="Academic Year" value={s.academicYear} />
+            <Field icon={BookOpen} label="Academic Year" value={s.currentAcademicYear} />
             <Field icon={Calendar} label="Date of Joining" value={s.dateOfJoining} />
             <Field icon={Building2} label="Management" value={s.managementOrGovt} />
             <Field icon={UserCheck} label="Student Type" value={s.studentType} />
+            <Field icon={UserCheck} label="Current Semester" value={s.currentSemester } />
           </Section>
 
           {/* identity */}

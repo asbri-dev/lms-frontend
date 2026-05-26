@@ -9,8 +9,10 @@ export const moduleConfig = {
     theme: {
       sidebar: "bg-slate-900",
       background: "bg-[#2b3c6b]",
+      Ntext: "text-white",
       hover: "hover:bg-[#3f548f]",
-      active : "bg-[#3f548f]",
+      active : "bg-white",
+      text: "text-slate-900",
       header: "bg-white",
     },
 
@@ -24,6 +26,7 @@ export const moduleConfig = {
     theme: {
       sidebar: "bg-slate-900",
       background: "bg-[#2b3c6b]",
+      Ntext: "text-white",
       hover: "hover:bg-[#3f548f]",
       active : "bg-[#3f548f]",
       header: "bg-white",
@@ -39,6 +42,7 @@ export const moduleConfig = {
     theme: {
       sidebar: "bg-slate-900",
       background: "bg-[#2b3c6b]",
+      Ntext: "text-white",
       hover: "hover:bg-[#3f548f]",
       active : "bg-[#3f548f]",
       header: "bg-white",
@@ -54,8 +58,10 @@ export const moduleConfig = {
     theme: {
       sidebar: "bg-slate-900",
       background: "bg-[#2b3c6b]",
+      Ntext: "text-white",
       hover: "hover:bg-[#3f548f]",
-      active : "bg-[#3f548f]",
+      active : "bg-white",
+      text: "text-slate-900",
       header: "bg-white",
     },
 
