@@ -55,10 +55,15 @@ const OtpVerify = () => {
   };
 
   const handleKeyDown = (e, index) => {
-    if (e.key === "Backspace" && !otp[index] && index > 0) {
-      inputRefs.current[index - 1]?.focus();
-    }
-  };
+  if (e.key === "Backspace" && !otp[index] && index > 0) {
+    inputRefs.current[index - 1]?.focus();
+  }
+
+  // Submit on Enter
+  if (e.key === "Enter") {
+    handleVerifyOtp();
+  }
+};
 
   const handlePaste = (e) => {
     const pasted = e.clipboardData.getData("text").slice(0, OTP_LENGTH);

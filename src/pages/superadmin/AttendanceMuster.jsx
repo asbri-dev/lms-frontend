@@ -446,10 +446,10 @@ useEffect(() => {
                 >
 
                   {/* Employee info */}
-                  <td className="p-3 sticky left-0 z-10 bg-inherit border-r border-gray-100">
+                  <td className="p-3 sticky left-0 z-10 bg-white border-r border-gray-100">
                     <div className="font-medium text-gray-800">{emp.employeeName}</div>
                    
-                    <div className="text-xs text-gray-400">{emp.department}</div>
+                   
                     <span className={`inline-block mt-1 text-xs px-1.5 py-0.5 rounded-full font-medium ${
                       empLocation === "Palakkad"
                         ? "bg-green-100 text-green-700"
@@ -460,7 +460,7 @@ useEffect(() => {
                       {empLocation}
                     </span>
                   </td>
-                  <td className="p-3 sticky left-[180px] z-10 bg-inherit border-r border-gray-100 text-xs text-gray-500">
+                  <td className="p-3 sticky left-[180px] z-10 bg-white border-r border-gray-100 text-xs text-gray-500">
                     {emp.employeeId}
                   </td>
                   

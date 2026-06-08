@@ -69,7 +69,7 @@ function StatCard({ icon: Icon, label, value, sub, accent, delay }) {
         background:`${accent}15`,
         display:"flex", alignItems:"center", justifyContent:"center",
       }}>
-        <Icon size={20} color={accent} strokeWidth={2} />
+        {Icon && <Icon size={20} color={accent} strokeWidth={2} />}
       </div>
       <div>
         <p style={{ fontSize:12, color:"#64748b", margin:"0 0 4px", fontFamily:"'DM Sans',sans-serif" }}>{label}</p>
@@ -383,7 +383,7 @@ export default function FAdminDashboard() {
                   border:"1px solid rgba(255,255,255,.25)",
                   display:"inline-flex", alignItems:"center", gap:6,
                 }}>
-                  <Icon size={13} strokeWidth={2.2} /> {label}
+                  {Icon && <Icon size={13} strokeWidth={2.2} />} {label}
                 </span>
               ))}
             </div>

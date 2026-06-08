@@ -39,20 +39,55 @@ const ApplyLeave = () => {
     ml: 0,
     rmName: "",
     rmId: "",
+    casualLeaves: 0,
+    medicalLeaves: 0,
   });
+   /* ================= CALCULATE DAYS ================= */
+
+  const noOfDays = useMemo(() => {
+    
+    if (!leaveFrom || !leaveTo) return 0;
+
+    const days = eachDayOfInterval({ start: leaveFrom, end: leaveTo });
+
+    if (days.length === 0) return 0;
+
+    if (isSameDay(leaveFrom, leaveTo)) {
+      if (sessionFrom === "1" && sessionTo === "1") return 0.5;
+      if (sessionFrom === "2" && sessionTo === "2") return 0.5;
+      return 1;
+    }
+    
+
+    let total = days.length;
+
+    if (sessionFrom === "2") total -= 0.5;
+    if (sessionTo === "1") total -= 0.5;
+
+    return total;
+  }, [leaveFrom, leaveTo, sessionFrom, sessionTo]);
   /* ================= BALANCE VALIDATION ================= */
 
 const checkLeaveBalance = useCallback(() => {
   if (typeOfLeave === "ml" && leaveBalance.ml <= 0) {
     return "No Medical Leave balance available";
   }
+  
 
+  const clBalance = leaveBalance.cl-leaveBalance.casualLeaves || 0;
+  const mlBalance = leaveBalance.ml-leaveBalance.medicalLeaves || 0;
+  if(noOfDays > clBalance&& typeOfLeave === "cl") {
+    return "All available Casual Leaves already applied.";
+  }
+ if(noOfDays >mlBalance && typeOfLeave === "ml") {
+    return "All available Medical Leaves already applied.";
+  }
   if (typeOfLeave === "cl" && leaveBalance.cl <= 0) {
     return "No Casual Leave balance available";
   }
 
   return null;
-}, [typeOfLeave, leaveBalance]);
+}, [typeOfLeave, leaveBalance,noOfDays]);
 
   /* ================= LOAD DASHBOARD ================= */
 
@@ -69,6 +104,8 @@ const checkLeaveBalance = useCallback(() => {
           ml: data.basicDetails.medicalLeaves,
           rmName: data.basicDetails.rmName,
           rmId: data.basicDetails.rmEmployeeId,
+          casualLeaves: data.basicDetails.pendingLeaves,
+          medicalLeaves: data.basicDetails.pendingMedicalLeaves,
         });
       } catch {
         console.error("Dashboard load failed");
@@ -78,29 +115,7 @@ const checkLeaveBalance = useCallback(() => {
     fetchDashboard();
   }, [user.employeeId]);
 
-  /* ================= CALCULATE DAYS ================= */
-
-  const noOfDays = useMemo(() => {
-    
-    if (!leaveFrom || !leaveTo) return 0;
-
-    const days = eachDayOfInterval({ start: leaveFrom, end: leaveTo });
-
-    if (days.length === 0) return 0;
-
-    if (isSameDay(leaveFrom, leaveTo)) {
-      if (sessionFrom === "1" && sessionTo === "1") return 0.5;
-      if (sessionFrom === "2" && sessionTo === "2") return 0.5;
-      return 1;
-    }
-
-    let total = days.length;
-
-    if (sessionFrom === "2") total -= 0.5;
-    if (sessionTo === "1") total -= 0.5;
-
-    return total;
-  }, [leaveFrom, leaveTo, sessionFrom, sessionTo]);
+ 
 
   /* ================= VALIDATION (NO REASON) ================= */
 
@@ -113,8 +128,9 @@ const checkLeaveBalance = useCallback(() => {
       sessionFrom === "2" &&
       sessionTo === "1"
     ) {
-      return "Invalid session selection";
+      return "Invalid session selections for single day leave";
     }
+    
 
     return null;
   }, [leaveFrom, leaveTo, sessionFrom, sessionTo]);
@@ -196,6 +212,7 @@ const checkLeaveBalance = useCallback(() => {
       setMessage("Invalid leave duration");
       return;
     }
+ 
 
     const timer = setTimeout(() => {
       runCheck();
@@ -213,6 +230,7 @@ const checkLeaveBalance = useCallback(() => {
     checkLeaveBalance,
     runCheck,
     validateEligibility,
+
   ]);
 
   /* ================= SUBMIT ================= */

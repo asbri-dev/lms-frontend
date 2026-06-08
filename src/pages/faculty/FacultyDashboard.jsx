@@ -22,12 +22,11 @@ import permission from "../../assets/permisson.jpeg";
 
 
 const FacultyDashboard = () => {
-  const { user } = useAuth();
-  const navigate = useNavigate();
-
-  const [data, setData] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [actionMessage, setActionMessage] = useState("");
+const { user } = useAuth();
+const navigate = useNavigate();
+const [data, setData] = useState(null);
+const [loading, setLoading] = useState(true);
+const [actionMessage, setActionMessage] = useState("");
 const [actionLoading, setActionLoading] = useState(null);
 const [attendanceSummary, setAttendanceSummary] = useState(null);
 const [selectedMonth, setSelectedMonth] = useState(new Date());
@@ -113,7 +112,7 @@ const handleNextMonth = () => {
 const fetchExtraData = async () => {
   try {
     // 🔹 Today Leave
-    const leaveRes = await fetch(`${API_BASE_URL}/todayLeaves`);
+    const leaveRes = await fetch(`${API_BASE_URL}/todayLeave?empId=${user.employeeId}`);
     const leaveData = await leaveRes.json();
 
     // ⚠️ flatten array
@@ -185,15 +184,18 @@ useEffect(() => {
         message = data?.message || JSON.stringify(data);
       } else {
         message = await response.text();
+         
       }
     } catch {
       message = "Invalid server response";
+      
     }
-
     if (!response.ok) {
-      setActionMessage(message || "Withdraw failed");
-      return;
-    }
+  setActionMessage(message || "Withdraw failed");
+  await fetchDashboard(); // ✅ refresh data
+
+  return;
+}
 
     setActionMessage(message || "Leave withdrawn successfully");
 
@@ -213,6 +215,7 @@ useEffect(() => {
 
   } finally {
     setActionLoading(null);
+   
   }
 };
   if (loading) return <div>Loading...</div>;
@@ -251,7 +254,7 @@ const mlAvailed = data.approvedLeaveList?.filter(l => l.typeOfLeave === "ml").le
       <div className="lg:col-span-3 space-y-6">
 
         {/* HERO */}
-          <div className="bg-gradient-to-r from-[#2b3c6b] to-[#3f548f] text-white p-6 rounded-2xl shadow-md flex justify-between items-center">
+          <div className="bg-gradient-to-r from-[#2b3c6b] to-[#3f548f] text-white p-6 rounded-3xl shadow-lg flex justify-between items-center">
           <div>
             <h2 className="text-2xl font-semibold">
               Welcome, {basic.employeeName}

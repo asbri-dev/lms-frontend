@@ -28,7 +28,8 @@ export const moduleConfig = {
       background: "bg-[#2b3c6b]",
       Ntext: "text-white",
       hover: "hover:bg-[#3f548f]",
-      active : "bg-[#3f548f]",
+      active : "bg-white",
+      text: "text-slate-900",
       header: "bg-white",
     },
 
