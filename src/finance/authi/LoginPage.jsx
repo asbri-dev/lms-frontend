@@ -70,6 +70,7 @@ export default function LoginPage() {
       }
 
       sessionStorage.setItem("otpToken", data.token);
+      sessionStorage.setItem("mobileNumber", username.trim());
 
       toast.success(data?.message || "OTP sent successfully!");
 

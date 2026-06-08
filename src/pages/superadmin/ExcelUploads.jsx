@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { Upload, FileCheck, FileSpreadsheet,IndianRupee, Users, GraduationCap, X, CloudUpload } from "lucide-react";
+import { Upload, FileCheck, FileSpreadsheet,IndianRupee, Users, GraduationCap, X, CloudUpload,CalendarDays,ClipboardPen } from "lucide-react";
 import toast from "react-hot-toast";
 import { API_BASE_URL } from "../../config/api";
 
@@ -19,10 +19,30 @@ const UPLOAD_CONFIG = {
     subtitle: "Import attendance logs",
     icon: FileSpreadsheet,
     endpoint: (base) => `${base}/attendanceInOut`,
-    color: "emerald",
+    color: "green",
     gradient: "from-emerald-500 to-emerald-600",
     light: "bg-emerald-50 text-emerald-700 border-emerald-200",
     ring: "ring-emerald-400",
+  },
+  Leave: {
+    title: "Leave Data",
+    subtitle: "Import leave records",
+    icon: CalendarDays,
+    endpoint: (base) => `${base}/leaveExcelUpload`,
+    color: "red",
+    gradient: "from-red-500 to-red-600",
+    light: "bg-red-50 text-red-700 border-red-200",
+    ring: "ring-red-400",
+  },
+  modifier: {
+    title: "Attendance Modifier",
+    subtitle: "Import modifier records",
+    icon: ClipboardPen,
+    endpoint: (base) => `${base}/bulkAttendanceOverRide`,
+    color: "amber",
+    gradient: "from-amber-500 to-amber-600",
+    light: "bg-amber-50 text-amber-700 border-amber-200",
+    ring: "ring-amber-400",
   },
   student: {
     title: "Student Data",
@@ -40,7 +60,7 @@ const UPLOAD_CONFIG = {
     subtitle: "Import fee records",
     icon: IndianRupee,
     endpoint: (base) => `${base}/feeStructureExcelUpload`,
-    color: "emerald",
+    color: "green",
     gradient: "from-green-500 to-green-600",
     light: "bg-green-50 text-green-700 border-green-200",
     ring: "ring-green-400",
@@ -81,16 +101,36 @@ const UploadCard = ({ type, config, file, onFileChange, onClear, uploading }) =>
         </div>
 
         {/* Drop zone */}
-        <div
-          onClick={() => !file && inputRef.current?.click()}
-          className={`
-            relative rounded-xl border-2 border-dashed transition-all duration-200 cursor-pointer
-            ${file
-              ? `border-transparent ${config.light} border`
-              : `border-gray-200 bg-gray-50 hover:border-${config.color}-300 hover:bg-${config.color}-50/30`
-            }
-          `}
-        >
+       <div
+  onClick={() => !file && inputRef.current?.click()}
+
+  onDragOver={(e) => {
+    e.preventDefault();
+    e.stopPropagation();
+  }}
+
+  onDrop={(e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const droppedFile = e.dataTransfer.files[0];
+
+    if (droppedFile) {
+      onFileChange(
+        { target: { files: [droppedFile] } },
+        type
+      );
+    }
+  }}
+
+  className={`
+    relative rounded-xl border-2 border-dashed transition-all duration-200 cursor-pointer
+    ${file
+      ? `border-transparent ${config.light} border`
+      : `border-gray-200 bg-gray-50`
+    }
+  `}
+>
           <input
             ref={inputRef}
             type="file"

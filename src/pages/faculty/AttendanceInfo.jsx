@@ -117,6 +117,7 @@ const AttendanceInfo = ({ employeeId }) => {
   useEffect(() => {
     fetchAttendance();
   }, [fetchAttendance]);
+  
 return (
   <div className="space-y-6">
 
@@ -280,9 +281,10 @@ return (
   <div className="mb-4 pb-4 border-b border-gray-100">
     <p className="text-xs text-gray-400 font-medium mb-1">Session 1</p>
     <p className="text-sm text-gray-700 mb-3">
-      {selectedDetails.empId === "AREP"
-        ? "09:30 - 12:30"
-        : "09:00 - 13:00"}
+    
+  {empId?.startsWith("AREP")
+    ? "09:30 - 12:30"
+    : "09:30 - 13:00"}
     </p>
     <div className="flex justify-between">
       <div>
@@ -304,9 +306,9 @@ return (
   <div>
     <p className="text-xs text-gray-400 font-medium mb-1">Session 2</p>
     <p className="text-sm text-gray-700 mb-3">
-      {selectedDetails.empId === "AREP"
+      {empId.startsWith("AREP")
         ? "12:31 - 15:30"
-        : "13:01 - 14:30"}
+        : "13:01 - 16:30"}
     </p>
     <div className="flex justify-between">
       <div>
@@ -356,15 +358,15 @@ return (
 
             {[
               { label: "Present", color: "#D7FDF0", short: "P" },
-              { label: "Absent", color: "#FE8985", short: "A" },
-              { label: "CL", color: "#79ADDC", short: "CL", },
+              { label: "Absent", color: "#FBA39D", short: "A" },
+              { label: "CL", color: "#CEF1FD", short: "CL", },
               { label: "ML", color: "#79ADDC", short: "ML" },
               { label: "Off", color: "#F7F7F7", short: "OFF" },
               { label: "Holiday", color: "#0ea5e9", short: "H" },
-              { label: "OD", color: "#1B2A41", short: "OD" },
+              { label: "OD", color: "#E9F0DB", short: "OD" },
               { label: "PR", color: "#9333ea", short: "PR" },
             ].map((item, i) => (
-              <div key={i} className="flex items-center gap-2 bg-gray-50 px-2 py-1 rounded-lg">
+              <div key={i} className="flex items-center gap-2 px-2 py-1 rounded-lg">
                 <div
                   className="w-3 h-3 rounded"
                   style={{ backgroundColor: item.color,border: item.label === "OFF" ? "5px solid #155ecb" : "none" }}

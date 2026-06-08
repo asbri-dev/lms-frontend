@@ -15,6 +15,7 @@ const SetPassword = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   /* Password Rules */
   const rules = {
@@ -122,37 +123,54 @@ const SetPassword = () => {
 
         <form onSubmit={handleSubmit} className="space-y-5">
 
-          {/* Password */}
-          <div>
-            <label className="text-sm text-gray-600 font-medium">
-              New Password
-            </label>
+         
+{/* Password */}
+<div className="relative">
+  <label className="text-sm text-gray-600 font-medium">
+    New Password
+  </label>
 
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Enter strong password"
-              className="mt-1 w-full border border-gray-300 rounded-lg px-3 py-2
-                         focus:outline-none focus:ring-2 focus:ring-[#3f548f]"
-            />
-          </div>
+  <input
+    type={showPassword ? "text" : "password"}
+    value={password}
+    onChange={(e) => setPassword(e.target.value)}
+    placeholder="Enter strong password"
+    className="mt-1 w-full border border-gray-300 rounded-lg px-3 py-2 pr-16
+               focus:outline-none focus:ring-2 focus:ring-[#3f548f]"
+  />
 
-          {/* Confirm Password */}
-          <div>
-            <label className="text-sm text-gray-600 font-medium">
-              Confirm Password
-            </label>
+  <button
+    type="button"
+    onClick={() => setShowPassword(!showPassword)}
+    className="absolute right-3 top-10 text-sm font-medium text-[#1e3a8a] hover:text-[#3b82f6]"
+  >
+    {showPassword ? "Hide" : "Show"}
+  </button>
+</div>
 
-            <input
-              type="password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              placeholder="Re-enter password"
-              className="mt-1 w-full border border-gray-300 rounded-lg px-3 py-2
-                         focus:outline-none focus:ring-2 focus:ring-[#3f548f]"
-            />
-          </div>
+{/* Confirm Password */}
+<div className="relative">
+  <label className="text-sm text-gray-600 font-medium">
+    Confirm Password
+  </label>
+
+  <input
+    type={showPassword ? "text" : "password"}
+    value={confirmPassword}
+    onChange={(e) => setConfirmPassword(e.target.value)}
+    placeholder="Re-enter password"
+    className="mt-1 w-full border border-gray-300 rounded-lg px-3 py-2 pr-16
+               focus:outline-none focus:ring-2 focus:ring-[#3f548f]"
+  />
+
+  <button
+    type="button"
+    onClick={() => setShowPassword(!showPassword)}
+    className="absolute right-3 top-10 text-sm font-medium text-[#1e3a8a] hover:text-[#3b82f6]"
+  >
+    {showPassword ? "Hide" : "Show"}
+  </button>
+</div>
 
           {/* Password Rules */}
           <div className="bg-gray-50 border border-gray-200 p-4 rounded-lg text-sm">

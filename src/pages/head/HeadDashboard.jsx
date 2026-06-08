@@ -112,8 +112,8 @@ function DeptPieChart({ title, faculty, colors, loading }) {
               data={data}
               cx="50%"
               cy="50%"
-              innerRadius={55}
-              outerRadius={88}
+              innerRadius={45}
+              outerRadius={78}
               paddingAngle={2}
               dataKey="value"
             >
@@ -410,6 +410,7 @@ function FacultyTable({ palakkad, chittoor, loading }) {
                     <td style={{ ...tdSt, fontSize: 12, color: C.textSecond }}>{e.contactNumber}</td>
                     <td style={{ ...tdSt, fontSize: 12, color: C.textSecond }}>{e.email}</td>
                     <td style={{ ...tdSt, fontSize: 11, color: C.textMuted }}>{e.reportingTo}</td>
+                  
                   </tr>
                 ))
             }
@@ -480,8 +481,8 @@ export default function HeadDashboard() {
   const palakkadCount   = data?.palakkadFacultyCount ?? palakkad.length;
   const chittoorCount   = data?.ChittoorFacultyCount ?? chittoor.length;
   const adminCount      = data?.AdminCount ?? admins.length;
-  const palakkadAdmin   = admins.find(a => a.collageLocation === "Palakkad");
-  const chittoorAdminHead = admins.find(a => a.adminRole === "HEAD");
+  const palakkadAdmin   = data?.AdminDetails?.find(a => a.adminRole === "HEAD");
+  const chittoorAdminHead = data?.AdminDetails?.find(a => a.adminRole === "ADMIN" && a.collageLocation === "CHITTOOR");
 
   return (
     <>

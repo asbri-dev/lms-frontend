@@ -25,7 +25,7 @@ import OdApprovals from "./pages/admin/OdApprovals";
 import PermissionApprovals from "./pages/admin/PermissionApproval"; 
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import LeaveApprovals from "./pages/admin/LeaveApprovals";
-import { UserManagement } from "./pages/admin/UserManagement";
+import  UserManagement  from "./pages/admin/UserManagement";
 
 
 import FacultyDashboard from "./pages/faculty/FacultyDashboard";
@@ -34,6 +34,7 @@ import MyLeaves from "./pages/faculty/MyLeaves";
 import AttendanceInfo from "./pages/faculty/AttendanceInfo";
 import ApplyPermission from "./pages/faculty/ApplyPermission";
 import ApplyOd from "./pages/faculty/ApplyOd";
+import FacultyProfile from "./components/profile/Facultyprofile";
 
 
 import HeadAdminDashboard from "./finance/headadmin/FHAdminDashboard";
@@ -157,6 +158,7 @@ function App() {
   <Route path="attendance" element={<AttendanceInfo />} />
   <Route path="apply-permission" element={<ApplyPermission />} />
   <Route path="apply-od" element={<ApplyOd />} />
+  <Route path="profile" element={<FacultyProfile />} />
 </Route>
 
       {/* FINANCE */} 

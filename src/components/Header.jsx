@@ -4,75 +4,30 @@ import ProfileDetails from "../components/profile/ProfileDetails";
 import { API_BASE_URL } from "../config/api";
 import { Menu } from "lucide-react";
 import { moduleConfig } from "../utils/moduleConfig";
+import downloadImage from "../assets/download.png";
+import { useNavigate } from "react-router-dom";
+
+
 
 
 const Header = ({ onMenuClick }) => {
-  const { user, token } = useAuth();
+  const { user,} = useAuth();
 
   const [showProfile, setShowProfile] = useState(false);
-  const [profileData, setProfileData] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+
 
   const name = user?.name || user?.studentName || "User";
   const empId = user?.employeeId || "";
   const role = user?.role || "";
-  const avatarLetter = user?.name?.charAt(0)?.toUpperCase() || "U";
+  const navigate = useNavigate();
+ // const avatarLetter = user?.name?.charAt(0)?.toUpperCase() || "U";
   const currentModule = moduleConfig[user?.role];
+  const handleProfileClick = () => {
+  if (role === "FACULTY") {
+    navigate("profile");
+  }
+};
 
-  /* ── Fetch profile ── */
-  const fetchProfile = async () => {
-    if (!empId) return;
-
-    if (profileData) {
-      setShowProfile(true);
-      return;
-    }
-
-    try {
-      setLoading(true);
-      setError("");
-      setShowProfile(true);
-
-      const response = await fetch(
-        `${API_BASE_URL}/faculty/getAllFacultyDetails?empId=${empId}`,
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      let data = null;
-      try {
-        data = await response.json();
-      } catch {
-        data = null;
-      }
-
-      if (response.status >= 500) {
-        setError("Server error. Please try again later.");
-        return;
-      }
-
-      if (!response.ok) {
-        setError(data?.message || "Failed to load profile.");
-        return;
-      }
-
-      const structured = {};
-      if (Array.isArray(data)) {
-        data.forEach((item) => Object.assign(structured, item));
-      }
-
-      setProfileData(structured);
-    } catch {
-      setError("Network error. Please check connection.");
-    } finally {
-      setLoading(false);
-    }
-  };
 
   return (
     <>
@@ -110,17 +65,21 @@ const Header = ({ onMenuClick }) => {
           </div>
 
           {/* Avatar */}
-          <div
-            onClick={fetchProfile}
-            className="w-9 h-9 md:w-10 md:h-10 rounded-full
-                       bg-gradient-to-br from-[#2b3c6b] to-[#3f548f]
-                       flex items-center justify-center
-                       text-white font-semibold text-sm
-                       cursor-pointer hover:scale-105
-                       hover:shadow-md transition duration-200 flex-shrink-0"
-          >
-            {avatarLetter}
-          </div>
+          
+          <img
+  onClick={handleProfileClick}
+  src={`${API_BASE_URL}/image/${empId}`}
+  alt="Profile"
+ className={`
+  w-10 h-10 rounded-full object-cover
+  ${role === "FACULTY"
+    ? "cursor-pointer hover:scale-105"
+    : "cursor-default"}
+`}
+  onError={(e) => {
+    e.target.src = downloadImage;
+  }}
+/>
 
         </div>
       </header>
@@ -158,26 +117,9 @@ const Header = ({ onMenuClick }) => {
               </button>
             </div>
 
-            {/* Modal body */}
-            <div className="p-4 md:p-6">
+           
 
-              {loading && (
-                <div className="text-center py-12 text-gray-500">
-                  Loading profile...
-                </div>
-              )}
-
-              {error && (
-                <div className="bg-red-100 text-red-600 p-3 rounded-lg mb-4">
-                  {error}
-                </div>
-              )}
-
-              {profileData && !loading && !error && (
-                <ProfileDetails profileData={profileData} />
-              )}
-
-            </div>
+            
           </div>
         </div>
       )}
