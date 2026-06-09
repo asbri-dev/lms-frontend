@@ -7,7 +7,6 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    environment: uat
     steps:
       # ── 1. Checkout code ──────────────────────────────────
       - name: Checkout Code
@@ -35,10 +34,10 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
       # ── 6. Build Docker Image ─────────────────────────────
       - name: Build Docker Image
-        run: docker build -t ${{ secrets.DOCKER_USERNAME }}/lms-frontend-uat:latest .
+        run: docker build -t ${{ secrets.DOCKER_USERNAME }}/lms-frontend:latest .
       # ── 7. Push Docker Image ──────────────────────────────
       - name: Push Docker Image
-        run: docker push ${{ secrets.DOCKER_USERNAME }}/lms-frontend-uat:latest
+        run: docker push ${{ secrets.DOCKER_USERNAME }}/lms-frontend:latest
       # ── 8. Authenticate to GCP ────────────────────────────
       - name: Authenticate to GCP
         uses: google-github-actions/auth@v2
