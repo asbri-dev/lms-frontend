@@ -12,8 +12,15 @@ const API_CONFIG = {
       "Content-Type": "application/json",
     },
   },
+  uat: {
+  baseURL: import.meta.env.VITE_API_BASE_URL,
+  timeout: 10000,
+  headers: {
+    "Content-Type": "application/json",
+  },
+},
   production: {
-    baseURL: "https://lms-app-uat-792341416101.asia-south1.run.app",
+    baseURL: import.meta.env.VITE_API_BASE_URL,
     timeout: 10000,
     headers: {
       "Content-Type": "application/json",
