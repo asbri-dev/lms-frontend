@@ -2,7 +2,7 @@ name: Build, Push and Deploy Frontend to Cloud Run
 on:
   push:
     branches:
-      - lmsUat-13-05-2026
+      - main
   workflow_dispatch:
 jobs:
   deploy:
@@ -49,8 +49,8 @@ jobs:
       # ── 10. Deploy to Cloud Run ───────────────────────────
       - name: Deploy to Cloud Run
         run: |
-          gcloud run deploy lms-frontend-uat \
-            --image docker.io/${{ secrets.DOCKER_USERNAME }}/lms-frontend-uat:latest \
+          gcloud run deploy lms-frontend \
+            --image docker.io/${{ secrets.DOCKER_USERNAME }}/lms-frontend:latest \
             --platform managed \
             --region asia-south1 \
             --service-account github-deployer@lms-aries.iam.gserviceaccount.com \
