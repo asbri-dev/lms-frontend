@@ -1,59 +1,38 @@
-name: Build, Push and Deploy Frontend to Cloud Run
+name: Deploy Frontend UAT to Firebase
+
 on:
   push:
     branches:
       - lmsUat-13-05-2026
   workflow_dispatch:
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    environment: uat
+
     steps:
-      # ── 1. Checkout code ──────────────────────────────────
       - name: Checkout Code
-        uses: actions/checkout@v3
-      # ── 2. Setup Node ─────────────────────────────────────
+        uses: actions/checkout@v4
+
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '20'
           cache: 'npm'
-      # ── 3. Install dependencies ───────────────────────────
-      - name: Install dependencies
+
+      - name: Install Dependencies
         run: npm ci
-      # ── 4. Build Vite app ─────────────────────────────────
-      - name: Build React App
-        run: npm run build
+
+      - name: Build React App (UAT)
+        run: npm run build -- --mode uat
         env:
-          # If you have a .env variable for your backend URL, set it here
-          VITE_API_URL: ${{ secrets.VITE_API_URL }}
-      # ── 5. Login to Docker Hub ────────────────────────────
-      - name: Login to Docker Hub
-        uses: docker/login-action@v2
+          VITE_API_BASE_URL: ${{ secrets.VITE_API_URL }}
+
+      - name: Deploy to Firebase UAT Channel
+        uses: FirebaseExtended/action-hosting-deploy@v0
         with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
-      # ── 6. Build Docker Image ─────────────────────────────
-      - name: Build Docker Image
-        run: docker build -t ${{ secrets.DOCKER_USERNAME }}/lms-frontend:latest .
-      # ── 7. Push Docker Image ──────────────────────────────
-      - name: Push Docker Image
-        run: docker push ${{ secrets.DOCKER_USERNAME }}/lms-frontend:latest
-      # ── 8. Authenticate to GCP ────────────────────────────
-      - name: Authenticate to GCP
-        uses: google-github-actions/auth@v2
-        with:
-          credentials_json: ${{ secrets.GCP_SA_KEY }}
-      # ── 9. Set up gcloud CLI ──────────────────────────────
-      - name: Set up gcloud
-        uses: google-github-actions/setup-gcloud@v2
-      # ── 10. Deploy to Cloud Run ───────────────────────────
-      - name: Deploy to Cloud Run
-        run: |
-          gcloud run deploy lms-frontend-uat \
-            --image docker.io/${{ secrets.DOCKER_USERNAME }}/lms-frontend-uat:latest \
-            --platform managed \
-            --region asia-south1 \
-            --service-account github-deployer@lms-aries.iam.gserviceaccount.com \
-            --allow-unauthenticated \
-            --port 8080 \
-            --set-env-vars "VITE_API_URL=${{ secrets.VITE_API_URL }}"
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_LMS_ARIES }}
+          channelId: uat
+          projectId: lms-aries
