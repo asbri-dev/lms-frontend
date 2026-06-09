@@ -20,7 +20,7 @@ const API_CONFIG = {
   },
 },
   production: {
-    baseURL: import.meta.env.VITE_API_BASE_URL,
+    baseURL: import.meta.env.VITE_API_BASE_URL || "https://lms-app-792341416101.asia-south1.run.app",
     timeout: 10000,
     headers: {
       "Content-Type": "application/json",
