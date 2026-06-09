@@ -17,6 +17,8 @@
     "ag-grid-react": "^35.2.0",
     "date-fns": "^4.1.0",
     "file-saver": "^2.0.5",
+    "jspdf": "^4.2.1",
+    "jspdf-autotable": "^5.0.8",
     "lucide-react": "^0.563.0",
     "react": "^19.2.0",
     "react-datepicker": "^9.1.0",

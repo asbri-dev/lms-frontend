@@ -456,9 +456,26 @@ const PendingRequests = () => {
   /* ─── Flatten All Requests ─── */
   const flatAll = useMemo(() => {
     const rows = [];
-    const leaves      = allData.leaves      || allData.pendingLeaves      || [];
-    const permissions = allData.permissions || allData.pendingPermissions || [];
-    const ods         = allData.ods         || allData.pendingOds         || [];
+    const leaves = [
+  ...(allData.pendingLeaves || []),
+  ...(allData.approvedLeaves || []),
+  ...(allData.rejectedLeaves || []),
+  ...(allData.withdrawnLeaves || []),
+];
+
+const permissions = [
+  ...(allData.pendingPermissions || []),
+  ...(allData.approvedPermissions || []),
+  ...(allData.rejectedPermissions || []),
+  ...(allData.withdrawnPermissions || []),
+];
+
+const ods = [
+  ...(allData.pendingOds || []),
+  ...(allData.approvedOds || []),
+  ...(allData.rejectedOds || []),
+  ...(allData.withdrawnOds || []),
+];
     leaves.forEach((i)      => rows.push({ ...i, _type: "Leave"      }));
     permissions.forEach((i) => rows.push({ ...i, _type: "Permission" }));
     ods.forEach((i)         => rows.push({ ...i, _type: "OD"         }));
@@ -590,42 +607,80 @@ const PendingRequests = () => {
         <div className="space-y-4">
 
           {/* Filters */}
-          <div className="flex flex-wrap gap-3 items-center">
-            <input
-              type="text"
-              placeholder="Search name or ID..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="border px-3 py-2 rounded-md text-sm w-48 focus:outline-none focus:ring-2 focus:ring-indigo-300"
-            />
-            <select
-              value={filterType}
-              onChange={(e) => setFilterType(e.target.value)}
-              className="border px-3 py-2 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300"
-            >
-              {["All", "Leave", "Permission", "OD"].map((t) => <option key={t}>{t}</option>)}
-            </select>
-            <select
-              value={filterStatus}
-              onChange={(e) => setFilterStatus(e.target.value)}
-              className="border px-3 py-2 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300"
-            >
-              {["All", "Pending", "Approved", "Rejected", "Withdrawn"].map((s) => <option key={s}>{s}</option>)}
-            </select>
-            <select
-              value={filterLoc}
-              onChange={(e) => setFilterLoc(e.target.value)}
-              className="border px-3 py-2 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300"
-            >
-              {["All", "Palakkad", "Chittoor"].map((l) => <option key={l}>{l}</option>)}
-            </select>
-            {filteredAll.length !== flatAll.length && (
-              <span className="text-xs text-gray-400 ml-auto">
-                {filteredAll.length} of {flatAll.length} requests
-              </span>
-            )}
-          </div>
+        <div className="bg-white shadow-md rounded-xl border border-gray-100 p-4 mb-4">
+  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
 
+    {/* Search */}
+    <div>
+      <label className="block text-xs font-semibold text-gray-500 mb-1">
+        Search
+      </label>
+      <input
+        type="text"
+        placeholder="Employee Name / ID"
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        className="w-full border border-gray-200 shadow-sm px-3 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+      />
+    </div>
+
+    {/* Type */}
+    <div>
+      <label className="block text-xs font-semibold text-gray-500 mb-1">
+        Type
+      </label>
+      <select
+        value={filterType}
+        onChange={(e) => setFilterType(e.target.value)}
+        className="w-full border border-gray-200 shadow-sm px-3 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+      >
+        {["All", "Leave", "Permission", "OD"].map((t) => (
+          <option key={t}>{t}</option>
+        ))}
+      </select>
+    </div>
+
+    {/* Status */}
+    <div>
+      <label className="block text-xs font-semibold text-gray-500 mb-1">
+        Status
+      </label>
+      <select
+        value={filterStatus}
+        onChange={(e) => setFilterStatus(e.target.value)}
+        className="w-full border border-gray-200 shadow-sm px-3 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+      >
+        {["All", "Pending", "Approved", "Rejected", "Withdrawn"].map((s) => (
+          <option key={s}>{s}</option>
+        ))}
+      </select>
+    </div>
+
+    {/* Location */}
+    <div>
+      <label className="block text-xs font-semibold text-gray-500 mb-1">
+        Location
+      </label>
+      <select
+        value={filterLoc}
+        onChange={(e) => setFilterLoc(e.target.value)}
+        className="w-full border border-gray-200 shadow-sm px-3 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+      >
+        {["All", "Palakkad", "Chittoor"].map((l) => (
+          <option key={l}>{l}</option>
+        ))}
+      </select>
+    </div>
+
+  </div>
+
+  {(search || filterType !== "All" || filterStatus !== "All" || filterLoc !== "All") && (
+    <div className="mt-3 text-xs text-gray-500 text-right">
+      Showing <span className="font-semibold">{filteredAll.length}</span> of{" "}
+      <span className="font-semibold">{flatAll.length}</span> requests
+    </div>
+  )}
+</div>
           {errorAll && (
             <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm flex items-center gap-2">
               <span>⚠</span> {errorAll}
@@ -653,7 +708,7 @@ const PendingRequests = () => {
           )}
 
           {!loadingAll && filteredAll.length > 0 && (
-            <div className="overflow-x-auto border border-gray-200 rounded-xl">
+            <div className="bg-white overflow-x-auto border border-gray-200 rounded-xl">
               <table className="w-full text-sm">
                 <thead className="bg-gray-50 border-b border-gray-200 sticky top-0 z-10">
                   <tr>

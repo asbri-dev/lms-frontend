@@ -1,17 +1,19 @@
 import { useEffect, useState } from "react";
-import { AuthProvider  } from "../../auth/AuthProvider";
+import { useAuth } from "../../auth/useAuth";;
 import { CheckCircle, XCircle, Eye } from "lucide-react";
 import AdminDonutChart from "../../components/dashboard/AdminDonutChart";
 import { API_BASE_URL } from "../../config/api";
 
 
 const AdminDashboard = () => {
-  const { user } = AuthProvider ();
+  const { user } = useAuth();
 
   const [dashboardData, setDashboardData] = useState(null);
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [todayLeaves, setTodayLeaves] = useState([]);
+  const [birthdays, setBirthdays] = useState([]);
 
   /* ---------- FETCH ---------- */
   const fetchDashboard = async () => {
@@ -30,12 +32,89 @@ const AdminDashboard = () => {
     }
   };
 
+  const fetchExtraData = async () => {
+    try {
+      // 🔹 Today Leave
+      const leaveRes = await fetch(`${API_BASE_URL}/todayLeaves`);
+      const leaveData = await leaveRes.json();
+      setTodayLeaves(leaveData?.flat() || []);
+
+      // 🔹 Birthday
+      const bdayRes = await fetch(`${API_BASE_URL}/isBirthday`);
+      const bdayData = await bdayRes.json();
+      setBirthdays(bdayData || []);
+    } catch (err) {
+      console.error("Extra data fetch failed", err);
+    }
+  };
+
   useEffect(() => {
-    if (user?.employeeId) fetchDashboard();
+    if (user?.employeeId) {
+      fetchDashboard();
+      fetchExtraData();
+    }
   }, [user]);
 
   /* ---------- ACTIONS ---------- */
+const TodayLeaveCard = ({ data }) => {
+  return (
+    <div className="bg-white p-5 rounded-2xl shadow-md space-y-3">
 
+      <h3 className="text-sm font-semibold text-gray-700">
+        Today Leave
+      </h3>
+
+      {data.length === 0 ? (
+        <p className="text-xs text-gray-400">No one on leave</p>
+      ) : (
+        data.map((emp, i) => (
+          <div key={i} className="flex justify-between text-sm">
+
+            <span className="font-medium text-gray-800">
+              {emp.empName} - {emp.empId}
+            </span>
+
+            <span className="text-xs px-2 py-1 bg-yellow-100 text-yellow-700 rounded">
+              {emp.leaveType.toUpperCase()}
+            </span>
+
+          </div>
+        ))
+      )}
+
+    </div>
+  );
+};
+const BirthdayCard = ({ data }) => {
+  return (
+    <div className="bg-white p-5 rounded-2xl shadow-md space-y-3">
+
+      <h3 className="text-sm font-semibold text-gray-700">
+        🎉 Birthdays Today
+      </h3>
+
+      {data.length === 0 ? (
+        <p className="text-xs text-gray-400">No birthdays today</p>
+      ) : (
+        data.map((emp, i) => (
+          <div key={i} className="flex items-center gap-2 text-sm">
+
+            <span className="text-pink-500">🎂</span>
+
+            <span className="font-medium text-gray-800">
+              {emp.empName} - {emp.empId}
+            </span>
+            <span className="text-xs px-2 py-1 bg-yellow-100 text-blue-700 rounded">
+              {emp.location}
+            </span>
+
+          </div>
+        ))
+      )}
+
+    </div>
+  );
+};
 
   
 
@@ -102,6 +181,7 @@ const AdminDashboard = () => {
         <StatCard title="All Approved Requests" value={allApprovedRequests} />
         <StatCard title="All Rejected Requests" value={allRejectedRequests} />
       </div>
+      
 
       {/* CHARTS */}
       <div className="grid md:grid-cols-2 gap-6">
@@ -121,9 +201,14 @@ const AdminDashboard = () => {
           type="approved"
         />
       </div>
+   
+
+ 
+
+
 
       {/* FLEX CARDS (REPLACED TABLE) */}
-      <div className="grid md:grid-cols-2 gap-6">
+      <div className="grid md:grid-cols-4 gap-6">
 
         {/* PENDING LIST */}
         <div className="bg-white rounded-3xl shadow-lg p-5">
@@ -174,6 +259,85 @@ const AdminDashboard = () => {
             <SummaryCard label="OD" value={approvedOdsCnt} color="orange" />
           </div>
         </div>
+         {/* Today Leave */}
+  <div className="bg-white rounded-3xl shadow-lg border border-gray-100">
+    <div className="p-5 border-b">
+      <h3 className="font-semibold text-gray-800">
+        Today's Leave
+      </h3>
+      <p className="text-xs text-gray-400">
+        Employees currently on leave
+      </p>
+    </div>
+
+    <div className="max-h-72 overflow-y-auto">
+      {todayLeaves.length === 0 ? (
+        <div className="p-6 text-center text-gray-400">
+          No employees on leave today
+        </div>
+      ) : (
+        todayLeaves.map((emp, i) => (
+          <div
+            key={i}
+            className="flex items-center justify-between p-4 border-b last:border-b-0 hover:bg-gray-50"
+          >
+            <div>
+              <p className="font-medium text-gray-800">
+                {emp.empName}
+              </p>
+              <p className="text-xs text-gray-400">
+                {emp.empId}
+              </p>
+            </div>
+
+            <span className="px-3 py-1 rounded-full text-xs bg-yellow-100 text-yellow-700">
+              {emp.leaveType?.toUpperCase()}
+            </span>
+          </div>
+        ))
+      )}
+    </div>
+  </div>
+
+  {/* Birthdays */}
+  <div className="bg-white rounded-3xl shadow-lg border border-gray-100">
+    <div className="p-5 border-b">
+      <h3 className="font-semibold text-gray-800">
+        Birthday Celebrations 🎉
+      </h3>
+      <p className="text-xs text-gray-400">
+        Employees celebrating today
+      </p>
+    </div>
+
+    <div className="max-h-72 overflow-y-auto">
+      {birthdays.length === 0 ? (
+        <div className="p-6 text-center text-gray-400">
+          No birthdays today
+        </div>
+      ) : (
+        birthdays.map((emp, i) => (
+          <div
+            key={i}
+            className="flex items-center justify-between p-4 border-b last:border-b-0 hover:bg-pink-50"
+          >
+            <div>
+              <p className="font-medium text-gray-800">
+                {emp.empName}
+              </p>
+              <p className="text-xs text-gray-400">
+                {emp.empId}
+              </p>
+            </div>
+
+            <span className="px-3 py-1 rounded-full text-xs bg-pink-100 text-pink-700">
+              🎂 {emp.location}
+            </span>
+          </div>
+        ))
+      )}
+    </div>
+  </div>
 
       </div>
 

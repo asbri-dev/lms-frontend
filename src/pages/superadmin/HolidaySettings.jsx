@@ -1,5 +1,12 @@
 import { useEffect, useMemo, useState, useCallback } from "react";
-import { format, startOfMonth, endOfMonth, eachDayOfInterval, parseISO } from "date-fns";
+import {
+  format,
+  startOfMonth,
+  endOfMonth,
+  eachDayOfInterval,
+  parseISO,
+  getDay
+} from "date-fns";
 import { useAuth } from "../../auth/useAuth";
 import toast from "react-hot-toast";
 import { API_BASE_URL } from "../../config/api";
@@ -38,11 +45,19 @@ const HolidayPage = () => {
     };
   }, [month]);
 
-  const days = useMemo(() => {
-    const start = new Date(month + "-01");
-    const end = endOfMonth(start);
-    return eachDayOfInterval({ start, end });
-  }, [month]);
+ const days = useMemo(() => {
+  const start = new Date(month + "-01");
+  const end = endOfMonth(start);
+
+  const monthDays = eachDayOfInterval({ start, end });
+
+  const firstDayIndex = getDay(start);
+
+  return [
+    ...Array(firstDayIndex).fill(null),
+    ...monthDays
+  ];
+}, [month]);
 
   /* ================= FETCH HOLIDAYS ================= */
   const fetchHolidays = useCallback(async () => {
@@ -106,7 +121,7 @@ const HolidayPage = () => {
 
     return false;
   };
-
+const weekDays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
   /* ================= CALCULATE DAYS ================= */
   const calculateDays = (from, to) => {
     const start = new Date(from);
@@ -240,7 +255,7 @@ const HolidayPage = () => {
           className="border px-3 py-2 rounded"
         >
           <option>Palakkad</option>
-          <option>Chittor</option>
+          <option>Chittoor</option>
         </select>
 
         <input
@@ -258,16 +273,31 @@ const HolidayPage = () => {
         </button>
 
       </div>
+      <div className="grid grid-cols-7 gap-3 mb-2">
+  {weekDays.map((d) => (
+    <div
+      key={d}
+      className="text-center font-semibold text-gray-600"
+    >
+      {d}
+    </div>
+  ))}
+</div>
 
       {/* CALENDAR */}
       <div className="grid grid-cols-7 gap-3 bg-gray-100 p-4 rounded-2xl">
+        
 
-        {days.map((day) => {
-          const dateStr = format(day, "yyyy-MM-dd");
+       {days.map((day, index) => {
+  if (!day) {
+    return <div key={index}></div>;
+  }
 
-          const event = events.find((e) => e.date === dateStr);
+  const dateStr = format(day, "yyyy-MM-dd");
 
-          return (
+  const event = events.find((e) => e.date === dateStr);
+
+  return (
             <div
               key={dateStr}
               onClick={() => setSelectedDate(event)}

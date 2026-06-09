@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect} from "react";
 import { AuthContext } from "./AuthContext";
 
 export const AuthProvider = ({ children }) => {
@@ -23,6 +23,38 @@ export const AuthProvider = ({ children }) => {
     sessionStorage.removeItem("authToken");
     sessionStorage.removeItem("authUser");
   }, []);
+  /* ==============================
+   AUTO LOGOUT AFTER INACTIVITY
+============================== */
+useEffect(() => {
+  if (!token) return;
+
+  let timer;
+
+  const resetTimer = () => {
+    clearTimeout(timer);
+
+    timer = setTimeout(() => {
+      logout();
+      alert("Logged out due to inactivity.");
+    }, 5 * 60 * 1000); // 5 minutes
+  };
+
+  window.addEventListener("mousemove", resetTimer);
+  window.addEventListener("keydown", resetTimer);
+  window.addEventListener("click", resetTimer);
+
+  resetTimer();
+
+  return () => {
+    clearTimeout(timer);
+
+    window.removeEventListener("mousemove", resetTimer);
+    window.removeEventListener("keydown", resetTimer);
+    window.removeEventListener("click", resetTimer);
+  };
+}, [token, logout]);
+  
 
   const value = useMemo(() => ({
     token,

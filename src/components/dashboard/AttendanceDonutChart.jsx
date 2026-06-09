@@ -9,7 +9,7 @@ const COLORS = {
   ML: "#8b5cf6",
   Holiday: "#0ea5e9",
   OFF: "#6b7280",
-  OD: "#1B2A41",
+  OD: "#E9F0DB",
 };
 
 const AttendanceDonutChart = ({ summary, selectedMonth, onPrev, onNext }) => {
@@ -75,10 +75,12 @@ const AttendanceDonutChart = ({ summary, selectedMonth, onPrev, onNext }) => {
       </div>
 
       {/* CENTER INFO */}
-      <p className="text-center text-xs text-gray-500 mt-2">
-        {summary.summaryFor}
-        
+      <p className="text-center font-semibold text-xs text-black mt-2">
+        {summary.summaryFor} 
       </p>
+      <p className="text-center font-bold text-xs text-black mt-2">  
+      Avg Hours :{" "} {summary.averageWorkingHrs}
+        </p>
 
       {/* LEGEND */}
       <div className="grid grid-cols-2 gap-2 mt-4 text-xs">

@@ -181,40 +181,123 @@ const EmployeeDirectory = () => {
       <div className="mb-6 flex justify-between items-center">
         <h1 className="text-2xl font-bold">Employee Directory</h1>
 
-        <div className="flex gap-2">
-          <button onClick={() => toggleSort("name")}>
-            Sort Name {sortField === "name" && (sortDir === "asc" ? "↑" : "↓")}
-          </button>
-          <button onClick={() => toggleSort("id")}>
-            Sort ID {sortField === "id" && (sortDir === "asc" ? "↑" : "↓")}
-          </button>
-        </div>
+       <div className="flex flex-wrap gap-3">
+
+  <button
+    onClick={() => toggleSort("name")}
+    className={`
+      flex items-center gap-2
+      px-4 py-2
+      rounded-xl
+      border
+      text-sm font-semibold
+      transition-all duration-200
+      shadow-sm
+      hover:shadow-md
+      hover:-translate-y-0.5
+
+      ${
+        sortField === "name"
+          ? "bg-blue-600 text-white border-green-600"
+          : "bg-white text-gray-700 border-gray-200 hover:bg-green-50"
+      }
+    `}
+  >
+    <span>Sort Name</span>
+
+    {sortField === "name" && (
+      <span className="text-base">
+        {sortDir === "asc" ? "↑" : "↓"}
+      </span>
+    )}
+  </button>
+
+  <button
+    onClick={() => toggleSort("id")}
+    className={`
+      flex items-center gap-2
+      px-4 py-2
+      rounded-xl
+      border
+      text-sm font-semibold
+      transition-all duration-200
+      shadow-sm
+      hover:shadow-md
+      hover:-translate-y-0.5
+
+      ${
+        sortField === "id"
+          ? "bg-red-500 text-white border-red-300"
+          : "bg-white text-gray-700 border-gray-200 hover:bg-blue-50"
+      }
+    `}
+  >
+    <span>Sort ID</span>
+
+    {sortField === "id" && (
+      <span className="text-base">
+        {sortDir === "asc" ? "↑" : "↓"}
+      </span>
+    )}
+  </button>
+
+</div>
       </div>
 
       {/* Filters */}
-      <div className="grid grid-cols-4 gap-3 mb-6">
-        <div className="relative">
-          <Search className="absolute left-2 top-2 w-4 h-4 text-gray-400" />
-          <input
-            className="pl-8 border p-2 rounded w-full"
-            placeholder="Search..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-        </div>
+   <div className="grid grid-cols-4 gap-3 mb-6">
 
-        <select onChange={(e) => setDept(e.target.value)} className="border p-2 rounded">
-          {departments.map((d) => (
-            <option key={d}>{d}</option>
-          ))}
-        </select>
+  {/* Search */}
+  <div>
+    <label className="block text-sm font-medium text-gray-700 mb-1">
+      Search
+    </label>
 
-        <select onChange={(e) => setLocation(e.target.value)} className="border p-2 rounded">
-          {locations.map((l) => (
-            <option key={l}>{l}</option>
-          ))}
-        </select>
-      </div>
+    <div className="relative">
+      <Search className="absolute left-2 top-2.5 w-4 h-4 text-gray-400" />
+
+      <input
+        className="pl-8 shadow-sm p-2 rounded w-full"
+        placeholder="Search..."
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+      />
+    </div>
+  </div>
+
+  {/* Department */}
+  <div>
+    <label className="block text-sm font-medium text-gray-700 mb-1">
+      Department
+    </label>
+
+    <select
+      onChange={(e) => setDept(e.target.value)}
+      className="shadow-sm p-2 rounded w-full"
+    >
+      {departments.map((d) => (
+        <option key={d}>{d}</option>
+      ))}
+    </select>
+  </div>
+
+  {/* Location */}
+  <div>
+    <label className="block text-sm font-medium text-gray-700 mb-1">
+      Location
+    </label>
+
+    <select
+      onChange={(e) => setLocation(e.target.value)}
+      className="shadow-sm p-2 rounded w-full"
+    >
+      {locations.map((l) => (
+        <option key={l}>{l}</option>
+      ))}
+    </select>
+  </div>
+
+</div>
 
       {/* Loading & Error */}
       {loading && <p className="text-center">Loading...</p>}

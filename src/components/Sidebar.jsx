@@ -1,6 +1,6 @@
 import { NavLink } from "react-router-dom";
 import { useAuth } from "../auth/useAuth";
-import { LogOut, X } from "lucide-react";
+import { LeafyGreen, LogOut, X } from "lucide-react";
 import { moduleConfig } from "../utils/moduleConfig";
 import {
   LayoutDashboard,
@@ -11,6 +11,7 @@ import {
   Edit,
   CalendarCheck,
   Upload,
+  IndianRupee,
 } from "lucide-react";
 
 const Sidebar = ({ onClose }) => {
@@ -19,26 +20,33 @@ const Sidebar = ({ onClose }) => {
 
   // Wrap linkClasses — also calls onClose on mobile
   const linkClasses = ({ isActive }) =>
-    `flex items-center gap-3 px-4 py-2 rounded-lg text-sm font-medium transition ${
+    `flex items-center gap-3 px-4 py-2 rounded-md text-sm font-medium transition ${
       isActive
-        ? `${currentModule?.theme?.active} ${currentModule.theme.text} shadow-md`
-        : `${currentModule?.theme?.hover} hover:text-white`
+        ? `${currentModule?.theme?.active} ${currentModule.theme.text} shadow-lg`
+        : `${currentModule?.theme?.hover} hover:text-white  ${currentModule.theme.Ntext}`
     }`;
 
   const sectionTitle =
-    "text-xs font-semibold text-[#ffffff] uppercase tracking-wider mt-6 mb-2 font-bold";
+    "text-xs font-bold text-${currentModule.theme.Ntext} uppercase tracking-wider mt-6 mb-2 font-bold";
 
   return (
-    <aside className={`h-full ${currentModule?.theme?.background} text-white flex flex-col p-6 overflow-y-auto`}>
+    <aside className={`"w-64 h-screen border-r border-gray-100 p-4"h-full ${currentModule?.theme?.background} ${currentModule.theme.Ntext} flex flex-col p-6 overflow-y-auto `}>
      
      
       {/* ── Logo + Close button (close only shows on mobile) ── */}
-      <div className="flex items-center justify-between mb-10">
-        <div>
-          <h2 className="text-xl text-[#fffff] font-bold tracking-wide">{currentModule?.subtitle}</h2>
-          {/*<p className="text-xs text-gray-300 mt-1">{currentModule?.subtitle}</p>*/}
-        </div>
+      <div className="flex items-center justify-between mb-2">
+       <div>
+  <h2 className="flex items-center gap-2 text-xl ${currentModule.theme.Ntext} font-bold tracking-wide border-b border-gray-300 pb-2 w-50">
+    {currentModule?.icon && (
+      <div className={currentModule?.background}>
+        <currentModule.icon size={24} color="#ffffff"/>
+      </div>
+    )}
+    <span>{currentModule?.label}</span>
+  </h2>
 
+  {/*<p className="text-xs text-gray-300 mt-1">{currentModule?.subtitle}</p>*/}
+</div>
         {/* Close button — mobile only */}
         <button
           onClick={onClose}
@@ -55,7 +63,7 @@ const Sidebar = ({ onClose }) => {
         {/* SUPERADMIN */}
         {user?.role === "SUPERADMIN" && (
           <>
-            <p className="text-xs text-white uppercase mt-4 mb-2 px-2 font-bold border-b border-white pb-2">
+            <p className="text-xs text-${currentModule.theme.Ntext} uppercase mt-4 mb-2 px-2 font-bold ">
   Overview
 </p>
             <NavLink to="/superadmin/dashboard" className={linkClasses} onClick={() => onClose?.()}>
@@ -213,12 +221,16 @@ const Sidebar = ({ onClose }) => {
               <LayoutDashboard size={18} /> 
               Dashboard
             </NavLink>
+            <NavLink to="/fadmin/fee-structure" className={linkClasses} onClick={() => onClose?.()}>
+              <FileText size={18} />
+              Fee Structure
+            </NavLink>
           </>
         )}
         {/* STUDENT */}
         {user?.role === "STUDENT" && (
           <>
-            <p className={sectionTitle}>Overview</p>
+            <p className={sectionTitle} >Overview</p>
             <NavLink to="/student/dashboard" className={linkClasses} onClick={() => onClose?.()}>   
               <LayoutDashboard size={18} />
               Dashboard
@@ -227,9 +239,13 @@ const Sidebar = ({ onClose }) => {
               <Users size={18} />
               Profile
             </NavLink>
-            <NavLink to="/student/fees" className={linkClasses} onClick={() => onClose?.()}>
+            <NavLink to="/student/fees-page" className={linkClasses} onClick={() => onClose?.()}>
               <FileText size={18} />
-              Fees
+              Fees Page
+            </NavLink>
+            <NavLink to="/student/make-payment" className={linkClasses} onClick={() => onClose?.()}>
+              <IndianRupee size={18} color="green" />
+              Make Payment
             </NavLink>
           </>
         )}  
@@ -240,7 +256,7 @@ const Sidebar = ({ onClose }) => {
       <div className="mt-auto pt-6">
         <button
           onClick={logout}
-          className="w-full flex items-center gap-3 px-4 py-2 rounded-lg text-sm font-medium text-gray-300 hover:bg-red-500 hover:text-white transition"
+          className="w-full flex items-center gap-3 px-4 py-2 rounded-lg text-red-500 font-bold hover:bg-red-500 hover:text-white transition"
         >
           <LogOut size={18} />
           Logout

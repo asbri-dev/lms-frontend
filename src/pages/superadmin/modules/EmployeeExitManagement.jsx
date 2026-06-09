@@ -188,9 +188,9 @@ const EmployeeExitManagement = () => {
   const [searchResults, setResults] = useState([]);
   const [searching, setSearching] = useState(false);
   const [selectedEmp, setSelected] = useState(null);
-  const [activeExits, setActiveExits] = useState([]);
+ // const [activeExits, setActiveExits] = useState([]);
   const [exitHistory, setExitHistory] = useState([]);
-  const [loadingActive, setLoadingActive] = useState(false);
+ // const [loadingActive, setLoadingActive] = useState(false);
   
 
   const token = sessionStorage.getItem("authToken");
@@ -293,159 +293,59 @@ const EmployeeExitManagement = () => {
 
       {/* ─── Initiate Tab ─── */}
       {innerTab === "initiate" && (
-        <div className="max-w-lg space-y-4">
-          {!selectedEmp ? (
-            <>
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  placeholder="Search employee name or ID..."
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && searchEmployee()}
-                  className="flex-1 border px-3 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-200"
-                />
-                <button
-                  onClick={searchEmployee}
-                  disabled={searching || !search.trim()}
-                  className="bg-red-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-red-700 disabled:opacity-50 transition-colors"
-                >
-                  {searching ? "..." : "Search"}
-                </button>
-              </div>
+         <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+      <div className="bg-white rounded-2xl shadow-lg p-10 text-center max-w-md w-full">
+        <div className="text-6xl mb-4">🚀</div>
 
-              {searchResults.length > 0 && (
-                <div className="border border-gray-200 rounded-xl overflow-hidden divide-y divide-gray-100">
-                  {searchResults.map((emp) => (
-                    <button
-                      key={emp.employeeId}
-                      onClick={() => setSelected(emp)}
-                      className="w-full flex items-center gap-3 px-4 py-3 hover:bg-red-50 transition-colors text-left"
-                    >
-                      <div className="w-8 h-8 rounded-full bg-red-100 text-red-700 flex items-center justify-center text-xs font-semibold flex-shrink-0">
-                        {(emp.employeeName || "?").split(" ").map((n) => n[0]).slice(0, 2).join("").toUpperCase()}
-                      </div>
-                      <div className="min-w-0">
-                        <div className="text-sm font-medium text-gray-800 truncate">{emp.employeeName}</div>
-                        <div className="text-xs text-gray-400">{emp.employeeId} · {emp.department}</div>
-                      </div>
-                      <span className={`ml-auto text-xs font-medium px-2 py-0.5 rounded-full flex-shrink-0 ${
-                        getLocation(emp.employeeId) === "Palakkad"
-                          ? "bg-green-100 text-green-700"
-                          : "bg-orange-100 text-orange-700"
-                      }`}>
-                        {getLocation(emp.employeeId)}
-                      </span>
-                    </button>
-                  ))}
-                </div>
-              )}
+        <h1 className="text-3xl font-bold text-gray-800 mb-3">
+          Coming Soon
+        </h1>
 
-              {search && searchResults.length === 0 && !searching && (
-                <div className="text-center py-10 text-gray-400 text-sm">No employees found</div>
-              )}
-
-              {!search && (
-                <div className="text-center py-16 text-gray-400">
-                  <div className="text-4xl mb-3">🔍</div>
-                  <div className="text-sm">Search for an employee to initiate exit process</div>
-                </div>
-              )}
-            </>
-          ) : (
-            <ExitForm
-              emp={selectedEmp}
-              onSubmit={handleExitSubmit}
-              onCancel={() => setSelected(null)}
-            />
-          )}
-        </div>
+        <p className="text-gray-500">
+          We're working on something amazing.
+          Stay tuned!
+        </p>
+      </div>
+    </div>
       )}
 
       {/* ─── Active Exits Tab ─── */}
       {innerTab === "active" && (
         <>
-          {loadingActive && (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {Array.from({ length: 3 }).map((_, i) => (
-                <div key={i} className="border rounded-xl p-4 animate-pulse space-y-3">
-                  <div className="h-4 bg-gray-200 rounded w-1/2" />
-                  <div className="h-3 bg-gray-100 rounded w-1/3" />
-                  <div className="space-y-2">
-                    {Array.from({ length: 4 }).map((__, j) => (
-                      <div key={j} className="h-3 bg-gray-100 rounded w-full" />
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-          {!loadingActive && activeExits.length === 0 && (
-            <div className="text-center py-20 text-gray-400">
-              <div className="text-4xl mb-3">✅</div>
-              <div className="text-sm">No active exit processes</div>
-            </div>
-          )}
-          {!loadingActive && activeExits.length > 0 && (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {activeExits.map((exit) => (
-                <ActiveExitCard key={exit.employeeId} exit={exit} />
-              ))}
-            </div>
-          )}
+           <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+      <div className="bg-white rounded-2xl shadow-lg p-10 text-center max-w-md w-full">
+        <div className="text-6xl mb-4">🚀</div>
+
+        <h1 className="text-3xl font-bold text-gray-800 mb-3">
+          Coming Soon
+        </h1>
+
+        <p className="text-gray-500">
+          We're working on something amazing.
+          Stay tuned!
+        </p>
+      </div>
+    </div>
         </>
       )}
 
       {/* ─── Exit History Tab ─── */}
       {innerTab === "history" && (
         <>
-          {exitHistory.length === 0 && (
-            <div className="text-center py-20 text-gray-400">
-              <div className="text-4xl mb-3">📋</div>
-              <div className="text-sm">No exit history found</div>
-            </div>
-          )}
-          {exitHistory.length > 0 && (
-            <div className="overflow-x-auto border border-gray-200 rounded-xl">
-              <table className="w-full text-sm">
-                <thead className="bg-gray-50 border-b border-gray-200">
-                  <tr>
-                    <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500">Employee</th>
-                    <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500">Location</th>
-                    <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500">Last date</th>
-                    <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500">Reason</th>
-                    <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500">Status</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-100">
-                  {exitHistory.map((exit) => (
-                    <tr key={exit.employeeId} className="hover:bg-gray-50">
-                      <td className="px-4 py-3">
-                        <div className="font-medium text-gray-800">{exit.employeeName}</div>
-                        <div className="text-xs text-gray-400">{exit.employeeId}</div>
-                      </td>
-                      <td className="px-4 py-3">
-                        <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
-                          getLocation(exit.employeeId) === "Palakkad"
-                            ? "bg-green-100 text-green-700"
-                            : "bg-orange-100 text-orange-700"
-                        }`}>
-                          {getLocation(exit.employeeId)}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3 text-gray-500 text-xs">{exit.lastDate || "—"}</td>
-                      <td className="px-4 py-3 text-gray-500 text-xs">{exit.reason || "—"}</td>
-                      <td className="px-4 py-3">
-                        <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-gray-100 text-gray-600">
-                          {exit.status || "Exited"}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
+          <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+      <div className="bg-white rounded-2xl shadow-lg p-10 text-center max-w-md w-full">
+        <div className="text-6xl mb-4">🚀</div>
+
+        <h1 className="text-3xl font-bold text-gray-800 mb-3">
+          Coming Soon
+        </h1>
+
+        <p className="text-gray-500">
+          We're working on something amazing.
+          Stay tuned!
+        </p>
+      </div>
+    </div>
         </>
       )}
     </div>

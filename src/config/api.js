@@ -6,14 +6,14 @@
 // Determine the API URL based on environment
 const API_CONFIG = {
   development: {
-    baseURL: "http://localhost:8080",
+    baseURL: "http://localhost:9090",
     timeout: 10000,
     headers: {
       "Content-Type": "application/json",
     },
   },
   production: {
-    baseURL: import.meta.env.VITE_API_BASE_URL || "https://lms-app-792341416101.asia-south1.run.app",
+    baseURL: "https://lms-app-uat-792341416101.asia-south1.run.app",
     timeout: 10000,
     headers: {
       "Content-Type": "application/json",
