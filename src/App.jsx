@@ -43,6 +43,7 @@ import HeadAdminDashboard from "./finance/headadmin/FHAdminDashboard";
 
 import FAdminDashboard from "./finance/fadmin/FAdminDashboard";
 import AdminFeeStructurePage from "./finance/fadmin/AdminFeeStructurePage";
+import AdminStudentPage from "./finance/fadmin/AdminStudentPage";
 
 
 
@@ -187,6 +188,7 @@ function App() {
       >  
         <Route path="dashboard" element={<FAdminDashboard />} />
         <Route path="fee-structure" element={<AdminFeeStructurePage />} />
+        <Route path="student-management" element={<AdminStudentPage />} />
       </Route>
 
       {/* STUDENT */}

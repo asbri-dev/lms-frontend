@@ -225,6 +225,10 @@ const Sidebar = ({ onClose }) => {
               <FileText size={18} />
               Fee Structure
             </NavLink>
+            <NavLink to="/fadmin/student-management" className={linkClasses} onClick={() => onClose?.()}>
+              <Users size={18} />
+              Student Management
+            </NavLink>
           </>
         )}
         {/* STUDENT */}

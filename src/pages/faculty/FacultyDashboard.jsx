@@ -8,6 +8,8 @@ import {
   Clock,
  PlusCircle,
   Activity,
+  GraduationCap,
+  User
 
 } from "lucide-react";
 import AttendanceDonutChart from "../../components/dashboard/AttendanceDonutChart";
@@ -254,18 +256,36 @@ const mlAvailed = data.approvedLeaveList?.filter(l => l.typeOfLeave === "ml").le
       <div className="lg:col-span-3 space-y-6">
 
         {/* HERO */}
-          <div className="bg-gradient-to-r from-[#2b3c6b] to-[#3f548f] text-white p-6 rounded-3xl shadow-lg flex justify-between items-center">
-          <div>
-            <h2 className="text-2xl font-semibold">
-              Welcome, {basic.employeeName}
-            </h2>
-            <p className="text-sm opacity-90 mt-1">
-              Reporting To: {basic.rmName} ({basic.rmEmployeeId})
-            </p>
-            
-          </div>
-          <Activity className="opacity-20" size={60} />
-        </div>
+      <div className="bg-gradient-to-r from-[#2b3c6b] to-[#3f548f] text-white p-6 rounded-3xl shadow-lg flex justify-between items-center">
+  <div className="flex flex-col gap-2">
+   
+
+    {/* Name */}
+    <h2 className="text-2xl font-semibold leading-tight">
+      Welcome, {basic.employeeName}
+    </h2>
+     {/* Designation Badge */}
+    
+
+    {/* Department */}
+    <p className="text-sm font-medium text-white/80 flex items-center gap-1.5">
+      <GraduationCap size={14} className="opacity-70" />
+      {basic.department} - {basic.designation}
+      
+    </p>
+
+    {/* Reporting To */}
+    <p className="text-xs text-white/60 flex items-center gap-1.5">
+      <User size={12} className="opacity-60" />
+      Reporting to: <span className="text-white/80 font-medium">{basic.rmName}</span>&nbsp;
+      <span className="bg-white/10 px-1.5 py-0.5 rounded text-white/70 font-mono text-[10px]">
+        {basic.rmEmployeeId}
+      </span>
+    </p>
+  </div>
+
+  <Activity className="opacity-20 shrink-0" size={60} />
+</div>
 
         {/* STATS */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -455,7 +475,11 @@ const Section = ({ title, icon, children }) => (
 
   </div>
 );
-
+const permissionTypeMap = {
+  lateIn: "Late In",
+  earlyOut: "Early Out",
+  lateInEarlyOut: "Late In & Early Out",
+};
 
 
 const ItemRow = ({ item, type, onWithdraw }) => {
@@ -473,12 +497,12 @@ const ItemRow = ({ item, type, onWithdraw }) => {
       {/* LEFT */}
       <div>
         <h1>{item.employeeId} {}</h1>
-        <p className="text-sm font-semibold text-gray-800">
+       <p className="text-sm font-semibold text-gray-800">
   {isLeave
     ? leaveTypeMap[item.typeOfLeave] || item.typeOfLeave
     : isPermission
-    ? item.permissionType
-    : item.odType}
+    ? permissionTypeMap[item.permissionType] || item.permissionType
+    : "On Duty"}
 </p>
 
         <p className="text-xs text-gray-500">
