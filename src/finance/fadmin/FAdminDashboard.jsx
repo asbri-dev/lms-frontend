@@ -207,6 +207,7 @@ export default function FAdminDashboard() {
 
     setData(result);
     setLastSync(new Date());
+    
 
   } catch (err) {
     setError(err.message || "Failed to load dashboard");

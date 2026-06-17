@@ -100,7 +100,7 @@ function DeptPieChart({ title, faculty, colors, loading }) {
 
   return (
     <Card>
-      <CardHeader title={title} right={`${faculty.length} staff`} />
+      <CardHeader title={title} right={`${faculty.length} employee`} />
       {loading ? (
         <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: 220 }}>
           <Skeleton w={180} h={180} style={{ borderRadius: "50%" }} />
@@ -153,7 +153,7 @@ function CampusCard({ campus, count, adminName, adminId, color, loading }) {
           ? <Skeleton w={40} h={28} />
           : <div style={{ textAlign: "right" }}>
               <div style={{ fontSize: 26, fontWeight: 700, color, lineHeight: 1 }}>{count}</div>
-              <div style={{ fontSize: 10, color: C.textMuted }}>staff</div>
+              <div style={{ fontSize: 10, color: C.textMuted }}>employee</div>
             </div>
         }
       </div>
@@ -526,9 +526,9 @@ export default function HeadDashboard() {
 
         {/* Stat cards */}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(4, minmax(0,1fr))", gap: 14, marginBottom: 28 }}>
-          <StatCard label="Total Staff" value={totalFaculty} sub="Across both campuses" accentColor={C.primary} loading={loading} />
-          <StatCard label="Palakkad Campus" value={palakkadCount} sub={`${totalFaculty ? Math.round((palakkadCount/totalFaculty)*100) : 0}% of total staff`} accentColor={C.secondary} loading={loading} />
-          <StatCard label="Chittoor Campus" value={chittoorCount} sub={`${totalFaculty ? Math.round((chittoorCount/totalFaculty)*100) : 0}% of total staff`} accentColor={C.primary} loading={loading} />
+          <StatCard label="Total Employees" value={totalFaculty} sub="Across both campuses" accentColor={C.primary} loading={loading} />
+          <StatCard label="Palakkad Campus" value={palakkadCount} sub={`${totalFaculty ? Math.round((palakkadCount/totalFaculty)*100) : 0}% of total employees`} accentColor={C.secondary} loading={loading} />
+          <StatCard label="Chittoor Campus" value={chittoorCount} sub={`${totalFaculty ? Math.round((chittoorCount/totalFaculty)*100) : 0}% of total employees`} accentColor={C.primary} loading={loading} />
           <StatCard label="Administrators" value={adminCount} sub="1 Head · 2 Admins" accentColor={C.secondary} loading={loading} />
         </div>
 

@@ -78,7 +78,16 @@ const SetPassword = () => {
       setSuccess("Password set successfully! Redirecting to login...");
 
       setTimeout(() => {
-        navigate("/");
+        if(data.portal==="Leave"){
+          navigate("/login");
+        }
+          else if(data.portal==="Fee"){ 
+            navigate("/login-page");
+          }
+          else{
+            navigate("/");
+          }
+        
       }, 2000);
     } catch (err) {
       setError(err.message || "Something went wrong");
@@ -105,9 +114,10 @@ const SetPassword = () => {
           Set Your Password
         </h2>
 
-        <p className="text-gray-500 text-sm text-center mb-6">
+        <p className="text-gray-500 text-sm font-bold text-center mb-6">
           Create a strong password to secure your account
         </p>
+       
 
         {error && (
           <div className="bg-red-100 text-red-600 text-sm p-3 rounded-lg mb-4">
@@ -171,6 +181,9 @@ const SetPassword = () => {
     {showPassword ? "Hide" : "Show"}
   </button>
 </div>
+<p className="text-blue-500 text-sm font-bold text-center mb-6">
+        Don't share your password with anyone !!!
+        </p>
 
           {/* Password Rules */}
           <div className="bg-gray-50 border border-gray-200 p-4 rounded-lg text-sm">
@@ -197,7 +210,7 @@ const SetPassword = () => {
               </li>
 
               <li className={`flex items-center gap-2 ${rules.special ? "text-green-600" : "text-gray-500"}`}>
-                {rules.special ? "✔" : "•"} One special character (@$!%*?&)
+                {rules.special ? "✔" : "•"} One special character (Eg: @$!%*?&)
               </li>
 
             </ul>

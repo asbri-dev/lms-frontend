@@ -3,7 +3,7 @@ import { GraduationCap,Leaf,Snowflake,Sun } from 'lucide-react';
 
 export const moduleConfig = {
   SUPERADMIN: {
-    title: "LMS",
+    title: "Management",
     subtitle: "Leave Management System",
 
     theme: {
@@ -20,7 +20,7 @@ export const moduleConfig = {
   },
 
   ADMIN: {
-    title: "LMS",
+    title: "Faculty Sphere",
     subtitle: "Leave Management System",
 
     theme: {
@@ -37,7 +37,7 @@ export const moduleConfig = {
   },
 
   HEAD: {
-    title: "LMS",
+    title: "Faculty Sphere",
     subtitle: "Leave Management System",
 
     theme: {
@@ -53,7 +53,7 @@ export const moduleConfig = {
   },
 
   FACULTY: {
-    title: "LMS",
+    title: "Faculty Sphere",
     subtitle: "Leave Management System",
 
     theme: {
