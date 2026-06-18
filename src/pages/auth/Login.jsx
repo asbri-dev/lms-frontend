@@ -93,7 +93,7 @@ const Login = () => {
               Aries Polytechnic
             </h1>
             <p className="text-sm text-white/70">
-              Student Portal
+              Leave Portal
             </p>
           </div>
         </div>
@@ -105,8 +105,7 @@ const Login = () => {
           </h2>
 
           <p className="text-lg text-white/80 leading-relaxed">
-            Access your student services, attendance, fees,
-            and academic details through one modern portal.
+          View and manage leave and attendance records in one easy-to-use portal
           </p>
         </div>
 
@@ -138,7 +137,7 @@ const Login = () => {
                   Aries Polytechnic
                 </h2>
                 <p className="text-xs text-gray-500">
-                  Student Portal
+                  Leave Portal
                 </p>
               </div>
             </div>

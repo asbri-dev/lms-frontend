@@ -328,18 +328,33 @@ const [messageType, setMessageType] = useState(""); // success | error
               
             </div>
 
-            <div className="text-right">
-              <span className="text-xs font-semibold px-2 py-1 rounded bg-gray-200">
+            <div className="text-right gap-2 flex flex-col items-end">
+              <span className="text-xs font-semibold px-2 py-1 gap-3 mt-2 rounded bg-gray-200">
                 {item.status}
               </span>
 
               {item.status === "PENDING" && (
-                <button
-                  onClick={() => handleWithdraw(item)}
-                  className="block mt-2 text-red-600 text-sm"
-                >
-                  Withdraw
-                </button>
+               <button
+  onClick={() => handleWithdraw(item)}
+  disabled={loading}
+  className="
+    mt-2 inline-flex items-center gap-3
+    px-3 py-1.5
+    bg-red-50 text-red-600
+    border border-red-200
+    rounded-lg
+    text-sm font-medium
+    cursor-pointer
+    hover:bg-red-600 hover:text-white hover:border-red-600
+    transition-all duration-200
+    disabled:opacity-50
+    disabled:cursor-not-allowed
+    disabled:hover:bg-red-50
+    disabled:hover:text-red-600
+  "
+>
+  Withdraw
+</button>
               )}
             </div>
           </div>

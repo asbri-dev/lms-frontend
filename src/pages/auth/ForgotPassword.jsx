@@ -28,7 +28,18 @@ const ForgotPassword = () => {
       const data = await response.json();
       if (!response.ok) throw new Error(data.message || "Request failed");
       setSuccess("Password reset request sent successfully");
-      setTimeout(() => navigate("/"), 2000);
+      setTimeout(() => {
+        if(data.portal==="Leave"){
+          navigate("/login");
+        }
+          else if(data.portal==="Fee"){ 
+            navigate("/login-page");
+          }
+          else{
+            navigate("/");
+          }
+        
+      }, 2000);
     } catch (err) {
       setError(err.message);
     } finally {
