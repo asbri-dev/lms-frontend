@@ -3,7 +3,7 @@ name: Deploy Frontend UAT to Firebase
 on:
   push:
     branches:
-      - main
+      - lmsUat-13-05-2026
   workflow_dispatch:
 
 jobs:
