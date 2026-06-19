@@ -7,19 +7,115 @@ import { API_BASE_URL } from "../../config/api";
 
 /* ─── Status Map ─── */
 const STATUS_MAP = {
-  Present: { label: "P",   color: "bg-green-100 text-green-800",   display: "Present"       },
-  Absent:  { label: "A",   color: "bg-red-100 text-red-800",       display: "Absent"        },
-  Holiday: { label: "H",   color: "bg-blue-100 text-blue-800",     display: "Holiday"       },
-  Off:     { label: "OFF", color: "bg-gray-200 text-gray-600",     display: "Week Off"      },
-  CL:      { label: "CL",  color: "bg-purple-100 text-purple-800", display: "Casual Leave"  },
-  ML:      { label: "ML",  color: "bg-pink-100 text-pink-800",     display: "Medical Leave" },
-  OD:      { label: "OD",  color: "bg-yellow-100 text-yellow-800", display: "On Duty"       },
-  Unknown: { label: "?",   color: "bg-gray-100 text-gray-400",     display: "Unknown"       },
-  // lowercase + alternate aliases from API
-  cl:      { label: "CL",  color: "bg-purple-100 text-purple-800", display: "Casual Leave"  },
-  ml:      { label: "ML",  color: "bg-pink-100 text-pink-800",     display: "Medical Leave" },
-  Onduty:  { label: "OD",  color: "bg-yellow-100 text-yellow-800", display: "On Duty"       },
+  Present: { label: "P", color: "bg-green-100 text-green-800", display: "Present" },
+  Absent: { label: "A", color: "bg-red-100 text-red-800", display: "Absent" },
+  Holiday: { label: "H", color: "bg-blue-100 text-blue-800", display: "Holiday" },
+  Off: { label: "OFF", color: "bg-gray-200 text-gray-600", display: "Week Off" },
+
+  CL: { label: "CL", color: "bg-purple-100 text-purple-800", display: "Casual Leave" },
+  ML: { label: "ML", color: "bg-pink-100 text-pink-800", display: "Medical Leave" },
+  OD: { label: "OD", color: "bg-yellow-100 text-yellow-800", display: "On Duty" },
+
+  Unknown: { label: "?", color: "bg-gray-100 text-gray-400", display: "Unknown" },
+
+  // aliases
+  cl: { label: "CL", color: "bg-purple-100 text-purple-800", display: "Casual Leave" },
+  ml: { label: "ML", color: "bg-pink-100 text-pink-800", display: "Medical Leave" },
+  Onduty: { label: "OD", color: "bg-yellow-100 text-yellow-800", display: "On Duty" },
+
+  // half-day combinations
+  "Present:Absent": {
+    label: "P/A",
+    color: "bg-orange-100 text-orange-800",
+    display: "Present / Absent",
+  },
+
+  "Absent:Present": {
+    label: "A/P",
+    color: "bg-orange-100 text-orange-800",
+    display: "Absent / Present",
+  },
+
+  "Present:cl": {
+    label: "P/CL",
+    color: "bg-cyan-100 text-cyan-800",
+    display: "Present / Casual Leave",
+  },
+
+  "cl:Present": {
+    label: "CL/P",
+    color: "bg-cyan-100 text-cyan-800",
+    display: "Casual Leave / Present",
+  },
+
+  "Present:ml": {
+    label: "P/ML",
+    color: "bg-pink-100 text-pink-800",
+    display: "Present / Medical Leave",
+  },
+
+  "ml:Present": {
+    label: "ML/P",
+    color: "bg-pink-100 text-pink-800",
+    display: "Medical Leave / Present",
+  },
+
+  "Absent:cl": {
+    label: "A/CL",
+    color: "bg-red-100 text-red-800",
+    display: "Absent / Casual Leave",
+  },
+
+  "cl:Absent": {
+    label: "CL/A",
+    color: "bg-red-100 text-red-800",
+    display: "Casual Leave / Absent",
+  },
+
+  "Absent:ml": {
+    label: "A/ML",
+    color: "bg-red-100 text-red-800",
+    display: "Absent / Medical Leave",
+  },
+
+  "ml:Absent": {
+    label: "ML/A",
+    color: "bg-red-100 text-red-800",
+    display: "Medical Leave / Absent",
+  },
+
+  // permission combinations
+  "PR-Present:Present": {
+    label: "PR-P",
+    color: "bg-green-100 text-green-800",
+    display: "Permission",
+  },
+
+  "Present:Present-PR": {
+    label: "P-PR",
+    color: "bg-green-100 text-green-800",
+    display: "Present + Permission",
+  },
+
+  "PR-Present:Absent": {
+    label: "PR-A",
+    color: "bg-orange-100 text-orange-800",
+    display: "Permission + Absent",
+  },
+
+  "Absent:Present-PR": {
+    label: "A-PR",
+    color: "bg-orange-100 text-orange-800",
+    display: "Absent + Permission",
+  },
+
+  "CL(O)": {
+    label: "CL(O)",
+    color: "bg-purple-100 text-purple-800",
+    display: "Casual Leave Opening",
+  },
 };
+
 
 const LEGEND_ENTRIES = [
   { key: "Present", ...STATUS_MAP.Present },
@@ -30,9 +126,10 @@ const LEGEND_ENTRIES = [
   { key: "Off",     ...STATUS_MAP.Off     },
   { key: "Holiday", ...STATUS_MAP.Holiday },
   { key: "Unknown", ...STATUS_MAP.Unknown },
+  { key: "PR-Present:Present", ...STATUS_MAP["PR-Present:Present"] },
 ];
 
-const TOTAL_KEYS = ["Present", "Absent", "CL", "ML", "OD", "Off", "Holiday", "Unknown"];
+const TOTAL_KEYS = ["Total","Present", "Absent", "CL", "ML", "OD", "Off", "Holiday", "Unknown", "Permission"];
 
 /* ─── Derive location from employeeId prefix ─── */
 const getLocation = (employeeId) => {
@@ -42,14 +139,14 @@ const getLocation = (employeeId) => {
   return "Unknown";
 };
 
-/* ─── Normalize status key to canonical form ─── */
-const normalizeStatus = (status) => {
-  if (!status) return null;
-  if (status === "cl" || status === "CL") return "CL";
-  if (status === "ml" || status === "ML") return "ML";
-  if (status === "Onduty" || status === "OD") return "OD";
-  return status;
-};
+// /* ─── Normalize status key to canonical form ─── */
+// const normalizeStatus = (status) => {
+//   if (!status) return null;
+//   if (status === "cl" || status === "CL") return "CL";
+//   if (status === "ml" || status === "ML") return "ML";
+//   if (status === "Onduty" || status === "OD") return "OD";
+//   return status;
+// };
 
 const AttendanceMuster = () => {
   const [month, setMonth]         = useState(format(new Date(), "yyyy-MM"));
@@ -164,18 +261,105 @@ useEffect(() => {
   }
 };
 
-  /* ─── Summary bar totals ─── */
-  const summary = useMemo(() => {
-    const totals = { Present: 0, Absent: 0, CL: 0, ML: 0, OD: 0, Off: 0, Holiday: 0, Unknown: 0 };
-    filtered.forEach(emp =>
-      emp.attendanceHistory?.forEach(a => {
-        const key = normalizeStatus(a.status);
-        if (key && totals[key] !== undefined) totals[key]++;
-      })
-    );
-    return totals;
-  }, [filtered]);
+ const summary = useMemo(() => {
+  const totals = {
+    Present: 0,
+    Absent: 0,
+    CL: 0,
+    ML: 0,
+    OD: 0,
+    Off: 0,
+    Holiday: 0,
+    Unknown: 0,
+    Permission: 0
+  };
 
+  filtered.forEach((emp) => {
+    emp.attendanceHistory?.forEach((a) => {
+      switch (a.status) {
+        case "Present":
+          totals.Present += 1;
+          break;
+
+        case "Absent":
+          totals.Absent += 1;
+          break;
+
+        case "Present:Absent":
+        case "Absent:Present":
+          totals.Present += 0.5;
+          totals.Absent += 0.5;
+          break;
+
+        case "Present:cl":
+        case "cl:Present":
+          totals.Present += 0.5;
+          totals.CL += 0.5;
+          break;
+
+        case "Present:ml":
+        case "ml:Present":
+          totals.Present += 0.5;
+          totals.ML += 0.5;
+          break;
+
+        case "Absent:cl":
+        case "cl:Absent":
+          totals.Absent += 0.5;
+          totals.CL += 0.5;
+          break;
+
+        case "Absent:ml":
+        case "ml:Absent":
+          totals.Absent += 0.5;
+          totals.ML += 0.5;
+          break;
+
+        case "PR-Present:Present":
+        case "Present:Present-PR":
+          totals.Present += 1;
+          totals.Permission += 1;
+          break;
+
+        case "PR-Present:Absent":
+        case "Absent:Present-PR":
+          totals.Present += 0.5;
+          totals.Permission += 1;
+          totals.Absent += 0.5;
+          break;
+
+        case "CL":
+        case "cl":
+        case "CL(O)":
+          totals.CL += 1;
+          break;
+
+        case "ML":
+        case "ml":
+          totals.ML += 1;
+          break;
+
+        case "OD":
+        case "Onduty":
+          totals.OD += 1;
+          break;
+
+        case "Holiday":
+          totals.Holiday += 1;
+          break;
+
+        case "Off":
+          totals.Off += 1;
+          break;
+
+        default:
+          totals.Unknown += 1;
+      }
+    });
+  });
+
+  return totals;
+}, [filtered]);
   /* ─── Sort toggle ─── */
   const toggleSort = (field) => {
     if (sortField === field) {
@@ -247,7 +431,6 @@ useEffect(() => {
 
   {/* 📅 Month */}
   <div className="relative">
-    <Calendar className="absolute left-3 top-2.5 text-gray-400 " size={16} />
     <input
       type="month"
       value={month}
@@ -294,7 +477,7 @@ useEffect(() => {
 
       {/* ─── Summary bar ─── */}
       {!loading && filtered.length > 0 && (
-        <div className="flex flex-wrap gap-5 bg-gray-50 border rounded-lg px-4 py-2.5 text-sm">
+        <div className="flex flex-wrap gap-5 bg-gray-50  shadow-sm rounded-lg px-4 py-2.5 text-sm">
           <span className="text-gray-500 font-medium">Summary:</span>
           <span className="text-green-700 font-medium">P: {summary.Present}</span>
           <span className="text-red-600 font-medium">A: {summary.Absent}</span>
@@ -304,6 +487,7 @@ useEffect(() => {
           <span className="text-gray-500">OFF: {summary.Off}</span>
           <span className="text-blue-600">H: {summary.Holiday}</span>
           <span className="text-gray-400">?: {summary.Unknown}</span>
+          <span className="text-green-800">PR: {summary.Permission}</span>
         </div>
       )}
 
@@ -322,7 +506,7 @@ useEffect(() => {
       )}
 
       {/* ─── Table ─── */}
-      <div className="overflow-x-auto border rounded-lg">
+      <div className="overflow-x-auto border border-gray-200 rounded-lg">
         <table className="min-w-max text-sm border-collapse">
 
           <thead className="bg-gray-100 sticky top-0 z-20">
@@ -423,13 +607,103 @@ useEffect(() => {
             {!loading && filtered.map(emp => {
 
               const map    = {};
-              const totals = { Present: 0, Absent: 0, CL: 0, ML: 0, OD: 0, Off: 0, Holiday: 0, Unknown: 0 };
+              const totals = {Total: 0, Present: 0, Absent: 0, CL: 0, ML: 0, OD: 0, Off: 0, Holiday: 0, Unknown: 0, Permission: 0 };
 
-              emp.attendanceHistory?.forEach(a => {
-                map[a.date] = a.status;
-                const key = normalizeStatus(a.status);
-                if (key && totals[key] !== undefined) totals[key]++;
-              });
+             emp.attendanceHistory?.forEach((a) => {
+  map[a.date] = a.status;
+
+  switch (a.status) {
+    case "Present":
+      totals.Present += 1;
+      totals.Total += 1;
+      break;
+
+    case "Absent":
+      totals.Absent += 1;
+      break;
+
+    case "Present:Absent":
+    case "Absent:Present":
+      totals.Present += 0.5;
+      totals.Absent += 0.5;
+      totals.Total += 0.5;
+      break;
+
+    case "Present:cl":
+    case "cl:Present":
+      totals.Present += 0.5;
+      totals.CL += 0.5;
+      totals.Total += 1;
+      break;
+
+    case "Present:ml":
+    case "ml:Present":
+      totals.Present += 0.5;
+      totals.ML += 0.5;
+      totals.Total += 1;
+      break;
+
+    case "Absent:cl":
+    case "cl:Absent":
+      totals.Absent += 0.5;
+      totals.CL += 0.5;
+      totals.Total += 0.5;
+      break;
+
+    case "Absent:ml":
+    case "ml:Absent":
+      totals.Absent += 0.5;
+      totals.ML += 0.5;
+      totals.Total += 0.5;
+      break;
+
+    case "PR-Present:Present":
+    case "Present:Present-PR":
+      totals.Present += 1;
+      totals.Permission += 1;
+      totals.Total += 1;
+      break;
+
+    case "PR-Present:Absent":
+    case "Absent:Present-PR":
+      totals.Present += 0.5;
+      totals.Absent += 0.5;
+      totals.Permission += 1;
+      totals.Total += 0.5;
+      break;
+
+    case "CL":
+    case "cl":
+    case "CL(O)":
+      totals.CL += 1;
+      totals.Total += 1;
+      break;
+
+    case "ML":
+    case "ml":
+      totals.ML += 1;
+      totals.Total += 1;
+      break;
+
+    case "OD":
+    case "Onduty":
+      totals.OD += 1;
+      totals.Total += 1;
+      break;
+
+    case "Holiday":
+      totals.Holiday += 1;
+      totals.Total += 1;
+      break;
+
+    case "Off":
+      totals.Off += 1;
+      break;
+
+    default:
+      totals.Unknown += 1;
+  }
+});
 
               // Low attendance highlight: present < 50% of working days
               const workingDays  = days.length - totals.Off - totals.Holiday;
@@ -490,6 +764,7 @@ useEffect(() => {
                   })}
 
                   {/* Totals */}
+                  <td className="text-center text-xs font-semibold text-gray-600 px-2">{totals.Total}</td>
                   <td className="text-center text-xs font-semibold text-green-700 px-2">{totals.Present}</td>
                   <td className="text-center text-xs font-semibold text-red-600 px-2">{totals.Absent}</td>
                   <td className="text-center text-xs text-purple-700 px-2">{totals.CL}</td>
@@ -498,6 +773,7 @@ useEffect(() => {
                   <td className="text-center text-xs text-gray-500 px-2">{totals.Off}</td>
                   <td className="text-center text-xs text-blue-600 px-2">{totals.Holiday}</td>
                   <td className="text-center text-xs text-gray-400 px-2">{totals.Unknown}</td>
+                  <td className="text-center text-xs text-green-800 px-2">{totals.Permission}</td>
 
                 </tr>
               );
