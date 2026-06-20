@@ -18,6 +18,7 @@ export const STATUS_MAP = {
   Absent: { label: "A", color: "#FBA39D", type: "Absent" },
   Off: { label: "OFF", color: "#F7F7F7", type: "Leave" },
   cl: { label: "Casual Leave", color: "#CEF1FD", type: "Leave" },
+   CL: { label: "CL Override", color: "#CEF1FD", type: "Leave" },
   ml: { label: "Medical Leave", color: "#79ADDC", type: "Leave" },
   Onduty: { label: "OD", color: "#E9F0DB", type: "Leave" },
   Holiday: { label: "H", color: "#0ea5e9", type: "Leave" },
