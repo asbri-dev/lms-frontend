@@ -29,6 +29,17 @@ const STATUS_MAP = {
     color: "bg-orange-100 text-orange-800",
     display: "Present / Absent",
   },
+  "Present(O):Present":
+   {
+    label: "P",
+    color: "bg-green-100 text-green-800",
+    display: "Present (Opening) / Present",
+  },
+  "Present:Present(O)": {
+    label: "P",
+    color: "bg-green-100 text-green-800",
+    display: "Present / Present (Opening)",
+  },
 
   "Absent:Present": {
     label: "A/P",
@@ -239,27 +250,50 @@ useEffect(() => {
 
     return result;
   }, [data, search, department, location, sortField, sortDir]);
+  const [exporting, setExporting] = useState(false);
 
-
- const exportAttendanceExcel = async (fromdate, todate, location) => {
+  const exportAttendanceExcel = async (fromdate, todate, location) => {
   try {
-    const res = await fetch(
+    setExporting(true);
+    const response = await fetch(
       `${API_BASE_URL}/downloadAttendanceMusterExcel?fromDate=${fromdate}&toDate=${todate}&collegeLocation=${location}`,
       {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       }
     );
 
-    if (res.status === 200) {
-      toast.success("C:/Downloads/Attendance_Muster");
-    } else {
-      toast.error("Failed to export attendance muster.");
+    if (!response.ok) {
+      throw new Error("Failed to download Excel");
     }
+
+    const blob = await response.blob();
+
+    const url = window.URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "Attendance_Muster.xlsx";
+
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    window.URL.revokeObjectURL(url);
+
+    setExporting(false);
+    toast.success("Attendance Muster Excel downloaded successfully");
+
   } catch (error) {
     console.error(error);
-    toast.error("Something went wrong!");
+    toast.error("Failed to download Attendance Muster Excel");
+  }finally {
+    setExporting(false);
   }
+  
 };
+
 
  const summary = useMemo(() => {
   const totals = {
@@ -289,6 +323,11 @@ useEffect(() => {
         case "Absent:Present":
           totals.Present += 0.5;
           totals.Absent += 0.5;
+          break;
+
+        case "Present(O):Present":
+        case "Present:Present(O)":
+          totals.Present += 1;
           break;
 
         case "Present:cl":
@@ -451,7 +490,8 @@ useEffect(() => {
                disabled:opacity-50 disabled:cursor-not-allowed"
   >
     <Download size={16} />
-    Export
+     {exporting ? "Exporting..." : "Export"}
+    
   </button>
 
   {/* 📊 Result count */}

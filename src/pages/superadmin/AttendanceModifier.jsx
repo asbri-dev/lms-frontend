@@ -4,9 +4,6 @@ import toast from "react-hot-toast";
 import { API_BASE_URL } from "../../config/api";
 
 
-
-
-
 // ─── Status config ───────────────────────────────────────────────────────────
 const STATUS_OPTIONS = [
   "Present", "Absent", "CL", "ML", "OD", "Holiday", "Off", "Unknown",
@@ -23,6 +20,22 @@ const STATUS_STYLE = {
   Unknown:   { bg: "#fdf4ff", color: "#86198f", dot: "#a21caf" },
   default:   { bg: "#f1f5f9", color: "#475569", dot: "#64748b" },
 };
+
+const backendStatusMap = {
+  Cl: "cl(o)",
+  ML: "ml(o)",
+  OD: "od(o)",
+};
+  const normalizeStatus = (status) => {
+    if (!status) return null;
+    if (status === "cl" || status === "CL") return "CL";
+    if(status==="Absent:Present" || status==="Present:Absent") return "Unknown";
+    if (status === "ml" || status === "ML") return "ML";
+    if (status === "Onduty" || status === "OD") return "OD";
+    if (status === "holiday" || status === "Holiday") return "Holiday";
+    return status;
+  };
+
 
 const getStatusStyle = (status) => {
   if (!status) return STATUS_STYLE.default;
@@ -63,6 +76,139 @@ const getDayName = (dateStr) => {
   const d = new Date(parts[2], months[parts[1]], parseInt(parts[0]));
   return d.toLocaleDateString("en-US", { weekday: "short" });
 };
+
+// ─── ReasonModal ─────────────────────────────────────────────────────────────
+function ReasonModal({ date, empName, onConfirm, onCancel }) {
+  const [reason, setReason] = useState("");
+  const trimmed = reason.trim();
+
+  // Close on Escape
+  useEffect(() => {
+    const onKey = (e) => { if (e.key === "Escape") onCancel(); };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onCancel]);
+
+  return (
+    /* Backdrop */
+    <div
+      onClick={(e) => { if (e.target === e.currentTarget) onCancel(); }}
+      style={{
+        position: "fixed", inset: 0, zIndex: 1000,
+        background: "rgba(15,23,42,0.45)",
+        display: "flex", alignItems: "center", justifyContent: "center",
+        backdropFilter: "blur(2px)",
+      }}
+    >
+      {/* Card */}
+      <div style={{
+        width: 420, background: "white", borderRadius: 16,
+        boxShadow: "0 24px 60px rgba(0,0,0,0.18)",
+        overflow: "hidden",
+        animation: "modalIn 0.18s ease",
+      }}>
+        {/* Header */}
+        <div style={{
+          padding: "18px 22px 14px",
+          borderBottom: "1px solid #f1f5f9",
+          display: "flex", alignItems: "flex-start", gap: 12,
+        }}>
+          <div style={{
+            width: 36, height: 36, borderRadius: 10, flexShrink: 0,
+            background: "linear-gradient(135deg,#fef3c7,#fde68a)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+          }}>
+            {/* Pencil icon */}
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+              stroke="#d97706" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+            </svg>
+          </div>
+          <div>
+            <div style={{ fontSize: 15, fontWeight: 700, color: "#1e293b" }}>
+              Reason for Override
+            </div>
+            <div style={{ fontSize: 12, color: "#94a3b8", marginTop: 2 }}>
+              {empName} &mdash; {date}
+            </div>
+          </div>
+        </div>
+
+        {/* Body */}
+        <div style={{ padding: "18px 22px" }}>
+          <label style={{
+            display: "block", fontSize: 11, fontWeight: 700,
+            color: "#64748b", textTransform: "uppercase",
+            letterSpacing: 0.6, marginBottom: 8,
+          }}>
+            Reason <span style={{ color: "#ef4444" }}>*</span>
+          </label>
+          <textarea
+            autoFocus
+            placeholder="e.g. Biometric failure, duty reassignment, manual correction after verification…"
+            value={reason}
+            onChange={(e) => setReason(e.target.value)}
+            maxLength={300}
+            rows={4}
+            style={{
+              width: "100%", padding: "10px 12px",
+              borderRadius: 10, resize: "vertical",
+              border: "1.5px solid #e2e8f0",
+              fontSize: 13, color: "#334155",
+              fontFamily: "'DM Sans','Segoe UI',sans-serif",
+              outline: "none", lineHeight: 1.5,
+              transition: "border-color 0.15s",
+              boxSizing: "border-box",
+            }}
+            onFocus={(e) => (e.target.style.borderColor = "#6366f1")}
+            onBlur={(e)  => (e.target.style.borderColor = "#e2e8f0")}
+          />
+          <div style={{
+            fontSize: 11, color: "#cbd5e1", textAlign: "right", marginTop: 4,
+          }}>
+            {reason.length}/300
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div style={{
+          padding: "0 22px 18px",
+          display: "flex", gap: 10, justifyContent: "flex-end",
+        }}>
+          <button
+            onClick={onCancel}
+            style={{
+              padding: "8px 20px", borderRadius: 8,
+              border: "1.5px solid #e2e8f0",
+              background: "white", color: "#64748b",
+              fontSize: 13, fontWeight: 600, cursor: "pointer",
+              transition: "all 0.15s",
+            }}
+            onMouseEnter={(e) => (e.target.style.background = "#f8fafc")}
+            onMouseLeave={(e) => (e.target.style.background = "white")}
+          >
+            Cancel
+          </button>
+          <button
+            onClick={() => trimmed && onConfirm(trimmed)}
+            disabled={!trimmed}
+            style={{
+              padding: "8px 22px", borderRadius: 8, border: "none",
+              background: trimmed ? "#6366f1" : "#e2e8f0",
+              color: trimmed ? "white" : "#94a3b8",
+              fontSize: 13, fontWeight: 600,
+              cursor: trimmed ? "pointer" : "not-allowed",
+              transition: "all 0.15s",
+            }}
+          >
+            Confirm Override
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
@@ -160,6 +306,7 @@ function EmployeeCard({ emp, isAdmin, isSelected, onClick }) {
   );
 }
 
+
 function StatusBadge({ status }) {
   const style = getStatusStyle(status);
   return (
@@ -177,6 +324,7 @@ function StatusBadge({ status }) {
     </span>
   );
 }
+
 
 function ToggleSwitch({ value, onChange, disabled }) {
   return (
@@ -202,8 +350,9 @@ function ToggleSwitch({ value, onChange, disabled }) {
   );
 }
 
+// ─── AttendanceRow ────────────────────────────────────────────────────────────
 function AttendanceRow({ record, empName, empId, onSave, isSaving }) {
-   const { user } = useAuth();
+  const { user } = useAuth();
   const locked = isLocked(record.AttendanceDetails?.status);
   const originalStatus = record.AttendanceDetails?.status || "";
   const originalS1 = record.AttendanceDetails?.sessionOne;
@@ -212,25 +361,53 @@ function AttendanceRow({ record, empName, empId, onSave, isSaving }) {
   const toBoolean = (val) => {
     if (typeof val === "boolean") return val;
     const s = (val || "").toLowerCase();
-    return s === "present" || s === "pr-present" || s === "true";
+    return s === "present" || s === "pr-present" || s === "true"|| s==="Present(O)".toLowerCase();
   };
 
   const [s1, setS1] = useState(toBoolean(originalS1));
   const [s2, setS2] = useState(toBoolean(originalS2));
-  const [status, setStatus] = useState(originalStatus);
+ const displayStatus = (status) => {
+  const map = {
+    "cl(o)": "CL",
+    "ml(o)": "ML",
+    "od(o)": "OD",
+    "PR-Present:Present": "Present",
+    "Present":"PR-Present:Present"
+  };
+
+  return map[status?.toLowerCase()] || status;
+};
+
+const [status, setStatus] = useState(
+  displayStatus(originalStatus)
+);
+  const [s1Changed, setS1Changed] = useState(false);
+  const [s2Changed, setS2Changed] = useState(false);
+
+  // ── NEW: reason modal state ───────────────────────────────────────────────
+  const [showReasonModal, setShowReasonModal] = useState(false);
 
   const isDirty = s1 !== toBoolean(originalS1) ||
     s2 !== toBoolean(originalS2) ||
     status !== originalStatus;
 
-  const handleSave = async () => {
+  // Called when user clicks "Save" → open modal
+  const handleSaveClick = () => {
+    if (!isDirty || isSaving) return;
+    setShowReasonModal(true);
+  };
+
+  // Called when modal is confirmed with a reason
+  const handleReasonConfirm = async (reason) => {
+    setShowReasonModal(false);
     await onSave({
-      superAdminEmpId :user.employeeId,
+      superAdminEmpId: user.employeeId,
       empId,
       date: record.Date,
-      sessionOne: s1,
-      sessionTwo: s2,
-      status,
+      sessionOne: s1Changed ? s1 : false,
+      sessionTwo: s2Changed ? s2 : false,
+     status: backendStatusMap[status] || status,
+      reason, // ← included in payload
     });
   };
 
@@ -240,140 +417,164 @@ function AttendanceRow({ record, empName, empId, onSave, isSaving }) {
     setStatus(originalStatus);
   };
 
+
+
   const dayName = getDayName(record.Date);
   const isWeekend = dayName === "Sat" || dayName === "Sun";
 
   return (
-    <tr style={{
-      background: isDirty
-        ? "linear-gradient(90deg,#fffbeb 0%,#fefce8 100%)"
-        : locked
-          ? "#f8fafc"
-          : "white",
-      transition: "background 0.2s",
-      borderBottom: "1px solid #f1f5f9",
-    }}>
-      {/* Date */}
-      <td style={{ padding: "10px 14px", whiteSpace: "nowrap" }}>
-        <div style={{ fontSize: 13, fontWeight: 600, color: "#1e293b" }}>
-          {record.Date}
-        </div>
-        <div style={{
-          fontSize: 11, color: isWeekend ? "#f59e0b" : "#94a3b8",
-          fontWeight: isWeekend ? 600 : 400,
-        }}>
-          {dayName}
-        </div>
-      </td>
+    <>
+      {/* Reason modal — rendered at row level, portals above everything */}
+      {showReasonModal && (
+        <tr style={{ display: "contents" }}>
+          <td style={{ display: "contents" }}>
+            <ReasonModal
+              date={record.Date}
+              empName={empName}
+              onConfirm={handleReasonConfirm}
+              onCancel={() => setShowReasonModal(false)}
+            />
+          </td>
+        </tr>
+      )}
 
-      {/* Name */}
-      <td style={{ padding: "10px 14px" }}>
-        <div style={{ fontSize: 13, fontWeight: 600, color: "#334155" }}>
-          {empName}
-        </div>
-        <div style={{ fontSize: 11, color: "#94a3b8" }}>{empId}</div>
-      </td>
+      <tr style={{
+        background: isDirty
+          ? "linear-gradient(90deg,#fffbeb 0%,#fefce8 100%)"
+          : locked
+            ? "#f8fafc"
+            : "white",
+        transition: "background 0.2s",
+        borderBottom: "1px solid #f1f5f9",
+      }}>
+        {/* Date */}
+        <td style={{ padding: "10px 14px", whiteSpace: "nowrap" }}>
+          <div style={{ fontSize: 13, fontWeight: 600, color: "#1e293b" }}>
+            {record.Date}
+          </div>
+          <div style={{
+            fontSize: 11, color: isWeekend ? "#f59e0b" : "#94a3b8",
+            fontWeight: isWeekend ? 600 : 400,
+          }}>
+            {dayName}
+          </div>
+        </td>
 
-      {/* Punch In / Out */}
-      <td style={{ padding: "10px 14px" }}>
-  <div style={{ display: "flex", gap: "10px", fontSize: 12, color: "#475569" }}>
-    <span>{record.AttendanceDetails?.punchIn || "—"}</span><p>/</p>
-    <span>{record.AttendanceDetails?.punchOut || "—"}</span>
-  </div>
-</td>
+        {/* Name */}
+        <td style={{ padding: "10px 14px" }}>
+          <div style={{ fontSize: 13, fontWeight: 600, color: "#334155" }}>
+            {empName}
+          </div>
+          <div style={{ fontSize: 11, color: "#94a3b8" }}>{empId}</div>
+        </td>
 
-      {/* Work Duration */}
-      <td style={{ padding: "10px 14px" }}>
-        <span style={{
-          fontSize: 12, color: "#475569",
-          fontVariantNumeric: "tabular-nums",
-        }}>
-          {record.AttendanceDetails?.workDuration || "—"}
-        </span>
-      </td>
+        {/* Punch In / Out */}
+        <td style={{ padding: "10px 14px" }}>
+          <div style={{ display: "flex", gap: "10px", fontSize: 12, color: "#475569" }}>
+            <span>{record.AttendanceDetails?.punchIn || "—"}</span><p>/</p>
+            <span>{record.AttendanceDetails?.punchOut || "—"}</span>
+          </div>
+        </td>
 
-      {/* Session 1 */}
-      <td style={{ padding: "10px 14px" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <ToggleSwitch value={s1} onChange={(v) => { setS1(v); }} disabled={locked} />
-          <span style={{ fontSize: 11, color: s1 ? "#16a34a" : "#94a3b8", fontWeight: 600 }}>
-            {s1 ? "Present" : "Absent"}
+        {/* Work Duration */}
+        <td style={{ padding: "10px 14px" }}>
+          <span style={{
+            fontSize: 12, color: "#475569",
+            fontVariantNumeric: "tabular-nums",
+          }}>
+            {record.AttendanceDetails?.workDuration || "—"}
           </span>
-        </div>
-      </td>
+        </td>
 
-      {/* Session 2 */}
-      <td style={{ padding: "10px 14px" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <ToggleSwitch value={s2} onChange={(v) => { setS2(v); }} disabled={locked} />
-          <span style={{ fontSize: 11, color: s2 ? "#16a34a" : "#94a3b8", fontWeight: 600 }}>
-            {s2 ? "Present" : "Absent"}
-          </span>
-        </div>
-      </td>
+        {/* Session 1 */}
+        <td style={{ padding: "10px 14px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <ToggleSwitch value={s1} onChange={(v) => {
+  setS1(v);
+  setS1Changed(true);
+}} disabled={locked} />
+            <span style={{ fontSize: 11, color: s1 ? "#16a34a" : "#94a3b8", fontWeight: 600 }}>
+              {s1 ? "Present" : "Absent"}
+            </span>
+          </div>
+        </td>
 
-      {/* Status */}
-      <td style={{ padding: "10px 14px" }}>
-        {locked ? (
-          <StatusBadge status={status} />
-        ) : (
-          <select
-            value={status}
-            onChange={(e) => setStatus(e.target.value)}
-            style={{
-              padding: "5px 10px", borderRadius: 8,
-              border: "1.5px solid #e2e8f0",
-              fontSize: 12, fontWeight: 600,
-              background: getStatusStyle(status).bg,
-              color: getStatusStyle(status).color,
-              cursor: "pointer", outline: "none",
-              transition: "border-color 0.15s",
-            }}
-          >
-            {STATUS_OPTIONS.map((opt) => (
-              <option key={opt} value={opt}>{opt}</option>
-            ))}
-          </select>
-        )}
-      </td>
+        {/* Session 2 */}
+        <td style={{ padding: "10px 14px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <ToggleSwitch value={s2} onChange={(v) => {
+  setS2(v);
+  setS2Changed(true);
+}} disabled={locked} />
+            <span style={{ fontSize: 11, color: s2 ? "#16a34a" : "#94a3b8", fontWeight: 600 }}>
+              {s2 ? "Present" : "Absent"}
+            </span>
+          </div>
+        </td>
 
-      {/* Actions */}
-      <td style={{ padding: "10px 14px" }}>
-        {locked ? (
-          <span style={{ fontSize: 11, color: "#cbd5e1" }}>Locked</span>
-        ) : (
-          <div style={{ display: "flex", gap: 6 }}>
-            <button
-              onClick={handleSave}
-              disabled={!isDirty || isSaving}
+        {/* Status */}
+        <td style={{ padding: "10px 14px" }}>
+          {locked ? (
+            <StatusBadge status={normalizeStatus(status)} />
+          ) : (
+            <select
+              value={normalizeStatus(status)}
+              onChange={(e) => setStatus(e.target.value)}
               style={{
-                padding: "5px 14px", borderRadius: 7, border: "none",
-                background: isDirty ? "#6366f1" : "#e2e8f0",
-                color: isDirty ? "white" : "#94a3b8",
+                padding: "5px 10px", borderRadius: 8,
+                border: "1.5px solid #e2e8f0",
                 fontSize: 12, fontWeight: 600,
-                cursor: isDirty && !isSaving ? "pointer" : "not-allowed",
-                transition: "all 0.15s",
+                background: getStatusStyle(normalizeStatus(status)).bg,
+                color: getStatusStyle(normalizeStatus(status)).color,
+                cursor: "pointer", outline: "none",
+                transition: "border-color 0.15s",
               }}
             >
-              {isSaving ? "Saving…" : "Save"}
-            </button>
-            {isDirty && (
+              {STATUS_OPTIONS.map((opt) => (
+                <option key={opt} value={opt}>{opt}</option>
+              ))}
+            </select>
+          )}
+        </td>
+
+        {/* Actions */}
+        <td style={{ padding: "10px 14px" }}>
+          {locked ? (
+            <span style={{ fontSize: 11, color: "#cbd5e1" }}>Locked</span>
+          ) : (
+            <div style={{ display: "flex", gap: 6 }}>
               <button
-                onClick={handleReset}
+                onClick={handleSaveClick}
+                disabled={!isDirty || isSaving}
                 style={{
-                  padding: "5px 10px", borderRadius: 7,
-                  border: "1.5px solid #e2e8f0",
-                  background: "white", color: "#64748b",
-                  fontSize: 12, fontWeight: 600, cursor: "pointer",
+                  padding: "5px 14px", borderRadius: 7, border: "none",
+                  background: isDirty ? "#6366f1" : "#e2e8f0",
+                  color: isDirty ? "white" : "#94a3b8",
+                  fontSize: 12, fontWeight: 600,
+                  cursor: isDirty && !isSaving ? "pointer" : "not-allowed",
+                  transition: "all 0.15s",
                 }}
               >
-                ✕
+                {isSaving ? "Saving…" : "Save"}
               </button>
-            )}
-          </div>
-        )}
-      </td>
-    </tr>
+              {isDirty && (
+                <button
+                  onClick={handleReset}
+                  style={{
+                    padding: "5px 10px", borderRadius: 7,
+                    border: "1.5px solid #e2e8f0",
+                    background: "white", color: "#64748b",
+                    fontSize: 12, fontWeight: 600, cursor: "pointer",
+                  }}
+                >
+                  ✕
+                </button>
+              )}
+            </div>
+          )}
+        </td>
+      </tr>
+    </>
   );
 }
 
@@ -393,7 +594,10 @@ export default function AttendanceModifier() {
   // Date range
   const [fromDate, setFromDate] = useState(getDefaultFromDate());
   const [toDate, setToDate] = useState(getDefaultToDate());
-  const [selectedMonth, setSelectedMonth] = useState(() => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}`; });
+  const [selectedMonth, setSelectedMonth] = useState(() => {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}`;
+  });
 
   // Attendance records
   const [records, setRecords] = useState([]);
@@ -491,8 +695,7 @@ export default function AttendanceModifier() {
     if (selectedEmp) loadAttendance(selectedEmp, first, last);
   };
 
-  // ── Save override ────────────────────────────────────────────────────────
-  
+  // ── Save override (now receives reason in payload) ───────────────────────
   const handleSave = async (payload) => {
     setSavingRow(payload.date);
     try {
@@ -501,17 +704,17 @@ export default function AttendanceModifier() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
-    if (res.status === 400) { 
-    try {
-    const text = await res.text();
-    let message = text;
-    toast.error(message);//
-    }
-    catch(err) {
-      console.error(err);
-      toast.error("Failed to update");
-    }
-    }
+
+      if (res.status === 400) {
+        try {
+          const text = await res.text();
+          toast.error(text);
+        } catch (err) {
+          console.error(err);
+          toast.error("Failed to update");
+        }
+        return;
+      }
 
       if (!res.ok) {
         let msg = "Failed to update";
@@ -522,7 +725,6 @@ export default function AttendanceModifier() {
       }
 
       toast.success(`Updated ${payload.date} successfully`);
-      // Refresh records
       await loadAttendance(selectedEmp, fromDate, toDate);
     } catch (err) {
       console.error(err);
@@ -549,9 +751,9 @@ export default function AttendanceModifier() {
   const stats = useMemo(() => {
     const counts = { Present: 0, Absent: 0, CL: 0, ML: 0, OD: 0, Holiday: 0, Off: 0 };
     records.forEach((r) => {
-      const s = r.AttendanceDetails?.status || "";// "Present", "Absent", "CL", "ML", "OD", "Holiday", "Off"
-      const key = Object.keys(counts).find((k) => k.toLowerCase() === s.toLowerCase());  //
-      if (key) counts[key]++; //
+      const s = r.AttendanceDetails?.status || "";
+      const key = Object.keys(counts).find((k) => k.toLowerCase() === s.toLowerCase());
+      if (key) counts[key]++;
     });
     return counts;
   }, [records]);
@@ -721,7 +923,6 @@ export default function AttendanceModifier() {
                 onBlur={(e)  => (e.target.style.borderColor = "#6366f1")}
               />
             </div>
-            
 
             {/* Divider */}
             <div style={{
@@ -766,7 +967,6 @@ export default function AttendanceModifier() {
                 onBlur={(e)  => (e.target.style.borderColor = "#e2e8f0")}
               />
             </div>
-            
 
             <button
               onClick={handleLoad}
@@ -915,6 +1115,10 @@ export default function AttendanceModifier() {
 
       <style>{`
         @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes modalIn {
+          from { opacity: 0; transform: translateY(-10px) scale(0.97); }
+          to   { opacity: 1; transform: translateY(0)    scale(1);    }
+        }
         * { box-sizing: border-box; }
         ::-webkit-scrollbar { width: 5px; height: 5px; }
         ::-webkit-scrollbar-track { background: transparent; }
