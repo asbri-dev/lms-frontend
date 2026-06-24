@@ -126,57 +126,57 @@ return (
 
       {/* Title */}
      <div className="flex flex-col">
-  <h2 className="text-lg font-semibold text-gray-800">
-    Attendance Calendar
-  </h2>
+      <h2 className="text-lg font-semibold text-gray-800">
+        Attendance Calendar
+      </h2>
 
-  <span className="text-sm text-indigo-600 font-medium">
-    {currentMonth.toLocaleString("default", {
-      month: "long",
-      year: "numeric",
-    })}
-  </span>
+           <span className="text-sm text-indigo-600 font-medium">
+         {currentMonth.toLocaleString("default", {
+           month: "long",
+           year: "numeric",
+         })}
+       </span>
 
-  <p className="text-xs text-gray-400">
-    Track daily attendance
-  </p>
-</div>
+          <p className="text-xs text-gray-400">
+            Track daily attendance
+          </p>
+     </div>
 
       {/* Controls */}
-      <div className="flex items-center gap-3 bg-white px-4 py-2 rounded-xl shadow-sm border">
+      <div className="flex items-center gap-3 bg-white px-4 py-2 rounded-xl shadow-sm border border-gray-200">
 
-  <button
-  onClick={() => handleMonthChange("prev")}
-  disabled={navLock || loading}
-  className="p-2 rounded-lg hover:bg-gray-100 disabled:opacity-50"
->
-  <ChevronLeft size={18} />
-</button>
-
-  <span className="text-sm font-semibold text-gray-700">
-    {currentMonth.toLocaleString("default", { month: "long", year: "numeric" })}
-  </span>
-
- <button
-  onClick={() => handleMonthChange("next")}
-  disabled={navLock || loading}
-  className="p-2 rounded-lg hover:bg-gray-100 disabled:opacity-50"
->
-  <ChevronRight size={18} />
-</button>
-
-  <button
-  onClick={() => handleMonthChange("today")}
-  disabled={navLock || loading}
-  className="ml-2 flex items-center gap-2 px-3 py-1.5 rounded-lg 
-             bg-[#2b3c6b] text-white text-sm hover:bg-[#3f548f] 
-             disabled:opacity-50"
->
-  <CalendarDays size={16} />
-  Today
-</button>
-
-</div>
+           <button
+           onClick={() => handleMonthChange("prev")}
+           disabled={navLock || loading}
+           className="p-2 rounded-lg hover:bg-gray-100 disabled:opacity-50"
+         >
+           <ChevronLeft size={18} />
+         </button>
+         
+           <span className="text-sm font-semibold text-gray-700">
+             {currentMonth.toLocaleString("default", { month: "long", year: "numeric" })}
+           </span>
+         
+          <button
+           onClick={() => handleMonthChange("next")}
+           disabled={navLock || loading}
+           className="p-2 rounded-lg hover:bg-gray-100 disabled:opacity-50"
+         >
+           <ChevronRight size={18} />
+         </button>
+         
+           <button
+           onClick={() => handleMonthChange("today")}
+           disabled={navLock || loading}
+           className="ml-2 flex items-center gap-2 px-3 py-1.5 rounded-lg 
+                      bg-[#2b3c6b] text-white text-sm hover:bg-[#3f548f] 
+                      disabled:opacity-50"
+         >
+           <CalendarDays size={16} />
+           Today
+         </button>
+         
+         </div>
     </div>
 
 

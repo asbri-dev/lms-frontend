@@ -21,7 +21,7 @@ const AdminDonutChart = ({
   const colors =
     type === "approved"
       ? ["#22c55e", "#3b82f6", "#f97316"]
-      : ["#facc15", "#3b82f6", "#f97316"];
+      : ["#22c55e", "#3b82f6", "#f97316"];
 
   const getPercent = (value) => {
     return total === 0 ? 0 : ((value / total) * 100).toFixed(0);
