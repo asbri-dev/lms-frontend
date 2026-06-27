@@ -412,7 +412,7 @@ const [status, setStatus] = useState(
       date: record.Date,
       sessionOne: s1Changed ? s1 : false,
       sessionTwo: s2Changed ? s2 : false,
-     status: backendStatusMap[status],
+     status: backendStatusMap(status),
       reason, // ← included in payload
     });
   };
