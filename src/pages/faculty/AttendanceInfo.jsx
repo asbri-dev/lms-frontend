@@ -3,6 +3,7 @@ import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import { useAuth } from "../../auth/useAuth";
 import { API_BASE_URL } from "../../config/api";
+import { SquarePen } from "lucide-react";
 //import { Toaster } from "react-hot-toast";
 import {
   getMonthRange,
@@ -220,14 +221,23 @@ return (
           }}
 
           eventContent={(arg) => {
-            const label = arg.event.extendedProps.label;
+  const { label, isPresentOverride } = arg.event.extendedProps;
 
-            return (
-              <div className="w-full h-full flex items-center justify-center text-xs font-semibold text-gray-700">
-                {label}
-              </div>
-            );
-          }}
+  return (
+    <div className="relative w-full h-full flex items-center justify-center">
+      <span className="text-xs font-semibold text-gray-700">
+        {label}
+      </span>
+
+      {isPresentOverride && (
+        <SquarePen
+          size={15}
+          className="absolute top-0 left-0 text-grey-400"
+        />
+      )}
+    </div>
+  );
+}}
 
           dateClick={(info) => {
             setSelectedDate(info.dateStr);
@@ -365,6 +375,7 @@ return (
               { label: "Holiday", color: "#0ea5e9", short: "H" },
               { label: "OD", color: "#E9F0DB", short: "OD" },
               { label: "PR", color: "#9333ea", short: "PR" },
+            
             ].map((item, i) => (
               <div key={i} className="flex items-center gap-2 px-2 py-1 rounded-lg">
                 <div
@@ -379,6 +390,19 @@ return (
 
           </div>
         </div>
+
+        <div className="bg-white p-4 rounded-xl shadow-sm">
+  <h5 className="text-xs font-semibold text-gray-500 uppercase mb-2">
+    Icons
+  </h5>
+
+  <div className="flex items-center gap-2">
+    <SquarePen size={14} className="text-gray-600" />
+    <span className="text-gray-700 text-sm">
+       Override (O)
+    </span>
+  </div>
+</div>
 
       </div>
 

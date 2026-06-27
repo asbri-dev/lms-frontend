@@ -39,6 +39,8 @@ export const STATUS_MAP = {
   "PR-Present:Absent": { label: "PR-A", color: "#FBA39D", type: "Absent" },
   "Absent:Present-PR": { label: "A-PR", color: "#FBA39D", type: "Absent" },
   Unknown:             { label: "?", color: "#FFD199", type: "Unknown" }, 
+  "Present(O):Present":{ label: "P", color: "#D7FDF0", type: "Present" },
+  "PR-Present:Present(O)": { label: "PR-P", color: "#D7FDF0", type: "Present" },
 };
 
 /* ============================
@@ -48,6 +50,7 @@ export const transformAttendanceData = (data = []) => {
   if (!Array.isArray(data)) return [];
 
   const uniqueMap = new Map();
+ 
 
   data.forEach((item) => {
     if (item?.Date && !uniqueMap.has(item.Date)) {
@@ -60,6 +63,7 @@ export const transformAttendanceData = (data = []) => {
   const formattedDate = format(parsedDate, "yyyy-MM-dd");
 
   const details = item?.AttendanceDetails || {};
+   const isPresentOverride = details.status?.includes("(O)");
   const statusObj = STATUS_MAP[details.status] || {
     label: "",
     color: "#9ca3af",
@@ -82,6 +86,7 @@ export const transformAttendanceData = (data = []) => {
     extendedProps: {
       rawDate: item.Date,
       label: statusObj.label,
+      isPresentOverride,
       details: {
         status: details.status || "Unknown",
         sessionOne: details.sessionOne || "-",

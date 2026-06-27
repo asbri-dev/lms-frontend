@@ -371,8 +371,8 @@ function AttendanceRow({ record, empName, empId, onSave, isSaving }) {
     "cl(o)": "CL",
     "ml(o)": "ML",
     "od(o)": "OD",
-    "PR-Present:Present": "Present",
-    "Present":"PR-Present:Present"
+    "PR-Present:Present": "Present"
+    
   };
 
   return map[status?.toLowerCase()] || status;
