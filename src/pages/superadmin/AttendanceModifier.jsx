@@ -21,11 +21,17 @@ const STATUS_STYLE = {
   default:   { bg: "#f1f5f9", color: "#475569", dot: "#64748b" },
 };
 
-const backendStatusMap = {
-  Cl: "cl(o)",
-  ML: "ml(o)",
-  OD: "od(o)",
+const backendStatusMap = (status) => {
+  if (!status) return "Present";
+  if (status === "CL" || status === "cl") return "CL";
+  if (status === "ML" || status === "ml") return "ML";
+  if (status === "OD" || status === "Onduty") return "OD";
+  if (status === "Absent:Present" || status === "Present:Absent") return "Present";
+
+  return status;
 };
+
+
   const normalizeStatus = (status) => {
     if (!status) return null;
     if (status === "cl" || status === "CL") return "CL";
@@ -406,7 +412,7 @@ const [status, setStatus] = useState(
       date: record.Date,
       sessionOne: s1Changed ? s1 : false,
       sessionTwo: s2Changed ? s2 : false,
-     status: backendStatusMap[status] || status,
+     status: backendStatusMap[status],
       reason, // ← included in payload
     });
   };
