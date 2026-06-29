@@ -21,11 +21,18 @@ const STATUS_STYLE = {
   default:   { bg: "#f1f5f9", color: "#475569", dot: "#64748b" },
 };
 
-const backendStatusMap = {
-  Cl: "cl(o)",
-  ML: "ml(o)",
-  OD: "od(o)",
+const backendStatusMap = (status) => {
+  if (!status) return "Present";
+  if (status === "CL" || status === "cl") return "CL";
+  if (status === "ML" || status === "ml") return "ML";
+  if (status === "OD" || status === "Onduty") return "OD";
+  if (status === "Absent:Present" || status === "Present:Absent") return "Present";
+  if (status === "Absent:Present-PR") return "Present";
+
+  return status;
 };
+
+
   const normalizeStatus = (status) => {
     if (!status) return null;
     if (status === "cl" || status === "CL") return "CL";
@@ -45,7 +52,7 @@ const getStatusStyle = (status) => {
   return STATUS_STYLE[key] || STATUS_STYLE.default;
 };
 
-const LOCKED_STATUSES = ["off", "holiday"];
+const LOCKED_STATUSES = [ "holiday"];
 const isLocked = (status) =>
   LOCKED_STATUSES.includes((status || "").toLowerCase());
 
@@ -358,7 +365,7 @@ function AttendanceRow({ record, empName, empId, onSave, isSaving }) {
   const originalS1 = record.AttendanceDetails?.sessionOne;
   const originalS2 = record.AttendanceDetails?.sessionTwo;
 
-  const toBoolean = (val) => {
+  const toBoolean = (val) => {  //
     if (typeof val === "boolean") return val;
     const s = (val || "").toLowerCase();
     return s === "present" || s === "pr-present" || s === "true"|| s==="Present(O)".toLowerCase();
@@ -387,9 +394,10 @@ const [status, setStatus] = useState(
   // ── NEW: reason modal state ───────────────────────────────────────────────
   const [showReasonModal, setShowReasonModal] = useState(false);
 
-  const isDirty = s1 !== toBoolean(originalS1) ||
-    s2 !== toBoolean(originalS2) ||
-    status !== originalStatus;
+const isDirty =
+  s1 !== toBoolean(originalS1) ||
+  s2 !== toBoolean(originalS2) ||
+  displayStatus(status) !== displayStatus(originalStatus);
 
   // Called when user clicks "Save" → open modal
   const handleSaveClick = () => {
@@ -406,7 +414,7 @@ const [status, setStatus] = useState(
       date: record.Date,
       sessionOne: s1Changed ? s1 : false,
       sessionTwo: s2Changed ? s2 : false,
-     status: backendStatusMap[status] || status,
+     status: backendStatusMap(status),
       reason, // ← included in payload
     });
   };
@@ -438,50 +446,55 @@ const [status, setStatus] = useState(
         </tr>
       )}
 
-      <tr style={{
-        background: isDirty
-          ? "linear-gradient(90deg,#fffbeb 0%,#fefce8 100%)"
-          : locked
-            ? "#f8fafc"
-            : "white",
-        transition: "background 0.2s",
-        borderBottom: "1px solid #f1f5f9",
-      }}>
+      <tr
+        style={{
+          background: isDirty
+            ? "linear-gradient(90deg,#fffbeb 0%,#fefce8 100%)"
+            : locked
+              ? "#f8fafc"
+              : "white",
+          transition: "background 0.2s",
+          borderBottom: "1px solid #f1f5f9",
+        }}
+      >
         {/* Date */}
         <td style={{ padding: "10px 14px", whiteSpace: "nowrap" }}>
-          <div style={{ fontSize: 13, fontWeight: 600, color: "#1e293b" }}>
-            {record.Date}
-          </div>
-          <div style={{
-            fontSize: 11, color: isWeekend ? "#f59e0b" : "#94a3b8",
-            fontWeight: isWeekend ? 600 : 400,
-          }}>
+          <div style={{ fontSize: 13, fontWeight: 600, color: "#1e293b" }}>{record.Date}</div>
+          <div
+            style={{
+              fontSize: 11,
+              color: isWeekend ? "#f59e0b" : "#94a3b8",
+              fontWeight: isWeekend ? 600 : 400,
+            }}
+          >
             {dayName}
           </div>
         </td>
 
         {/* Name */}
         <td style={{ padding: "10px 14px" }}>
-          <div style={{ fontSize: 13, fontWeight: 600, color: "#334155" }}>
-            {empName}
-          </div>
+          <div style={{ fontSize: 13, fontWeight: 600, color: "#334155" }}>{empName}</div>
           <div style={{ fontSize: 11, color: "#94a3b8" }}>{empId}</div>
         </td>
 
         {/* Punch In / Out */}
         <td style={{ padding: "10px 14px" }}>
           <div style={{ display: "flex", gap: "10px", fontSize: 12, color: "#475569" }}>
-            <span>{record.AttendanceDetails?.punchIn || "—"}</span><p>/</p>
+            <span>{record.AttendanceDetails?.punchIn || "—"}</span>
+            <p>/</p>
             <span>{record.AttendanceDetails?.punchOut || "—"}</span>
           </div>
         </td>
 
         {/* Work Duration */}
         <td style={{ padding: "10px 14px" }}>
-          <span style={{
-            fontSize: 12, color: "#475569",
-            fontVariantNumeric: "tabular-nums",
-          }}>
+          <span
+            style={{
+              fontSize: 12,
+              color: "#475569",
+              fontVariantNumeric: "tabular-nums",
+            }}
+          >
             {record.AttendanceDetails?.workDuration || "—"}
           </span>
         </td>
@@ -489,10 +502,14 @@ const [status, setStatus] = useState(
         {/* Session 1 */}
         <td style={{ padding: "10px 14px" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <ToggleSwitch value={s1} onChange={(v) => {
-  setS1(v);
-  setS1Changed(true);
-}} disabled={locked} />
+            <ToggleSwitch
+              value={s1}
+              onChange={(v) => {
+                setS1(v);
+                setS1Changed(true);
+              }}
+              disabled={locked}
+            />
             <span style={{ fontSize: 11, color: s1 ? "#16a34a" : "#94a3b8", fontWeight: 600 }}>
               {s1 ? "Present" : "Absent"}
             </span>
@@ -502,10 +519,14 @@ const [status, setStatus] = useState(
         {/* Session 2 */}
         <td style={{ padding: "10px 14px" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <ToggleSwitch value={s2} onChange={(v) => {
-  setS2(v);
-  setS2Changed(true);
-}} disabled={locked} />
+            <ToggleSwitch
+              value={s2}
+              onChange={(v) => {
+                setS2(v);
+                setS2Changed(true);
+              }}
+              disabled={locked}
+            />
             <span style={{ fontSize: 11, color: s2 ? "#16a34a" : "#94a3b8", fontWeight: 600 }}>
               {s2 ? "Present" : "Absent"}
             </span>
@@ -521,17 +542,22 @@ const [status, setStatus] = useState(
               value={normalizeStatus(status)}
               onChange={(e) => setStatus(e.target.value)}
               style={{
-                padding: "5px 10px", borderRadius: 8,
+                padding: "5px 10px",
+                borderRadius: 8,
                 border: "1.5px solid #e2e8f0",
-                fontSize: 12, fontWeight: 600,
+                fontSize: 12,
+                fontWeight: 600,
                 background: getStatusStyle(normalizeStatus(status)).bg,
                 color: getStatusStyle(normalizeStatus(status)).color,
-                cursor: "pointer", outline: "none",
+                cursor: "pointer",
+                outline: "none",
                 transition: "border-color 0.15s",
               }}
             >
               {STATUS_OPTIONS.map((opt) => (
-                <option key={opt} value={opt}>{opt}</option>
+                <option key={opt} value={opt}>
+                  {opt}
+                </option>
               ))}
             </select>
           )}
@@ -547,10 +573,13 @@ const [status, setStatus] = useState(
                 onClick={handleSaveClick}
                 disabled={!isDirty || isSaving}
                 style={{
-                  padding: "5px 14px", borderRadius: 7, border: "none",
+                  padding: "5px 14px",
+                  borderRadius: 7,
+                  border: "none",
                   background: isDirty ? "#6366f1" : "#e2e8f0",
                   color: isDirty ? "white" : "#94a3b8",
-                  fontSize: 12, fontWeight: 600,
+                  fontSize: 12,
+                  fontWeight: 600,
                   cursor: isDirty && !isSaving ? "pointer" : "not-allowed",
                   transition: "all 0.15s",
                 }}
@@ -561,10 +590,14 @@ const [status, setStatus] = useState(
                 <button
                   onClick={handleReset}
                   style={{
-                    padding: "5px 10px", borderRadius: 7,
+                    padding: "5px 10px",
+                    borderRadius: 7,
                     border: "1.5px solid #e2e8f0",
-                    background: "white", color: "#64748b",
-                    fontSize: 12, fontWeight: 600, cursor: "pointer",
+                    background: "white",
+                    color: "#64748b",
+                    fontSize: 12,
+                    fontWeight: 600,
+                    cursor: "pointer",
                   }}
                 >
                   ✕
