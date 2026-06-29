@@ -40,7 +40,10 @@ export const STATUS_MAP = {
   "Absent:Present-PR": { label: "A-PR", color: "#FBA39D", type: "Absent" },
   Unknown:             { label: "?", color: "#FFD199", type: "Unknown" }, 
   "Present(O):Present":{ label: "P", color: "#D7FDF0", type: "Present" },
+  "Present:Present(O)":{ label: "P", color: "#D7FDF0", type: "Present" },
   "PR-Present:Present(O)": { label: "PR-P", color: "#D7FDF0", type: "Present" },
+  
+
 };
 
 /* ============================
