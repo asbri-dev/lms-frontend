@@ -125,6 +125,13 @@ const STATUS_MAP = {
     color: "bg-purple-100 text-purple-800",
     display: "Casual Leave Opening",
   },
+
+
+    "CL(O): Present": {
+    label: "CL(O)/P",
+    color: "bg-purple-100 text-purple-800",
+    display: "Casual Leave Opening",
+  },
 };
 
 
@@ -416,98 +423,102 @@ useEffect(() => {
 
   return (
     <div className="p-6 space-y-5">
-
       {/* ─── Controls ─── */}
-     
-<div className="flex flex-wrap items-center gap-3 bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
 
-  {/* 🔍 Search */}
-  <div className="relative">
-    <Search className="absolute left-3 top-2.5 text-gray-400" size={16} />
-    <input
-      type="text"
-      placeholder="Search name or ID..."
-      value={search}
-      onChange={(e) => setSearch(e.target.value)}
-      className="pl-9 pr-3 py-2 w-56 rounded-lg bg-gray-50 
+      <div className="flex flex-wrap items-center gap-3 bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
+        {/* 🔍 Search */}
+        <div className="relative">
+          <Search className="absolute left-3 top-2.5 text-gray-400" size={16} />
+          <input
+            type="text"
+            placeholder="Search name or ID..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="pl-9 pr-3 py-2 w-56 rounded-lg bg-gray-50 
                  border border-gray-200 text-sm
                  focus:outline-none focus:ring-2 focus:ring-[#2b3c6b]/30
                  focus:bg-white transition"
-    />
-  </div>
+          />
+        </div>
 
-  {/* 🏢 Department */}
-  <div className="relative">
-    <Building2 className="absolute left-3 top-2.5 text-gray-400" size={16} />
-    <select
-      value={department}
-      onChange={(e) => setDept(e.target.value)}
-      className="pl-9 pr-6 py-2 rounded-lg bg-gray-50 border border-gray-200 text-sm
+        {/* 🏢 Department */}
+        <div className="relative">
+          <Building2
+            className="absolute left-3 top-2.5 text-gray-400"
+            size={16}
+          />
+          <select
+            value={department}
+            onChange={(e) => setDept(e.target.value)}
+            className="pl-9 pr-6 py-2 rounded-lg bg-gray-50 border border-gray-200 text-sm
                  focus:outline-none focus:ring-2 focus:ring-[#2b3c6b]/30
                  appearance-none cursor-pointer"
-    >
-      {departments.map((d) => (
-        <option key={d}>{d}</option>
-      ))}
-    </select>
-  </div>
+          >
+            {departments.map((d) => (
+              <option key={d}>{d}</option>
+            ))}
+          </select>
+        </div>
 
-  {/* 📍 Location */}
-  <div className="relative">
-    <MapPin className="absolute left-3 top-2.5 text-gray-400 " size={16} />
-    <select
-      value={location}
-      onChange={(e) => setLocation(e.target.value)}
-      className="pl-9 pr-6 py-2 rounded-lg bg-gray-50 border border-gray-200 text-sm
+        {/* 📍 Location */}
+        <div className="relative">
+          <MapPin
+            className="absolute left-3 top-2.5 text-gray-400 "
+            size={16}
+          />
+          <select
+            value={location}
+            onChange={(e) => setLocation(e.target.value)}
+            className="pl-9 pr-6 py-2 rounded-lg bg-gray-50 border border-gray-200 text-sm
                  focus:outline-none focus:ring-2 focus:ring-[#2b3c6b]/30
                  appearance-none cursor-pointer"
-    >
-      {locations.map((l) => (
-        <option key={l}>{l}</option>
-      ))}
-    </select>
-  </div>
+          >
+            {locations.map((l) => (
+              <option key={l}>{l}</option>
+            ))}
+          </select>
+        </div>
 
-  {/* 📅 Month */}
-  <div className="relative">
-    <input
-      type="month"
-      value={month}
-      onChange={(e) => setMonth(e.target.value)}
-      className="pl-9 pr-3 py-2 rounded-lg bg-gray-50 border border-gray-200 text-sm
+        {/* 📅 Month */}
+        <div className="relative">
+          <input
+            type="month"
+            value={month}
+            onChange={(e) => setMonth(e.target.value)}
+            className="pl-9 pr-3 py-2 rounded-lg bg-gray-50 border border-gray-200 text-sm
                  focus:outline-none focus:ring-2 focus:ring-[#2b3c6b]/30"
-    />
-  </div>
+          />
+        </div>
 
-  {/* ⬇ Export */}
-  <button
-    onClick={() => exportAttendanceExcel(fromDate, endDate, location)}
-    disabled={filtered.length === 0 || loading}
-    className="flex items-center gap-2 px-4 py-2 rounded-lg 
+        {/* ⬇ Export */}
+        <button
+          onClick={() => exportAttendanceExcel(fromDate, endDate, location)}
+          disabled={filtered.length === 0 || loading}
+          className="flex items-center gap-2 px-4 py-2 rounded-lg 
                bg-gradient-to-r from-[#2b3c6b] to-[#3f548f] 
                text-white text-sm font-medium
                hover:opacity-90 transition shadow-sm
                disabled:opacity-50 disabled:cursor-not-allowed"
-  >
-    <Download size={16} />
-     {exporting ? "Exporting..." : "Export"}
-    
-  </button>
+        >
+          <Download size={16} />
+          {exporting ? "Exporting..." : "Export"}
+        </button>
 
-  {/* 📊 Result count */}
-  {(search || department !== "All" || location !== "All") && (
-    <span className="text-sm text-gray-500 ml-auto">
-      Showing <b>{filtered.length}</b> of <b>{data.length}</b>
-    </span>
-  )}
-
-</div>
+        {/* 📊 Result count */}
+        {(search || department !== "All" || location !== "All") && (
+          <span className="text-sm text-gray-500 ml-auto">
+            Showing <b>{filtered.length}</b> of <b>{data.length}</b>
+          </span>
+        )}
+      </div>
 
       {/* ─── Legend ─── */}
       <div className="flex flex-wrap gap-3">
-        {LEGEND_ENTRIES.map(e => (
+        {LEGEND_ENTRIES.map((e) => (
           <div key={e.key} className="flex items-center gap-1.5">
-            <span className={`px-2 py-0.5 rounded text-xs font-medium ${e.color}`}>
+            <span
+              className={`px-2 py-0.5 rounded text-xs font-medium ${e.color}`}
+            >
               {e.label}
             </span>
             <span className="text-xs text-gray-500">{e.display}</span>
@@ -519,7 +530,9 @@ useEffect(() => {
       {!loading && filtered.length > 0 && (
         <div className="flex flex-wrap gap-5 bg-gray-50  shadow-sm rounded-lg px-4 py-2.5 text-sm">
           <span className="text-gray-500 font-medium">Summary:</span>
-          <span className="text-green-700 font-medium">P: {summary.Present}</span>
+          <span className="text-green-700 font-medium">
+            P: {summary.Present}
+          </span>
           <span className="text-red-600 font-medium">A: {summary.Absent}</span>
           <span className="text-purple-700">CL: {summary.CL}</span>
           <span className="text-pink-700">ML: {summary.ML}</span>
@@ -548,10 +561,8 @@ useEffect(() => {
       {/* ─── Table ─── */}
       <div className="overflow-x-auto border border-gray-200 rounded-lg">
         <table className="min-w-max text-sm border-collapse">
-
           <thead className="bg-gray-100 sticky top-0 z-20">
             <tr>
-
               {/* Employee col — sortable by name & id */}
               <th className="p-3 text-left sticky left-0 bg-gray-100 z-30 min-w-[180px] border-r border-gray-200">
                 <div className="flex flex-col gap-1">
@@ -566,7 +577,7 @@ useEffect(() => {
               </th>
               <th className="p-3 text-left sticky left-0 bg-gray-100 z-20 min-w-[120px] border-r border-gray-200">
                 <div className="flex flex-col gap-1">
-                   <button
+                  <button
                     onClick={() => toggleSort("id")}
                     className="flex items-center text-left text-xs font-normal text-gray-400 hover:text-indigo-500 transition-colors hover:text-[#2b3c6b]
              transition cursor-pointer"
@@ -577,7 +588,7 @@ useEffect(() => {
               </th>
 
               {/* Date columns */}
-              {days.map(day => {
+              {days.map((day) => {
                 const isSun = day.getDay() === 0;
                 const isSat = day.getDay() === 6;
                 return (
@@ -587,44 +598,50 @@ useEffect(() => {
                       isSun || isSat ? "bg-blue-50 text-blue-600" : ""
                     }`}
                   >
-                    <div className="font-medium text-xs">{format(day, "dd")}</div>
-                    <div className="text-xs text-gray-400">{format(day, "EEE")}</div>
+                    <div className="font-medium text-xs">
+                      {format(day, "dd")}
+                    </div>
+                    <div className="text-xs text-gray-400">
+                      {format(day, "EEE")}
+                    </div>
                   </th>
                 );
               })}
 
               {/* Total columns */}
-              {TOTAL_KEYS.map(k => (
-                <th key={k} className="px-2 py-3 text-xs font-semibold text-gray-500 min-w-[34px] text-center">
+              {TOTAL_KEYS.map((k) => (
+                <th
+                  key={k}
+                  className="px-2 py-3 text-xs font-semibold text-gray-500 min-w-[34px] text-center"
+                >
                   {k === "Unknown" ? "?" : k === "Holiday" ? "H" : k}
                 </th>
               ))}
-
             </tr>
           </thead>
 
           <tbody>
-
             {/* Skeleton loader */}
-            {loading && Array.from({ length: 6 }).map((_, i) => (
-              <tr key={i} className="border-t animate-pulse">
-                <td className="p-3 sticky left-0 bg-white border-r border-gray-100">
-                  <div className="h-4 bg-gray-200 rounded w-32 mb-1.5" />
-                  <div className="h-3 bg-gray-100 rounded w-20 mb-1" />
-                  <div className="h-3 bg-gray-100 rounded w-24" />
-                </td>
-                {days.map(d => (
-                  <td key={d.toISOString()} className="p-2">
-                    <div className="h-5 w-7 bg-gray-100 rounded mx-auto" />
+            {loading &&
+              Array.from({ length: 6 }).map((_, i) => (
+                <tr key={i} className="border-t animate-pulse">
+                  <td className="p-3 sticky left-0 bg-white border-r border-gray-100">
+                    <div className="h-4 bg-gray-200 rounded w-32 mb-1.5" />
+                    <div className="h-3 bg-gray-100 rounded w-20 mb-1" />
+                    <div className="h-3 bg-gray-100 rounded w-24" />
                   </td>
-                ))}
-                {TOTAL_KEYS.map(k => (
-                  <td key={k} className="px-2">
-                    <div className="h-4 w-5 bg-gray-100 rounded mx-auto" />
-                  </td>
-                ))}
-              </tr>
-            ))}
+                  {days.map((d) => (
+                    <td key={d.toISOString()} className="p-2">
+                      <div className="h-5 w-7 bg-gray-100 rounded mx-auto" />
+                    </td>
+                  ))}
+                  {TOTAL_KEYS.map((k) => (
+                    <td key={k} className="px-2">
+                      <div className="h-4 w-5 bg-gray-100 rounded mx-auto" />
+                    </td>
+                  ))}
+                </tr>
+              ))}
 
             {/* Empty state */}
             {!loading && !error && filtered.length === 0 && (
@@ -644,185 +661,217 @@ useEffect(() => {
             )}
 
             {/* Data rows */}
-            {!loading && filtered.map(emp => {
+            {!loading &&
+              filtered.map((emp) => {
+                const map = {};
+                const totals = {
+                  Total: 0,
+                  Present: 0,
+                  Absent: 0,
+                  CL: 0,
+                  ML: 0,
+                  OD: 0,
+                  Off: 0,
+                  Holiday: 0,
+                  Unknown: 0,
+                  Permission: 0,
+                };
 
-              const map    = {};
-              const totals = {Total: 0, Present: 0, Absent: 0, CL: 0, ML: 0, OD: 0, Off: 0, Holiday: 0, Unknown: 0, Permission: 0 };
+                emp.attendanceHistory?.forEach((a) => {
+                  map[a.date] = a.status;
 
-             emp.attendanceHistory?.forEach((a) => {
-  map[a.date] = a.status;
+                  switch (a.status) {
+                    case "Present":
+                      totals.Present += 1;
+                      totals.Total += 1;
+                      break;
 
-  switch (a.status) {
-    case "Present":
-      totals.Present += 1;
-      totals.Total += 1;
-      break;
+                    case "Absent":
+                      totals.Absent += 1;
+                      break;
 
-    case "Absent":
-      totals.Absent += 1;
-      break;
+                    case "Present:Absent":
+                    case "Absent:Present":
+                      totals.Present += 0.5;
+                      totals.Absent += 0.5;
+                      totals.Total += 0.5;
+                      break;
 
-    case "Present:Absent":
-    case "Absent:Present":
-      totals.Present += 0.5;
-      totals.Absent += 0.5;
-      totals.Total += 0.5;
-      break;
+                    case "Present:cl":
+                    case "cl:Present":
+                      totals.Present += 0.5;
+                      totals.CL += 0.5;
+                      totals.Total += 1;
+                      break;
 
-    case "Present:cl":
-    case "cl:Present":
-      totals.Present += 0.5;
-      totals.CL += 0.5;
-      totals.Total += 1;
-      break;
+                    case "Present:ml":
+                    case "ml:Present":
+                      totals.Present += 0.5;
+                      totals.ML += 0.5;
+                      totals.Total += 1;
+                      break;
 
-    case "Present:ml":
-    case "ml:Present":
-      totals.Present += 0.5;
-      totals.ML += 0.5;
-      totals.Total += 1;
-      break;
+                    case "Absent:cl":
+                    case "cl:Absent":
+                      totals.Absent += 0.5;
+                      totals.CL += 0.5;
+                      totals.Total += 0.5;
+                      break;
 
-    case "Absent:cl":
-    case "cl:Absent":
-      totals.Absent += 0.5;
-      totals.CL += 0.5;
-      totals.Total += 0.5;
-      break;
+                    case "Absent:ml":
+                    case "ml:Absent":
+                      totals.Absent += 0.5;
+                      totals.ML += 0.5;
+                      totals.Total += 0.5;
+                      break;
 
-    case "Absent:ml":
-    case "ml:Absent":
-      totals.Absent += 0.5;
-      totals.ML += 0.5;
-      totals.Total += 0.5;
-      break;
+                    case "PR-Present:Present":
+                    case "Present:Present-PR":
+                      totals.Present += 1;
+                      totals.Permission += 1;
+                      totals.Total += 1;
+                      break;
 
-    case "PR-Present:Present":
-    case "Present:Present-PR":
-      totals.Present += 1;
-      totals.Permission += 1;
-      totals.Total += 1;
-      break;
+                    case "PR-Present:Absent":
+                    case "Absent:Present-PR":
+                      totals.Present += 0.5;
+                      totals.Absent += 0.5;
+                      totals.Permission += 1;
+                      totals.Total += 0.5;
+                      break;
 
-    case "PR-Present:Absent":
-    case "Absent:Present-PR":
-      totals.Present += 0.5;
-      totals.Absent += 0.5;
-      totals.Permission += 1;
-      totals.Total += 0.5;
-      break;
+                    case "CL":
+                    case "cl":
+                    case "CL(O)":
+                      totals.CL += 1;
+                      totals.Total += 1;
+                      break;
 
-    case "CL":
-    case "cl":
-    case "CL(O)":
-      totals.CL += 1;
-      totals.Total += 1;
-      break;
+                    case "ML":
+                    case "ml":
+                      totals.ML += 1;
+                      totals.Total += 1;
+                      break;
 
-    case "ML":
-    case "ml":
-      totals.ML += 1;
-      totals.Total += 1;
-      break;
+                    case "OD":
+                    case "Onduty":
+                      totals.OD += 1;
+                      totals.Total += 1;
+                      break;
 
-    case "OD":
-    case "Onduty":
-      totals.OD += 1;
-      totals.Total += 1;
-      break;
+                    case "Holiday":
+                      totals.Holiday += 1;
+                      totals.Total += 1;
+                      break;
 
-    case "Holiday":
-      totals.Holiday += 1;
-      totals.Total += 1;
-      break;
+                    case "Off":
+                      totals.Off += 1;
+                      break;
 
-    case "Off":
-      totals.Off += 1;
-      break;
+                    default:
+                      totals.Unknown += 1;
+                  }
+                });
 
-    default:
-      totals.Unknown += 1;
-  }
-});
+                // Low attendance highlight: present < 50% of working days
+                const workingDays = days.length - totals.Off - totals.Holiday;
+                const lowAttendance =
+                  workingDays > 0 && totals.Present / workingDays < 0.5;
 
-              // Low attendance highlight: present < 50% of working days
-              const workingDays  = days.length - totals.Off - totals.Holiday;
-              const lowAttendance = workingDays > 0 && totals.Present / workingDays < 0.5;
+                const empLocation = getLocation(emp.employeeId);
 
-              const empLocation = getLocation(emp.employeeId);
+                return (
+                  <tr
+                    key={emp.employeeId}
+                    className={`border-t hover:bg-gray-50 transition-colors ${
+                      lowAttendance ? "bg-red-50 hover:bg-red-50" : ""
+                    }`}
+                  >
+                    {/* Employee info */}
+                    <td className="p-3 sticky left-0 z-10 bg-white border-r border-gray-100">
+                      <div className="font-medium text-gray-800">
+                        {emp.employeeName}
+                      </div>
 
-              return (
-                <tr
-                  key={emp.employeeId}
-                  className={`border-t hover:bg-gray-50 transition-colors ${
-                    lowAttendance ? "bg-red-50 hover:bg-red-50" : ""
-                  }`}
-                >
-
-                  {/* Employee info */}
-                  <td className="p-3 sticky left-0 z-10 bg-white border-r border-gray-100">
-                    <div className="font-medium text-gray-800">{emp.employeeName}</div>
-                   
-                   
-                    <span className={`inline-block mt-1 text-xs px-1.5 py-0.5 rounded-full font-medium ${
-                      empLocation === "Palakkad"
-                        ? "bg-green-100 text-green-700"
-                        : empLocation === "Chittoor"
-                        ? "bg-orange-100 text-orange-700"
-                        : "bg-gray-100 text-gray-500"
-                    }`}>
-                      {empLocation}
-                    </span>
-                  </td>
-                  <td className="p-3 sticky left-[180px] z-10 bg-white border-r border-gray-100 text-xs text-gray-500">
-                    {emp.employeeId}
-                  </td>
-                  
-
-                  {/* Daily status cells */}
-                  {days.map(day => {
-                    const dateStr   = format(day, "dd-MMM-yyyy");
-                    const rawStatus = map[dateStr];
-                    const statusObj = STATUS_MAP[rawStatus];
-                    const isSun     = day.getDay() === 0;
-                    const isSat     = day.getDay() === 6;
-
-                    return (
-                      <td
-                        key={dateStr}
-                        className={`p-1.5 text-center ${isSun || isSat ? "bg-blue-50/30" : ""}`}
+                      <span
+                        className={`inline-block mt-1 text-xs px-1.5 py-0.5 rounded-full font-medium ${
+                          empLocation === "Palakkad"
+                            ? "bg-green-100 text-green-700"
+                            : empLocation === "Chittoor"
+                              ? "bg-orange-100 text-orange-700"
+                              : "bg-gray-100 text-gray-500"
+                        }`}
                       >
-                        {statusObj ? (
-                          <span className={`px-1.5 py-0.5 rounded text-xs font-medium ${statusObj.color}`}>
-                            {statusObj.label}
-                          </span>
-                        ) : (
-                          <span className="text-gray-200 text-xs">—</span>
-                        )}
-                      </td>
-                    );
-                  })}
+                        {empLocation}
+                      </span>
+                    </td>
+                    <td className="p-3 sticky left-[180px] z-10 bg-white border-r border-gray-100 text-xs text-gray-500">
+                      {emp.employeeId}
+                    </td>
 
-                  {/* Totals */}
-                  <td className="text-center text-xs font-semibold text-gray-600 px-2">{totals.Total}</td>
-                  <td className="text-center text-xs font-semibold text-green-700 px-2">{totals.Present}</td>
-                  <td className="text-center text-xs font-semibold text-red-600 px-2">{totals.Absent}</td>
-                  <td className="text-center text-xs text-purple-700 px-2">{totals.CL}</td>
-                  <td className="text-center text-xs text-pink-700 px-2">{totals.ML}</td>
-                  <td className="text-center text-xs text-yellow-700 px-2">{totals.OD}</td>
-                  <td className="text-center text-xs text-gray-500 px-2">{totals.Off}</td>
-                  <td className="text-center text-xs text-blue-600 px-2">{totals.Holiday}</td>
-                  <td className="text-center text-xs text-gray-400 px-2">{totals.Unknown}</td>
-                  <td className="text-center text-xs text-green-800 px-2">{totals.Permission}</td>
+                    {/* Daily status cells */}
+                    {days.map((day) => {
+                      const dateStr = format(day, "dd-MMM-yyyy");
+                      const rawStatus = map[dateStr];
+                      const statusObj = STATUS_MAP[rawStatus];
+                      const isSun = day.getDay() === 0;
+                      const isSat = day.getDay() === 6;
 
-                </tr>
-              );
-            })}
+                      return (
+                        <td
+                          key={dateStr}
+                          className={`p-1.5 text-center ${isSun || isSat ? "bg-blue-50/30" : ""}`}
+                        >
+                          {statusObj ? (
+                            <span
+                              className={`px-1.5 py-0.5 rounded text-xs font-medium ${statusObj.color}`}
+                            >
+                              {statusObj.label}
+                            </span>
+                          ) : (
+                            <span className="text-gray-200 text-xs">—</span>
+                          )}
+                        </td>
+                      );
+                    })}
 
+                    {/* Totals */}
+                    <td className="text-center text-xs font-semibold text-gray-600 px-2">
+                      {totals.Total}
+                    </td>
+                    <td className="text-center text-xs font-semibold text-green-700 px-2">
+                      {totals.Present}
+                    </td>
+                    <td className="text-center text-xs font-semibold text-red-600 px-2">
+                      {totals.Absent}
+                    </td>
+                    <td className="text-center text-xs text-purple-700 px-2">
+                      {totals.CL}
+                    </td>
+                    <td className="text-center text-xs text-pink-700 px-2">
+                      {totals.ML}
+                    </td>
+                    <td className="text-center text-xs text-yellow-700 px-2">
+                      {totals.OD}
+                    </td>
+                    <td className="text-center text-xs text-gray-500 px-2">
+                      {totals.Off}
+                    </td>
+                    <td className="text-center text-xs text-blue-600 px-2">
+                      {totals.Holiday}
+                    </td>
+                    <td className="text-center text-xs text-gray-400 px-2">
+                      {totals.Unknown}
+                    </td>
+                    <td className="text-center text-xs text-green-800 px-2">
+                      {totals.Permission}
+                    </td>
+                  </tr>
+                );
+              })}
           </tbody>
         </table>
       </div>
-
     </div>
   );
 };

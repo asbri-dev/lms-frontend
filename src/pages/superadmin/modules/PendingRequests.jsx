@@ -18,6 +18,12 @@ const formatDate = (val) => {
   }
   return val;
 };
+ const format=(val)=> {  
+    if(val==="cl")return "Casual Leave";
+    if(val==="ml")return "Medical Leave";
+    if(val==="earlyOut")return "Early Out";
+    if(val==="lateIn")return "Late In";
+    return val;};
 
 const STATUS_STYLE = {
   Pending:   "bg-amber-100 text-amber-700",
@@ -42,6 +48,13 @@ const TYPE_STYLE = {
   Leave:      "bg-purple-100 text-purple-700",
   Permission: "bg-blue-100 text-blue-700",
   OD:         "bg-yellow-100 text-yellow-700",
+};
+
+const DETAILS_STYLE = {
+  "Casual Leave": "bg-purple-100 text-purple-700",
+  "Medical Leave": "bg-blue-100 text-blue-700",
+  "Early Out": "bg-yellow-100 text-yellow-700",
+  "Late In": "bg-red-100 text-red-700",
 };
 
 const APPROVE_API = {
@@ -273,6 +286,7 @@ const AllRequestRow = ({ item, type }) => {
     detail   = item.reason;
   }
 
+ 
   return (
     <tr className="border-t border-gray-100 hover:bg-gray-50 transition-colors">
       <td className="px-4 py-3">
@@ -285,7 +299,7 @@ const AllRequestRow = ({ item, type }) => {
       <td className="px-4 py-3 text-xs text-gray-500 whitespace-nowrap">
         {fromDate}{toDate && toDate !== "—" ? ` → ${toDate}` : ""}
       </td>
-      <td className="px-4 py-3 text-xs text-gray-400 max-w-[180px] truncate">{detail || "—"}</td>
+      <td className="px-4 py-3"><Badge label={format(detail) || "—"} style={DETAILS_STYLE[format(detail) || "—"]} /></td>
       <td className="px-4 py-3">
         <Badge label={statusLabel} style={STATUS_STYLE[item.status] || "bg-gray-100 text-gray-500"} />
       </td>
