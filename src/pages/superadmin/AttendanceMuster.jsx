@@ -132,6 +132,11 @@ const STATUS_MAP = {
     color: "bg-purple-100 text-purple-800",
     display: "Casual Leave Opening",
   },
+    "Present(O)": {
+    label: "P(O)",
+    color: "bg-green-100 text-green-800",
+    display: "Present Opening",
+  }
 };
 
 
