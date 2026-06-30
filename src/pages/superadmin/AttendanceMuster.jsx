@@ -125,8 +125,6 @@ const STATUS_MAP = {
     color: "bg-purple-100 text-purple-800",
     display: "Casual Leave Opening",
   },
-
-
     "CL(O): Present": {
     label: "CL(O)/P",
     color: "bg-purple-100 text-purple-800",
@@ -136,7 +134,18 @@ const STATUS_MAP = {
     label: "P(O)",
     color: "bg-green-100 text-green-800",
     display: "Present Opening",
+  },
+  "Present:CL(O)":{
+  label: "P/CL(O)",
+  color: "bg-green-100 text-green-800",
+  display: "Present Opening",
+  },
+  "CL(O):Present":{
+  label: "CL(O)/P",
+  color: "bg-green-100 text-green-800",
+  display: "Present Opening",
   }
+
 };
 
 
