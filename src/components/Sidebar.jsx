@@ -12,6 +12,7 @@ import {
   CalendarCheck,
   Upload,
   IndianRupee,
+  BarChart3 ,
 } from "lucide-react";
 
 const Sidebar = ({ onClose }) => {
@@ -94,6 +95,11 @@ const Sidebar = ({ onClose }) => {
               <Upload size={18} />
               Excel Uploads
             </NavLink>
+             <NavLink to="/superadmin/report-dashboard" className={linkClasses} onClick={() => onClose?.()}>
+              <BarChart3 size={18} />
+              Reports
+            </NavLink>
+            
 
             <p className="text-xs text-[#ffffff]  uppercase mt-6 mb-2 px-2 font-bold">
               Settings
@@ -116,6 +122,11 @@ const Sidebar = ({ onClose }) => {
             <NavLink to="/head/all-requests" className={linkClasses} onClick={() => onClose?.()}>
               <ClipboardCheck size={18} />
               All Requests
+            </NavLink>
+            <p className={sectionTitle}>Attendance</p>
+            <NavLink to="/head/faculty-attendance" className={linkClasses} onClick={() => onClose?.()}>
+              <CalendarDays size={18} />
+              Faculty Attendance
             </NavLink>
 
             <p className={sectionTitle}>Approvals</p>
@@ -147,6 +158,11 @@ const Sidebar = ({ onClose }) => {
             <NavLink to="/admin/users" className={linkClasses} onClick={() => onClose?.()}>
               <Users size={18} />
               Faculty Profiles
+            </NavLink>
+            <p className={sectionTitle}>Attendance</p>
+            <NavLink to="/admin/faculty-attendance" className={linkClasses} onClick={() => onClose?.()}>
+              <CalendarDays size={18} />
+              Faculty Attendance
             </NavLink>
 
             <p className={sectionTitle}>Approvals</p>

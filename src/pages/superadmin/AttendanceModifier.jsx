@@ -2,11 +2,12 @@ import { useState, useEffect, useCallback, useMemo } from "react";
 import { useAuth } from "../../auth/useAuth";
 import toast from "react-hot-toast";
 import { API_BASE_URL } from "../../config/api";
+import { Download } from "lucide-react";
 
 
 // ─── Status config ───────────────────────────────────────────────────────────
 const STATUS_OPTIONS = [
-  "Present", "Absent", "CL", "ML", "OD", "Holiday", "Off", "Unknown",
+  "Present", "Absent", "CL", "ML", "OD", "Holiday", "Off", "Unknown","PR"
 ];
 
 const STATUS_STYLE = {
@@ -26,8 +27,9 @@ const backendStatusMap = (status) => {
   if (status === "CL" || status === "cl") return "CL";
   if (status === "ML" || status === "ml") return "ML";
   if (status === "OD" || status === "Onduty") return "OD";
-  if (status === "Absent:Present" || status === "Present:Absent") return "Present";
-  if (status === "Absent:Present-PR") return "Present";
+  if (status === "Absent:Present") return "A/P";
+  if (status === "Present:Absent") return "P/A";
+  if (status === "Absent:Present-PR") return "Pr";
 
   return status;
 };
@@ -414,8 +416,8 @@ const isDirty =
       date: record.Date,
       sessionOne: s1Changed ? s1 : false,
       sessionTwo: s2Changed ? s2 : false,
-     status: backendStatusMap(status),
-      reason, // ← included in payload
+      status: status || "Present",
+      reason,
     });
   };
 
@@ -473,8 +475,7 @@ const isDirty =
 
         {/* Name */}
         <td style={{ padding: "10px 14px" }}>
-          <div style={{ fontSize: 13, fontWeight: 600, color: "#334155" }}>{empName}</div>
-          <div style={{ fontSize: 11, color: "#94a3b8" }}>{empId}</div>
+          <StatusBadge status={normalizeStatus(backendStatusMap(record.AttendanceDetails?.status))} />
         </td>
 
         {/* Punch In / Out */}
@@ -539,7 +540,7 @@ const isDirty =
             <StatusBadge status={normalizeStatus(status)} />
           ) : (
             <select
-              value={normalizeStatus(status)}
+              value={STATUS_OPTIONS.find((opt) => opt === normalizeStatus(status))}
               onChange={(e) => setStatus(e.target.value)}
               style={{
                 padding: "5px 10px",
@@ -727,6 +728,62 @@ export default function AttendanceModifier() {
     setToDate(last);
     if (selectedEmp) loadAttendance(selectedEmp, first, last);
   };
+
+  // ── Download excel Api ───────────────────────────────────────────────────
+
+
+  const [exporting, setExporting] = useState(false);
+
+  const exportAttendanceExcel = async (fromdate, todate, location) => {
+  try {
+    setExporting(true);
+
+    const formattedFrom = new Date(fromdate).toLocaleDateString("en-GB", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    }).replace(/ /g, "-");
+
+    const formattedTo = new Date(todate).toLocaleDateString("en-GB", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    }).replace(/ /g, "-");
+
+    const response = await fetch(
+      `${API_BASE_URL}/downloadOverrideExcel?fromDate=${formattedFrom}&toDate=${formattedTo}&adminEmpId=${user.employeeId}&collegeLocation=${location}`,
+    );
+
+    if (!response.ok) {
+      throw new Error("Failed to download Excel");
+    }
+
+    const blob = await response.blob();
+
+    const url = window.URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "Attendance_Override_Info.xlsx";
+
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    window.URL.revokeObjectURL(url);
+
+    setExporting(false);
+    toast.success("Attendance Modifier Excel downloaded successfully");
+
+  } catch (error) {
+    console.error(error);
+    toast.error("Failed to download Attendance Modifier Excel");
+  }finally {
+    setExporting(false);
+  }
+  
+};
+
 
   // ── Save override (now receives reason in payload) ───────────────────────
   const handleSave = async (payload) => {
@@ -931,7 +988,9 @@ export default function AttendanceModifier() {
                 Select an employee to begin
               </div>
             )}
+
           </div>
+                  
 
           {/* Date pickers + Load */}
           <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
@@ -1025,6 +1084,23 @@ export default function AttendanceModifier() {
                 </>
               ) : "Load"}
             </button>
+
+            <button
+              onClick={() => exportAttendanceExcel(fromDate, toDate, locationFilter)}
+              disabled={!selectedEmp || loadingRecords}
+              style={{
+                padding: "8px 14px", borderRadius: 8, border: "1.5px solid #e2e8f0",
+                background: selectedEmp && !loadingRecords ? "white" : "#f8fafc",
+                color: selectedEmp && !loadingRecords ? "#334155" : "#94a3b8",
+                fontSize: 13, fontWeight: 600,
+                cursor: selectedEmp && !loadingRecords ? "pointer" : "not-allowed",
+                transition: "all 0.15s", marginTop: 14,
+                display: "flex", alignItems: "center", gap: 6,
+              }}
+            >
+              <Download size={16} />
+              {exporting ? "Exporting..." : `Export${locationFilter !== "All" ? ` (${locationFilter})` : ""}`}
+            </button>
           </div>
         </div>
 
@@ -1116,8 +1192,8 @@ export default function AttendanceModifier() {
                   position: "sticky", top: 0, zIndex: 10,
                   borderBottom: "2px solid #e2e8f0",
                 }}>
-                  {["Date", "Employee", "Punch In / Out", "Work Duration",
-                    "Session 1", "Session 2", "Status", "Actions"].map((h) => (
+                  {["Date", "Status", "Punch In / Out", "Work Duration",
+                    "Session 1", "Session 2", "Override To", "Actions"].map((h) => (
                     <th key={h} style={{
                       padding: "11px 14px", textAlign: "left",
                       fontSize: 11, fontWeight: 700, color: "#64748b",

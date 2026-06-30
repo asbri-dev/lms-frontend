@@ -8,9 +8,8 @@ const AuditLogs = () => {
   const monthAgo  = format(subDays(new Date(), 29), "yyyy-MM-dd");
 
   const [fromDate, setFromDate] = useState(monthAgo);
-  const [toDate,   setToDate]   = useState(today);
-  const [loading,  setLoading]  = useState(false);
-
+  const [toDate, setToDate] = useState(today);
+  const [loading, setLoading] = useState(false);
   const token = sessionStorage.getItem("authToken");
 
   const handleDownload = async () => {
@@ -26,31 +25,39 @@ const AuditLogs = () => {
     try {
       setLoading(true);
 
-      const res = await fetch(
+      const response = await fetch(
         `${API_BASE_URL}/download-audit-logs?fromDate=${fromDate}&toDate=${toDate}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      if (!res.ok) throw new Error(`Server error: ${res.status}`);
-
-      // ✅ Auto-download the excel file
-      const blob     = await res.blob();
-      const url      = URL.createObjectURL(blob);
-      const a        = document.createElement("a");
-      a.href         = url;
-      a.download     = `audit-logs-${fromDate}-to-${toDate}.xlsx`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-
-      toast.success("Audit logs Excel downloaded successfully");
-    } catch (e) {
-      toast.error(e.message || "Failed to download audit logs");
-    } finally {
-      setLoading(false);
+      if (!response.ok) {
+      throw new Error("Failed to download Excel");
     }
-  };
+
+    const blob = await response.blob();
+
+    const url = window.URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "Attendance_Muster.xlsx";
+
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    window.URL.revokeObjectURL(url);
+
+    toast.success("Attendance Muster Excel downloaded successfully");
+
+  } catch (error) {
+    console.error(error);
+    toast.error("Failed to download Attendance Muster Excel");
+  } finally {
+    setLoading(false);
+  }
+  
+};
 
   // Quick range presets
   const applyPreset = (days) => {
