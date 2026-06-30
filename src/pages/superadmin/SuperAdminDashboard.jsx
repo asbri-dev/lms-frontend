@@ -4,6 +4,7 @@ import TopLeaveTakers from "./modules/TopLeaveTakers";
 import PendingRequests from "./modules/PendingRequests";
 import EmployeeExitManagement from "./modules/EmployeeExitManagement";
 import AuditLogs from "./modules/AuditLogs";
+import FacultyAttendanceModule from "./modules/FacultyAttendanceModule";
 
 const MODULES = [
   {
@@ -67,6 +68,31 @@ const MODULES = [
     ),
     component: <EmployeeExitManagement />,
   },
+  {
+    key: "faculty-attendance",
+    label: "Faculty Attendance",
+    icon: (
+      <svg
+        width="16"
+        height="16"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+        <path d="M16 2v4" />
+        <path d="M8 2v4" />
+        <path d="M3 10h18" />
+        <path d="M8 14h.01" />
+        <path d="M12 14h.01" />
+        <path d="M16 14h.01" />
+      </svg>
+    ),
+    component: <FacultyAttendanceModule />,
+  }
 ];
 
 const SuperAdminDashboard = () => {

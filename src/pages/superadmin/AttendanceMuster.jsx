@@ -324,6 +324,7 @@ useEffect(() => {
     emp.attendanceHistory?.forEach((a) => {
       switch (a.status) {
         case "Present":
+        case "Present(O)":
           totals.Present += 1;
           break;
 
@@ -701,6 +702,16 @@ useEffect(() => {
                       totals.Absent += 0.5;
                       totals.Total += 0.5;
                       break;
+                    
+                    case "Present(O):present":
+                    case "Present:Present(O)":
+                    case "Present(O)":
+                    case "Present(O):Present(O)":
+                    totals.Total +=1;
+                    totals.Present +=1;
+                    break;
+
+
 
                     case "Present:cl":
                     case "cl:Present":
@@ -754,12 +765,14 @@ useEffect(() => {
 
                     case "ML":
                     case "ml":
+                    case "ML(O)":
                       totals.ML += 1;
                       totals.Total += 1;
                       break;
 
                     case "OD":
                     case "Onduty":
+                    case "OD(O)":
                       totals.OD += 1;
                       totals.Total += 1;
                       break;
