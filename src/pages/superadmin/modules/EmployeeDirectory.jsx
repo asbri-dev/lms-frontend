@@ -180,7 +180,7 @@ function Section({ title, children }) {
       <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-2">
         {title}
       </p>
-      <div className="bg-slate-50 rounded-xl px-4 py-3 space-y-2.5">
+      <div className="bg-slate-50 rounded-xl px-3 sm:px-4 py-3 space-y-2.5">
         {children}
       </div>
     </div>
@@ -189,7 +189,7 @@ function Section({ title, children }) {
 
 function Field({ label, value }) {
   return (
-    <div className="flex justify-between items-start gap-4 text-sm">
+    <div className="flex justify-between items-start gap-3 sm:gap-4 text-sm">
       <span className="text-slate-500 shrink-0">{label}</span>
       <span className="text-slate-800 font-medium text-right break-all">
         {value || "—"}
@@ -201,7 +201,7 @@ function Field({ label, value }) {
 // For boolean fields like isPhysicallyChallenged
 function BoolField({ label, value }) {
   return (
-    <div className="flex justify-between items-center gap-4 text-sm">
+    <div className="flex justify-between items-center gap-3 sm:gap-4 text-sm">
       <span className="text-slate-500 shrink-0">{label}</span>
       <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
         value
@@ -232,22 +232,22 @@ function BoolField({ label, value }) {
 }
 
   return (
-    <div className="p-6 bg-gray-50 min-h-screen">
+    <div className="p-3 sm:p-6 bg-gray-50 min-h-screen">
 
       {/* Header */}
-      <div className="mb-6 flex justify-between items-center">
-        <h1 className="text-2xl font-bold">Employee Directory</h1>
+      <div className="mb-4 sm:mb-6 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
+        <h1 className="text-xl sm:text-2xl font-bold">Employee Directory</h1>
 
-       <div className="flex flex-wrap gap-3">
+       <div className="flex flex-wrap gap-2 sm:gap-3">
 
   <button
     onClick={() => toggleSort("name")}
     className={`
-      flex items-center gap-2
-      px-4 py-2
+      flex items-center gap-1.5 sm:gap-2
+      px-3 sm:px-4 py-1.5 sm:py-2
       rounded-xl
       border
-      text-sm font-semibold
+      text-xs sm:text-sm font-semibold
       transition-all duration-200
       shadow-sm
       hover:shadow-md
@@ -272,11 +272,11 @@ function BoolField({ label, value }) {
   <button
     onClick={() => toggleSort("id")}
     className={`
-      flex items-center gap-2
-      px-4 py-2
+      flex items-center gap-1.5 sm:gap-2
+      px-3 sm:px-4 py-1.5 sm:py-2
       rounded-xl
       border
-      text-sm font-semibold
+      text-xs sm:text-sm font-semibold
       transition-all duration-200
       shadow-sm
       hover:shadow-md
@@ -302,7 +302,7 @@ function BoolField({ label, value }) {
       </div>
 
       {/* Filters */}
-   <div className="grid grid-cols-4 gap-3 mb-6">
+   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
 
   {/* Search */}
   <div>
@@ -361,7 +361,7 @@ function BoolField({ label, value }) {
       {error && <p className="text-red-500 text-center">{error}</p>}
 
       {/* Cards */}
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
         {filtered.map((emp) => (
           <div
             key={emp.employeeId}
@@ -373,20 +373,20 @@ function BoolField({ label, value }) {
                 setDetails({ personal: emp });
               }
             }}
-            className="bg-white p-4 rounded shadow cursor-pointer"
+            className="bg-white p-4 rounded shadow cursor-pointer active:scale-[0.99] transition-transform"
           >
             <div className="flex gap-3 items-center">
-              <div className={`w-10 h-10 flex items-center justify-center rounded-xl ${avatarColor(emp.employeeId)}`}>
+              <div className={`w-10 h-10 shrink-0 flex items-center justify-center rounded-xl ${avatarColor(emp.employeeId)}`}>
                 {getInitials(emp.employeeName)}
               </div>
 
-              <div>
-                <h3 className="font-bold">{emp.employeeName}</h3>
-                <p className="text-sm text-gray-500">{emp.employeeId}</p>
+              <div className="min-w-0">
+                <h3 className="font-bold truncate">{emp.employeeName}</h3>
+                <p className="text-sm text-gray-500 truncate">{emp.employeeId}</p>
               </div>
             </div>
 
-            <div className="mt-2 text-sm text-gray-600">
+            <div className="mt-2 text-sm text-gray-600 truncate">
               {emp.department} - {emp.designation}
             </div>
           </div>
@@ -395,11 +395,11 @@ function BoolField({ label, value }) {
 
       {/* Modal */}
 {selectedEmp && (
-  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-    <div className="bg-white w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col">
+  <div className="fixed inset-0 z-50 flex items-center sm:items-center justify-center bg-black/60 backdrop-blur-sm p-0 sm:p-4">
+    <div className="bg-white w-full h-full sm:h-auto sm:max-w-lg rounded-none sm:rounded-2xl shadow-2xl overflow-hidden max-h-full sm:max-h-[90vh] flex flex-col">
 
       {/* ── Header ── */}
-      <div className="bg-[#1E293B] px-6 pt-6 pb-5 relative">
+      <div className="bg-[#1E293B] px-4 sm:px-6 pt-5 sm:pt-6 pb-4 sm:pb-5 relative shrink-0">
         <button
           onClick={() => { setSelectedEmp(null); setDetails(null); }}
           className="absolute top-4 right-4 text-slate-400 hover:text-white transition-colors"
@@ -409,27 +409,27 @@ function BoolField({ label, value }) {
 
         {detailsLoading ? (
           <div className="flex items-center gap-4 animate-pulse">
-            <div className="w-14 h-14 rounded-full bg-slate-600" />
+            <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-slate-600" />
             <div className="space-y-2">
-              <div className="h-4 w-36 bg-slate-600 rounded" />
-              <div className="h-3 w-24 bg-slate-700 rounded" />
+              <div className="h-4 w-32 sm:w-36 bg-slate-600 rounded" />
+              <div className="h-3 w-20 sm:w-24 bg-slate-700 rounded" />
             </div>
           </div>
         ) : (
-          <div className="flex items-center gap-4">
-            <div className="w-14 h-14 rounded-full bg-[#3D7DFC] flex items-center justify-center text-white text-xl font-bold shrink-0">
+          <div className="flex items-center gap-3 sm:gap-4 pr-6">
+            <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-[#3D7DFC] flex items-center justify-center text-white text-lg sm:text-xl font-bold shrink-0">
               {(details?.personal?.firstName?.[0] ?? "?")}
               {(details?.personal?.lastName?.[0] ?? "")}
             </div>
             <div className="min-w-0">
-              <h2 className="text-white text-lg font-semibold leading-tight">
+              <h2 className="text-white text-base sm:text-lg font-semibold leading-tight truncate">
                 {[
                   details?.personal?.firstName,
                   details?.personal?.middleName,
                   details?.personal?.lastName,
                 ].filter(Boolean).join(" ") || selectedEmp}
               </h2>
-              <p className="text-slate-400 text-sm mt-0.5">
+              <p className="text-slate-400 text-sm mt-0.5 truncate">
                 {details?.personal?.designation || "—"}
               </p>
               <div className="flex items-center gap-2 mt-2 flex-wrap">
@@ -452,7 +452,7 @@ function BoolField({ label, value }) {
       </div>
 
       {/* ── Body ── */}
-      <div className="overflow-y-auto flex-1 px-6 py-5 space-y-5">
+      <div className="overflow-y-auto flex-1 px-4 sm:px-6 py-4 sm:py-5 space-y-5">
         {detailsLoading ? (
           <div className="space-y-3 animate-pulse">
             {[...Array(10)].map((_, i) => (
@@ -463,15 +463,15 @@ function BoolField({ label, value }) {
           <>
                       {/* ── Leave Summary ── */}
             <Section title="Leave Summary">
-              <div className="grid grid-cols-4 gap-3">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
                 {[
                   { label: "Casual",     value: details?.personal?.casualLeaves      ?? "0" },
                   { label: "Medical",    value: details?.personal?.medicalLeaves     ?? "0" },
                   { label: "Permission", value: details?.personal?.permissionRequests ?? "0" },
                   { label: "On Duty",    value: details?.personal?.onDutyRequests    ?? "0" },
                 ].map(({ label, value }) => (
-                  <div key={label} className="bg-white border border-slate-200 rounded-xl p-3 text-center">
-                    <p className="text-2xl font-bold text-[#3D7DFC]">{value}</p>
+                  <div key={label} className="bg-white border border-slate-200 rounded-xl p-2.5 sm:p-3 text-center">
+                    <p className="text-xl sm:text-2xl font-bold text-[#3D7DFC]">{value}</p>
                     <p className="text-xs text-slate-500 mt-0.5 leading-tight">{label}</p>
                   </div>
                 ))}
@@ -626,15 +626,15 @@ function BoolField({ label, value }) {
 
             {/* ── Leave Summary ── */}
             <Section title="Leave Summary">
-              <div className="grid grid-cols-4 gap-3">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
                 {[
                   { label: "Casual",     value: details?.personal?.casualLeaves      ?? "0" },
                   { label: "Medical",    value: details?.personal?.medicalLeaves     ?? "0" },
                   { label: "Permission", value: details?.personal?.permissionRequests ?? "0" },
                   { label: "On Duty",    value: details?.personal?.onDutyRequests    ?? "0" },
                 ].map(({ label, value }) => (
-                  <div key={label} className="bg-white border border-slate-200 rounded-xl p-3 text-center">
-                    <p className="text-2xl font-bold text-[#3D7DFC]">{value}</p>
+                  <div key={label} className="bg-white border border-slate-200 rounded-xl p-2.5 sm:p-3 text-center">
+                    <p className="text-xl sm:text-2xl font-bold text-[#3D7DFC]">{value}</p>
                     <p className="text-xs text-slate-500 mt-0.5 leading-tight">{label}</p>
                   </div>
                 ))}

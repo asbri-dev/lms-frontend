@@ -18,6 +18,28 @@ const formatDate = (val) => {
   }
   return val;
 };
+const parseDate = (dateStr) => {
+  if (!dateStr) return null;
+
+  const months = {
+    Jan: 0,
+    Feb: 1,
+    Mar: 2,
+    Apr: 3,
+    May: 4,
+    Jun: 5,
+    Jul: 6,
+    Aug: 7,
+    Sep: 8,
+    Oct: 9,
+    Nov: 10,
+    Dec: 11,
+  };
+
+  const [day, month, year] = dateStr.split("-");
+
+  return new Date(Number(year), months[month], Number(day));
+};
  const format=(val)=> {  
     if(val==="cl")return "Casual Leave";
     if(val==="ml")return "Medical Leave";
@@ -331,11 +353,15 @@ const PendingRequests = () => {
   /* All tab filters */
   const [filterType,   setFilterType]   = useState("All");
   const [filterStatus, setFilterStatus] = useState("All");
+  const [filterMonthYear, setFilterMonthYear] = useState("All"); // NEW
   const [filterLoc,    setFilterLoc]    = useState("All");
   const [search,       setSearch]       = useState("");
 
   const token = sessionStorage.getItem("authToken");
   const user  = JSON.parse(sessionStorage.getItem("authUser") || "{}");
+
+
+
 
   /* ─── Fetch My Requests ─── */
   const fetchMyRequests = useCallback(async () => {
@@ -505,9 +531,73 @@ const ods = [
       const matchType   = filterType   === "All" || r._type === filterType;
       const matchLoc    = filterLoc    === "All" || getLocation(r.employeeId || r.empId) === filterLoc;
       const matchStatus = filterStatus === "All" || resolveStatus(r.status) === filterStatus;
-      return matchSearch && matchType && matchLoc && matchStatus;
+
+
+      let date = "";
+
+if (r._type === "Leave") {
+  date = r.leaveFrom;
+} else if (r._type === "Permission") {
+  date = r.Date;
+} else {
+  date = r.onDutyFrom;
+}
+
+let matchMonthYear = true;
+
+if (filterMonthYear !== "All") {
+  const d = parseDate(date);
+
+  if (!isNaN(d)) {
+    const value = `${d.getFullYear()}-${String(
+      d.getMonth() + 1
+    ).padStart(2, "0")}`;
+
+    matchMonthYear = value === filterMonthYear;
+  } else {
+    matchMonthYear = false;
+  }
+}
+      return matchSearch && matchType && matchLoc && matchStatus && matchMonthYear;
     });
-  }, [flatAll, search, filterType, filterLoc, filterStatus]);
+}, [
+  flatAll,
+  search,
+  filterType,
+  filterLoc,
+  filterStatus,
+  filterMonthYear,
+]);
+
+
+  // for month-year filter dropdown
+  const monthYearOptions = useMemo(() => {
+  const months = new Set();
+
+  flatAll.forEach((r) => {
+    let date = "";
+
+    if (r._type === "Leave") {
+      date = r.leaveFrom;
+    } else if (r._type === "Permission") {
+      date = r.Date;
+    } else {
+      date = r.onDutyFrom;
+    }
+
+    if (date) {
+      const d = parseDate(date);
+
+      if (!isNaN(d)) {
+        months.add(
+          `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`
+        );
+      }
+    }
+  });
+
+  return [...months].sort().reverse();
+}, [flatAll]);
 
   const totalPending = pendingLeaves.length + pendingPermissions.length + pendingOds.length;
 
@@ -622,7 +712,7 @@ const ods = [
 
           {/* Filters */}
         <div className="bg-white shadow-md rounded-xl border border-gray-100 p-4 mb-4">
-  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
 
     {/* Search */}
     <div>
@@ -685,6 +775,30 @@ const ods = [
         ))}
       </select>
     </div>
+
+  {/* Month-Year */}
+  <div>
+  <label className="block text-xs font-semibold text-gray-500 mb-1">
+    Month & Year
+  </label>
+
+  <select
+    value={filterMonthYear}
+    onChange={(e) => setFilterMonthYear(e.target.value)}
+    className="w-full border border-gray-200 shadow-sm px-3 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+  >
+    <option value="All">All</option>
+
+    {monthYearOptions.map((m) => (
+      <option key={m} value={m}>
+        {new Date(`${m}-01`).toLocaleDateString("en-IN", {
+          month: "long",
+          year: "numeric",
+        })}
+      </option>
+    ))}
+  </select>
+</div>
 
   </div>
 

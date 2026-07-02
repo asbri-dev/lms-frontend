@@ -17,7 +17,7 @@ export const STATUS_MAP = {
   Present:             { label: "P", color: "#D7FDF0", type: "Present",textColor: "#6b7280" },
   Absent:              { label: "A", color: "#FBA39D", type: "Absent" },
   Off:                 { label: "OFF", color: "#F7F7F7", type: "Leave" },
-  cl:                  { label: "Casual Leave", color: "#CEF1FD", type: "Leave" },
+  cl:                  { label: "CL", color: "#CEF1FD", type: "Leave" },
   CL:                  { label: "Casual Leave ", color: "#CEF1FD", type: "Leave" },
   ml:                  { label: "Medical Leave", color: "#79ADDC", type: "Leave" },
   Onduty:              { label: "OD", color: "#E9F0DB", type: "Leave" },
