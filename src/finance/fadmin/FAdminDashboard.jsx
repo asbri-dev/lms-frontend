@@ -258,6 +258,7 @@ export default function FAdminDashboard() {
       alignItems:"center", justifyContent:"center",
       background:"linear-gradient(135deg,#f0fdf4 0%,#fafffe 60%,#dcfce7 100%)",
       fontFamily:"'DM Sans',sans-serif",
+      
     }}>
       <LeafBg />
       <div style={{ position:"relative", zIndex:1, textAlign:"center" }}>

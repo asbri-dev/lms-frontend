@@ -15,6 +15,7 @@ import HolidaySettings from "./pages/superadmin/HolidaySettings";
 import ExcelUploads from "./pages/superadmin/ExcelUploads";
 import AdminManagement from "./pages/superadmin/AdminManagement";
 import AttendanceModifier from "./pages/superadmin/AttendanceModifier";
+import ReportsDashboard from "./pages/superadmin/ReportsDashboard";
 
 
 import HeadDashboard from "./pages/head/HeadDashboard";
@@ -26,6 +27,7 @@ import PermissionApprovals from "./pages/admin/PermissionApproval";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import LeaveApprovals from "./pages/admin/LeaveApprovals";
 import  UserManagement  from "./pages/admin/UserManagement";
+import FacultyAttendance from "./pages/admin/FacultyAttendance";
 
 
 import FacultyDashboard from "./pages/faculty/FacultyDashboard";
@@ -38,6 +40,7 @@ import FacultyProfile from "./components/profile/Facultyprofile";
 
 
 import HeadAdminDashboard from "./finance/headadmin/FHAdminDashboard";
+import FacultyAttendanceModule from "./pages/head/FacultyAttendance";
 
 
 
@@ -106,6 +109,7 @@ function App() {
         <Route path="excel-uploads" element={<ExcelUploads />} />
         <Route path="admin-management" element={<AdminManagement />} />
         <Route path="attendance-modifier" element={<AttendanceModifier />} />
+        <Route path="report-dashboard"  element={<ReportsDashboard />} />
       </Route>
       
       {/* HEAD */}
@@ -120,11 +124,13 @@ function App() {
   {/* ✅ Custom HEAD dashboard */}
   <Route path="dashboard" element={<HeadDashboard />} />
   <Route path="all-requests" element={<AllRequestsPage />} />
+  <Route path="faculty-attendance" element={<FacultyAttendanceModule />} />
 
   {/* ✅ Reusing ADMIN pages */}
   <Route path="leave-approvals" element={<LeaveApprovals />} />
   <Route path="od-approvals" element={<OdApprovals />} />
   <Route path="permission-approvals" element={<PermissionApprovals />} />
+  
 </Route>
      
 
@@ -142,6 +148,7 @@ function App() {
          <Route path="od-approvals" element={<OdApprovals />} />
          <Route path="permission-approvals" element={<PermissionApprovals />} />
          <Route path="users" element={<UserManagement />} />
+         <Route path="faculty-attendance" element={<FacultyAttendance />} />
       </Route>
 
       {/* FACULTY */}

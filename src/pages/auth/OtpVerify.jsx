@@ -217,7 +217,7 @@ return (
     className="min-h-screen flex items-center justify-center p-4"
     style={{ background: "#1a2a52" }}
   >
-    <div className="bg-white w-full max-w-md rounded-3xl shadow-2xl p-8 relative overflow-hidden">
+    <div className="bg-white w-full max-w-sm sm:max-w-md rounded-2xl sm:rounded-3xl shadow-2xl p-5 sm:p-8 relative overflow-hidden">
 
       {/* Decorative circles */}
       <div className="absolute rounded-full pointer-events-none"
@@ -227,7 +227,7 @@ return (
 
       {/* Header */}
       <div className="text-center mb-6 relative z-10">
-        <div className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4"
+        <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl flex items-center justify-center mx-auto mb-4"
           style={{ background: "#e8edf7" }}>
           <svg width="26" height="26" fill="none" viewBox="0 0 24 24">
             <rect x="5" y="11" width="14" height="10" rx="2"
@@ -237,10 +237,10 @@ return (
             <circle cx="12" cy="16" r="1.2" fill="#2b3c6b" />
           </svg>
         </div>
-        <h2 className="text-xl font-medium" style={{ color: "#1a2a52" }}>
+        <h2 className="text-lg sm:text-xl font-medium" style={{ color: "#1a2a52" }}>
           OTP Verification
         </h2>
-        <p className="text-sm mt-1" style={{ color: "#7a8db5" }}>
+        <p className="text-xs sm:text-sm mt-1 px-2" style={{ color: "#7a8db5" }}>
           Enter the 6-digit OTP sent to your registered email
         </p>
       </div>
@@ -256,7 +256,7 @@ return (
       </div>
 
       {/* OTP Inputs */}
-      <div className="flex items-center justify-center gap-2 mb-5 relative z-10"
+      <div className="flex items-center justify-center gap-1 sm:gap-2 mb-5 relative z-10"
         onPaste={handlePaste}>
         {[0, 1, 2].map((index) => (
           <input
@@ -269,13 +269,26 @@ return (
             onChange={(e) => handleChange(e.target.value, index)}
             onKeyDown={(e) => handleKeyDown(e, index)}
             onFocus={(e) => e.target.select()}
-            className="text-center font-medium outline-none transition-all duration-150"
-            style={{
-              width: 52, height: 58, borderRadius: 12, fontSize: 22,
-              color: "#1a2a52",
-              border: otp[index] ? "1.5px solid #3f548f" : "1.5px solid #c5d0e8",
-              background: otp[index] ? "#eef1fa" : "#f5f7fc",
-            }}
+           className="
+w-10 h-12
+sm:w-12 sm:h-14
+md:w-[52px] md:h-[58px]
+text-center
+text-lg sm:text-xl
+font-medium
+outline-none
+transition-all
+duration-150"
+           style={{
+  borderRadius: 12,
+  color: "#1a2a52",
+  border: otp[index]
+    ? "1.5px solid #3f548f"
+    : "1.5px solid #c5d0e8",
+  background: otp[index]
+    ? "#eef1fa"
+    : "#f5f7fc",
+}}
           />
         ))}
 
@@ -293,13 +306,26 @@ return (
             onChange={(e) => handleChange(e.target.value, index)}
             onKeyDown={(e) => handleKeyDown(e, index)}
             onFocus={(e) => e.target.select()}
-            className="text-center font-medium outline-none transition-all duration-150"
-            style={{
-              width: 52, height: 58, borderRadius: 12, fontSize: 22,
-              color: "#1a2a52",
-              border: otp[index] ? "1.5px solid #3f548f" : "1.5px solid #c5d0e8",
-              background: otp[index] ? "#eef1fa" : "#f5f7fc",
-            }}
+           className="
+w-10 h-12
+sm:w-12 sm:h-14
+md:w-[52px] md:h-[58px]
+text-center
+text-lg sm:text-xl
+font-medium
+outline-none
+transition-all
+duration-150"
+           style={{
+  borderRadius: 12,
+  color: "#1a2a52",
+  border: otp[index]
+    ? "1.5px solid #3f548f"
+    : "1.5px solid #c5d0e8",
+  background: otp[index]
+    ? "#eef1fa"
+    : "#f5f7fc",
+}}
           />
         ))}
       </div>
@@ -316,7 +342,7 @@ return (
       <button
         onClick={handleVerifyOtp}
         disabled={loading}
-        className="w-full py-3 rounded-xl font-medium text-white transition-all duration-150 relative z-10"
+        className="w-full py-2.5 sm:py-3 rounded-xl font-medium text-white transition-all duration-150 relative z-10"
         style={{
           background: "#2b3c6b",
           opacity: loading ? 0.8 : 1,

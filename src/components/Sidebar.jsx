@@ -1,6 +1,6 @@
 import { NavLink } from "react-router-dom";
 import { useAuth } from "../auth/useAuth";
-import { LeafyGreen, LogOut, X } from "lucide-react";
+import { LogOut, X } from "lucide-react";
 import { moduleConfig } from "../utils/moduleConfig";
 import {
   LayoutDashboard,
@@ -12,45 +12,44 @@ import {
   CalendarCheck,
   Upload,
   IndianRupee,
+  BarChart3,
 } from "lucide-react";
 
 const Sidebar = ({ onClose }) => {
   const { user, logout } = useAuth();
   const currentModule = moduleConfig[user?.role];
 
-  // Wrap linkClasses — also calls onClose on mobile
   const linkClasses = ({ isActive }) =>
-    `flex items-center gap-3 px-4 py-2 rounded-md text-sm font-medium transition ${
+    `flex items-center gap-3 px-4 py-2.5 sm:py-2 rounded-md text-sm font-medium transition ${
       isActive
         ? `${currentModule?.theme?.active} ${currentModule.theme.text} shadow-lg`
-        : `${currentModule?.theme?.hover} hover:text-white  ${currentModule.theme.Ntext}`
+        : `${currentModule?.theme?.hover} hover:text-white ${currentModule.theme.Ntext}`
     }`;
 
-  const sectionTitle =
-    "text-xs font-bold text-${currentModule.theme.Ntext} uppercase tracking-wider mt-6 mb-2 font-bold";
+  const sectionTitle = `text-xs font-bold ${currentModule?.theme?.Ntext} uppercase tracking-wider mt-6 mb-2 px-2`;
 
   return (
-    <aside className={`"w-64 h-screen border-r border-gray-100 p-4"h-full ${currentModule?.theme?.background} ${currentModule.theme.Ntext} flex flex-col p-6 overflow-y-auto `}>
-     
-     
+    <aside
+      className={`w-64 h-full border-r border-gray-100 ${currentModule?.theme?.background} ${currentModule.theme.Ntext} flex flex-col p-4 sm:p-6 overflow-y-auto`}
+    >
+
       {/* ── Logo + Close button (close only shows on mobile) ── */}
       <div className="flex items-center justify-between mb-2">
-       <div>
-  <h2 className="flex items-center gap-2 text-xl ${currentModule.theme.Ntext} font-bold tracking-wide border-b border-gray-300 pb-2 w-50">
-    {currentModule?.icon && (
-      <div className={currentModule?.background}>
-        <currentModule.icon size={24} color="#ffffff"/>
-      </div>
-    )}
-    <span>{currentModule?.label}</span>
-  </h2>
+        <div className="min-w-0">
+          <h2 className={`flex items-center gap-2 text-xl ${currentModule.theme.Ntext} font-bold tracking-wide border-b border-gray-300 pb-2 w-50`}>
+            {currentModule?.icon && (
+              <div className={`${currentModule?.background} shrink-0`}>
+                <currentModule.icon size={22} color="#ffffff" />
+              </div>
+            )}
+            <span className="truncate">{currentModule?.label}</span>
+          </h2>
+        </div>
 
-  {/*<p className="text-xs text-gray-300 mt-1">{currentModule?.subtitle}</p>*/}
-</div>
         {/* Close button — mobile only */}
         <button
           onClick={onClose}
-          className="lg:hidden p-1.5 rounded-lg text-gray-300 hover:bg-white/10 transition"
+          className="lg:hidden shrink-0 p-1.5 rounded-lg text-gray-300 hover:bg-white/10 transition"
           aria-label="Close sidebar"
         >
           <X size={20} />
@@ -63,17 +62,13 @@ const Sidebar = ({ onClose }) => {
         {/* SUPERADMIN */}
         {user?.role === "SUPERADMIN" && (
           <>
-            <p className="text-xs text-${currentModule.theme.Ntext} uppercase mt-4 mb-2 px-2 font-bold ">
-  Overview
-</p>
+            <p className={sectionTitle}>Overview</p>
             <NavLink to="/superadmin/dashboard" className={linkClasses} onClick={() => onClose?.()}>
               <LayoutDashboard size={18} />
               Dashboard
             </NavLink>
 
-            <p className="text-xs text-[#ffffff]  uppercase mt-6 mb-2 px-2 font-bold">
-              Attendance
-            </p>
+            <p className={sectionTitle}>Attendance</p>
             <NavLink to="/superadmin/attendance-muster" className={linkClasses} onClick={() => onClose?.()}>
               <CalendarDays size={18} />
               Attendance Muster
@@ -83,9 +78,7 @@ const Sidebar = ({ onClose }) => {
               Attendance Modifier
             </NavLink>
 
-            <p className="text-xs text-[#ffffff]  uppercase mt-6 mb-2 px-2 font-bold">
-              Management
-            </p>
+            <p className={sectionTitle}>Management</p>
             <NavLink to="/superadmin/admin-management" className={linkClasses} onClick={() => onClose?.()}>
               <Users size={18} />
               Admin Management
@@ -94,10 +87,12 @@ const Sidebar = ({ onClose }) => {
               <Upload size={18} />
               Excel Uploads
             </NavLink>
+            <NavLink to="/superadmin/report-dashboard" className={linkClasses} onClick={() => onClose?.()}>
+              <BarChart3 size={18} />
+              Reports
+            </NavLink>
 
-            <p className="text-xs text-[#ffffff]  uppercase mt-6 mb-2 px-2 font-bold">
-              Settings
-            </p>
+            <p className={sectionTitle}>Settings</p>
             <NavLink to="/superadmin/holiday-settings" className={linkClasses} onClick={() => onClose?.()}>
               <CalendarCheck size={18} />
               Holiday Settings
@@ -116,6 +111,11 @@ const Sidebar = ({ onClose }) => {
             <NavLink to="/head/all-requests" className={linkClasses} onClick={() => onClose?.()}>
               <ClipboardCheck size={18} />
               All Requests
+            </NavLink>
+            <p className={sectionTitle}>Attendance</p>
+            <NavLink to="/head/faculty-attendance" className={linkClasses} onClick={() => onClose?.()}>
+              <CalendarDays size={18} />
+              Faculty Attendance
             </NavLink>
 
             <p className={sectionTitle}>Approvals</p>
@@ -147,6 +147,11 @@ const Sidebar = ({ onClose }) => {
             <NavLink to="/admin/users" className={linkClasses} onClick={() => onClose?.()}>
               <Users size={18} />
               Faculty Profiles
+            </NavLink>
+            <p className={sectionTitle}>Attendance</p>
+            <NavLink to="/admin/faculty-attendance" className={linkClasses} onClick={() => onClose?.()}>
+              <CalendarDays size={18} />
+              Faculty Attendance
             </NavLink>
 
             <p className={sectionTitle}>Approvals</p>
@@ -218,7 +223,7 @@ const Sidebar = ({ onClose }) => {
           <>
             <p className={sectionTitle}>Overview</p>
             <NavLink to="/fadmin/dashboard" className={linkClasses} onClick={() => onClose?.()}>
-              <LayoutDashboard size={18} /> 
+              <LayoutDashboard size={18} />
               Dashboard
             </NavLink>
             <NavLink to="/fadmin/fee-structure" className={linkClasses} onClick={() => onClose?.()}>
@@ -231,11 +236,12 @@ const Sidebar = ({ onClose }) => {
             </NavLink>
           </>
         )}
+
         {/* STUDENT */}
         {user?.role === "STUDENT" && (
           <>
-            <p className={sectionTitle} >Overview</p>
-            <NavLink to="/student/dashboard" className={linkClasses} onClick={() => onClose?.()}>   
+            <p className={sectionTitle}>Overview</p>
+            <NavLink to="/student/dashboard" className={linkClasses} onClick={() => onClose?.()}>
               <LayoutDashboard size={18} />
               Dashboard
             </NavLink>
@@ -252,7 +258,7 @@ const Sidebar = ({ onClose }) => {
               Make Payment
             </NavLink>
           </>
-        )}  
+        )}
 
       </nav>
 
@@ -260,7 +266,7 @@ const Sidebar = ({ onClose }) => {
       <div className="mt-auto pt-6">
         <button
           onClick={logout}
-          className="w-full flex items-center gap-3 px-4 py-2 rounded-lg text-red-500 font-bold hover:bg-red-500 hover:text-white transition"
+          className="w-full flex items-center gap-3 px-4 py-2.5 sm:py-2 rounded-lg text-red-500 font-bold hover:bg-red-500 hover:text-white transition"
         >
           <LogOut size={18} />
           Logout
