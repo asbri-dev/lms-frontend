@@ -16,7 +16,7 @@ import {
 
 // import AttendanceReport from "./reportModules";
 // import LeaveReport from "./modules/LeaveReport";
-// import LeaveBalanceReport from "./modules/LeaveBalanceReport";
+ import LeaveBalanceReport from "./reportModules/LeaveBalanceReport";
 // import DepartmentReport from "./modules/DepartmentReport";
 // import MonthlyReport from "./modules/MonthlyReport";
 // import EmployeeReport from "./modules/EmployeeReport";
@@ -37,13 +37,13 @@ const MODULES = [
     key: "leave",
     label: "Leave Report",
     icon: <ClipboardList size={16} />,
-    //component: <LeaveReport />,
+     component: <LeaveBalanceReport />,
   },
   {
     key: "balance",
     label: "Leave Balance",
     icon: <WalletCards size={16} />,
-    //component: <LeaveBalanceReport />,
+   //component: <LeaveBalanceReport />,
   },
   {
     key: "department",
@@ -99,7 +99,7 @@ export default function ReportsDashboard() {
     <div className="min-h-screen bg-gray-50">
 
       {/* Header */}
-      <div className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
+      <div className="bg-white border-shadow border-shadow px-6 py-4 flex items-center justify-between">
 
         <div>
           <h1 className="text-lg font-semibold text-gray-800">

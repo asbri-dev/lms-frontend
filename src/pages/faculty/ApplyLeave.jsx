@@ -15,7 +15,7 @@ import {
 } from "date-fns";
 import "react-datepicker/dist/react-datepicker.css";
 import { API_BASE_URL } from "../../config/api";
-
+import { toast } from "react-hot-toast";
 const ApplyLeave = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -181,6 +181,7 @@ const checkLeaveBalance = useCallback(() => {
       }
 
       setEligible(true);
+      toast.success(data?.message || text || "Eligible");
       setMessage(data?.message || text || "Eligible");
 
     } catch {
@@ -279,6 +280,7 @@ const checkLeaveBalance = useCallback(() => {
       }
 
       setMessage("Leave applied successfully ✅");
+      toast.success(data?.message || "Leave applied successfully ✅");
 
       setTimeout(() => navigate("/faculty/dashboard"), 1500);
 

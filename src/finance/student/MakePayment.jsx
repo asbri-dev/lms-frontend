@@ -492,6 +492,7 @@ function AllPaidState() {
 // ─── main page ───────────────────────────────────────────────────────────────
 
 export default function PaymentPage() {
+  
   const { user } = useAuth();
   const admissionNo = user?.admissionNumber;
 

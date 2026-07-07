@@ -6,6 +6,7 @@ import DatePicker from "react-datepicker";
 import { format } from "date-fns";
 import "react-datepicker/dist/react-datepicker.css";
 import { CalendarDays, Clock, FileText } from "lucide-react";
+import { toast } from "react-hot-toast";
 
 /* ================= CONFIG ================= */
 const TIME_SLOTS = {
@@ -44,7 +45,6 @@ const ApplyPermission = () => {
   const [eligible, setEligible] = useState(false);
   const [message, setMessage] = useState("");
 
-  const [toast, setToast] = useState(null);
 
   /* ================= DERIVED ================= */
   const campus = useMemo(
@@ -130,7 +130,7 @@ const ApplyPermission = () => {
         // 🟢 Success
         setEligible(true);
         setMessage(data?.message || text || "Eligible");
-
+        toast.success(data?.message || text || "Eligible");
       } catch {
         setMessage("Network error");
       } finally {
@@ -183,7 +183,7 @@ const ApplyPermission = () => {
         return;
       }
 
-      setToast("Permission submitted successfully ✅");
+      toast.success(data?.message || text || "Permission submitted successfully ✅");
 
       setTimeout(() => {
         navigate("/faculty/my-leaves");

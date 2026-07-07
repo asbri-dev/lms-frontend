@@ -40,7 +40,7 @@ const AuditLogs = () => {
 
     const link = document.createElement("a");
     link.href = url;
-    link.download = "Attendance_Muster.xlsx";
+    link.download = "Audit_Logs.xlsx";
 
     document.body.appendChild(link);
     link.click();
@@ -48,11 +48,11 @@ const AuditLogs = () => {
 
     window.URL.revokeObjectURL(url);
 
-    toast.success("Attendance Muster Excel downloaded successfully");
+    toast.success("downloaded successfully");
 
   } catch (error) {
     console.error(error);
-    toast.error("Failed to download Attendance Muster Excel");
+    toast.error("Failed to download Excel");
   } finally {
     setLoading(false);
   }
