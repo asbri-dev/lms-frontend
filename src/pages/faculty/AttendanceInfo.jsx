@@ -120,6 +120,18 @@ const AttendanceInfo = ({ employeeId }) => {
     fetchAttendance();
   }, [fetchAttendance]);
 
+  const normalizeStatus = (status)=>{
+    switch(status){
+      case "cl":
+        return "CL";
+      
+      case "ml":
+        return "ML";
+  
+
+    } 
+  }
+
 return (
   <div className="space-y-4 sm:space-y-6">
 
@@ -285,11 +297,15 @@ return (
                   {selectedDetails.rawDate}
                 </h3>
                 <span className="shrink-0 text-[11px] sm:text-xs font-semibold px-2.5 py-1 rounded-full bg-[#eef2ff] text-[#2b3c6b]">
-                  {selectedDetails.details.status}
+                  {normalizeStatus(selectedDetails.details.status)}
                 </span>
               </div>
 
               <div className="flex items-center gap-2 text-gray-500 text-xs sm:text-sm">
+                <Clock size={14} className="text-gray-400" />
+                Work Hours: <span className="font-medium text-gray-700">{selectedDetails.details.workDuration}</span>
+              </div>
+               <div className="flex items-center gap-2 text-gray-500 text-xs sm:text-sm">
                 <Clock size={14} className="text-gray-400" />
                 Work Hours: <span className="font-medium text-gray-700">{selectedDetails.details.workDuration}</span>
               </div>
@@ -356,10 +372,10 @@ return (
               </div>
 
               <div className="grid grid-cols-2 gap-2 text-xs sm:text-sm">
-                <div className="bg-gray-50 rounded-lg px-3 py-2 text-gray-600">Late In: <span className="font-medium text-gray-800">{selectedDetails.details.lateIn}</span></div>
-                <div className="bg-gray-50 rounded-lg px-3 py-2 text-gray-600">Late Out: <span className="font-medium text-gray-800">{selectedDetails.details.lateOut}</span></div>
-                <div className="bg-gray-50 rounded-lg px-3 py-2 text-gray-600">Early In: <span className="font-medium text-gray-800">{selectedDetails.details.earlyIn}</span></div>
-                <div className="bg-gray-50 rounded-lg px-3 py-2 text-gray-600">Early Out: <span className="font-medium text-gray-800">{selectedDetails.details.earlyOut}</span></div>
+               <div className="bg-gray-50 rounded-lg px-3 py-2 text-gray-600">Late In: <span className="font-medium text-gray-800">{selectedDetails.details.lateIn}</span></div>
+               <div className="bg-gray-50 rounded-lg px-3 py-2 text-gray-600">Late Out: <span className="font-medium text-gray-800">{selectedDetails.details.lateOut}</span></div>
+               <div className="bg-gray-50 rounded-lg px-3 py-2 text-gray-600">Early In: <span className="font-medium text-gray-800">{selectedDetails.details.earlyIn}</span></div>
+               <div className="bg-gray-50 rounded-lg px-3 py-2 text-gray-600">Early Out: <span className="font-medium text-gray-800">{selectedDetails.details.earlyOut}</span></div>
               </div>
             </div>
 
