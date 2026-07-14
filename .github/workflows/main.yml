@@ -1,4 +1,4 @@
-name: Deploy Frontend Production to Firebase
+name: Deploy Frontend UAT to Firebase
 
 on:
   push:
@@ -27,12 +27,12 @@ jobs:
       - name: Build React App (Production)
         run: npm run build
         env:
-          VITE_API_BASE_URL: ${{ secrets.VITE_API_BASE_URL }}
+          VITE_API_BASE_URL: ${{ secrets.VITE_API_BASE_URL_UAT }}
 
       - name: Deploy to Firebase Live Channel
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
-          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_LMS_ARIES }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_LMS_ASBRITECH }}
           channelId: live
-          projectId: lms-aries
+          projectId: lms-asbritech
