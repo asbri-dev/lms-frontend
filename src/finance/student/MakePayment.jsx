@@ -78,7 +78,7 @@ function Backdrop({ children, onClose }) {
       style={{ background: "rgba(15,23,42,0.55)", backdropFilter: "blur(4px)" }}
       onClick={onClose}
     >
-      <div onClick={(e) => e.stopPropagation()}>{children}</div>/
+      <div onClick={(e) => e.stopPropagation()}>{children}</div>
     </div>
   );
 }
@@ -133,7 +133,7 @@ function ConfirmModal({ fee, studentInfo, onConfirm, onClose, paying }) {
               </p>
             </div>
           </div>
-
+           
           {/* Fee details */}
           <div
             className="rounded-2xl border divide-y"
@@ -492,7 +492,7 @@ function AllPaidState() {
 // ─── main page ───────────────────────────────────────────────────────────────
 
 export default function PaymentPage() {
-  
+
   const { user } = useAuth();
   const admissionNo = user?.admissionNumber;
 
@@ -541,31 +541,27 @@ export default function PaymentPage() {
       const payload = {
         studentName: pageData.studentName,
         admissionNumber: pageData.admissionNumber,
-        currentAcademicYear: pageData.currentAcademicYear,
-        amountPaid: selectedFee.amountPaid,
-        dueDate: selectedFee.dueDate,
-        fineAmount: selectedFee.fineAmount,
         amountToBePaid: selectedFee.amountToBePaid,
-        feeStatus: selectedFee.feeStatus,
+        email: pageData.email,
+        mobileNumber: pageData.mobileNumber,
         feeName: selectedFee.feeName,
       };
 
-      const res = await fetch(`${API_BASE_URL}/pay`, {
+      const res = await fetch(`${API_BASE_URL}/payments/initiateSale`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
 
       const data = await res.json();
-
-      if (!res.ok || data.status !== "success") {
-        throw new Error(data.message || "Payment was not successful.");
-      }
+if (!res.ok || !data.paymentUrl) {
+    throw new Error(data.message || "Failed to initiate payment");
+}
+// Redirect to ICICI — React app leaves browser here
+window.location.href = data.paymentUrl;
 
       // success
       setPaidFee(selectedFee);
-      setSuccessTxn(data);
-      setSelectedFee(null);
       // remove from list
       setUnpaidFees((prev) => prev.filter((f) => f.feeName !== selectedFee.feeName));
     } catch (err) {

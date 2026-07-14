@@ -55,6 +55,9 @@ import StudentDashboard from "./finance/student/StudentDashboard";
 import StudentProfile from "./finance/student/StudentProfile";
 import MyFeePage from "./finance/student/MyFeePage";
 import MakePayment from "./finance/student/MakePayment";
+import PaymentReturn  from "./finance/student/PaymentReturn";
+import PaymentSuccess from "./finance/student/PaymentSuccess";
+import PaymentFailure from "./finance/student/PaymentFailure";
 
 
 
@@ -211,6 +214,10 @@ function App() {
         <Route path="profile" element={<StudentProfile />} />
         <Route path="fees-page" element={<MyFeePage />} />
         <Route path="make-payment" element={<MakePayment />} />
+        <Route path="payment-return" element={<PaymentReturn />} />
+        <Route path="payment/success" element={<PaymentSuccess />} />
+        <Route path="payment/failure" element={<PaymentFailure />} />
+       
       </Route>  
 
 
