@@ -27,7 +27,7 @@ jobs:
       - name: Build React App (Production)
         run: npm run build
         env:
-          VITE_API_BASE_URL: ${{ secrets.VITE_API_BASE_URL_UAT }}
+          VITE_API_BASE_URL: ${{ secrets.VITE_API_URL }}
 
       - name: Deploy to Firebase Live Channel
         uses: FirebaseExtended/action-hosting-deploy@v0
