@@ -305,10 +305,16 @@ return (
                 <Clock size={14} className="text-gray-400" />
                 Work Hours: <span className="font-medium text-gray-700">{selectedDetails.details.workDuration}</span>
               </div>
-               <div className="flex items-center gap-2 text-gray-500 text-xs sm:text-sm">
-                <Clock size={14} className="text-gray-400" />
-                Work Hours: <span className="font-medium text-gray-700">{selectedDetails.details.workDuration}</span>
-              </div>
+              {/* Show only if Override Reason exists */}
+              {selectedDetails.details.reason && (
+               <div className="flex items-center gap-2 text-gray-500 text-xs sm:text-sm mt-2">
+                 <SquarePen size={14} className="text-gray-400" />
+                 <span>Reason for Override:</span>
+                 <span className="font-medium text-gray-700">
+                   {selectedDetails.details.reason}
+                 </span>
+               </div>
+              )} 
             </div>
 
             {/* SESSION */}
