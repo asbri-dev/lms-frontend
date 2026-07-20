@@ -45,6 +45,8 @@ export const STATUS_MAP = {
   "Present(O):Present":    { label: "P", color: "#D7FDF0", type: "Present" },
   "Present:Present(O)":    { label: "P", color: "#D7FDF0", type: "Present" },
   "PR-Present:Present(O)": { label: "PR-P", color: "#D7FDF0", type: "Present" },
+  "Onduty:Present":         { label: "OD/P", color: "#E9F0DB", type: "Leave/Present" },
+  "Present:Onduty":         { label: "P/OD", color: "#E9F0DB", type: "Present/Leave" },
   
 
 };
