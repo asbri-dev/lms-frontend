@@ -127,6 +127,9 @@ const AttendanceInfo = ({ employeeId }) => {
       
       case "ml":
         return "ML";
+
+      default:
+        return status.charAt(0).toUpperCase() + status.slice(1);
   
 
     } 
