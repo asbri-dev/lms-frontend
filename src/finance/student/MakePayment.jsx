@@ -545,6 +545,7 @@ export default function PaymentPage() {
         email: pageData.email,
         mobileNumber: pageData.mobileNumber,
         feeName: selectedFee.feeName,
+        curentYear: pageData.currentYear,
       };
 
       const res = await fetch(`${API_BASE_URL}/payments/initiateSale`, {
