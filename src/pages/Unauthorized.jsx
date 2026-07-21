@@ -15,7 +15,7 @@ const Unauthorized = () => {
         <div className="unauthorized-actions">
           <button
             className="btn-primary"
-            onClick={() => navigate("/login")}
+            onClick={() => navigate("/")}
           >
             Go to Login
           </button>

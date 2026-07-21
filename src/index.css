@@ -15,3 +15,81 @@
 @import "./styles/components.css";
 
 @import "tailwindcss";
+@keyframes slide-in {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.animate-slide-in {
+  animation: slide-in 0.3s ease-out;
+}
+
+
+/* FullCalendar Custom UI */
+
+.fc-bg-event {
+  opacity: 5 !important;
+  
+}
+
+/* HEADER CONTAINER */
+.fc .fc-toolbar {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 10px 15px;
+  margin-bottom: 15px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+}
+
+/* TITLE */
+.fc .fc-toolbar-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+/* BUTTON GROUP */
+.fc .fc-button-group {
+  display: flex;
+  gap: 6px;
+}
+
+/* BUTTON STYLE */
+.fc .fc-button {
+  background: #f3f4f6 !important;
+  border: none !important;
+  color: #374151 !important;
+  border-radius: 8px !important;
+  padding: 6px 12px !important;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+/* HOVER */
+.fc .fc-button:hover {
+  background: #6366f1 !important;
+  color: white !important;
+}
+
+/* ACTIVE */
+.fc .fc-button:active,
+.fc .fc-button.fc-button-active {
+  background: #4f46e5 !important;
+  color: white !important;
+}
+
+/* TODAY BUTTON SPECIAL */
+.fc .fc-today-button {
+
+  background: #22c55e !important;
+  color: white !important;
+}
+.fc-daygrid-day {
+  cursor: pointer;
+}

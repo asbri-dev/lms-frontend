@@ -1,257 +1,146 @@
-import { useEffect, useMemo, useState } from "react";
-import { useAuth } from "../../auth/AuthContext";
+import { useState } from "react";
+import EmployeeDirectory from "./modules/EmployeeDirectory";
+import TopLeaveTakers from "./modules/TopLeaveTakers";
+import PendingRequests from "./modules/PendingRequests";
+import EmployeeExitManagement from "./modules/EmployeeExitManagement";
+import AuditLogs from "./modules/AuditLogs";
+import FacultyAttendanceModule from "./modules/FacultyAttendanceModule";
 
-const PAGE_SIZE = 10;
+const MODULES = [
+  {
+    key: "directory",
+    label: "Employee Directory",
+    shortLabel: "Directory",
+    icon: (
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+        <circle cx="9" cy="7" r="4"/>
+        <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+        <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+      </svg>
+    ),
+    component: <EmployeeDirectory />,
+  },
+  {
+    key: "leavetakers",
+    label: "Top Leave Takers",
+    shortLabel: "Leave",
+    icon: (
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+      </svg>
+    ),
+    component: <TopLeaveTakers />,
+  },
+  {
+    key: "pending",
+    label: "Pending Requests",
+    shortLabel: "Pending",
+    icon: (
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M9 11l3 3L22 4"/>
+        <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+      </svg>
+    ),
+    component: <PendingRequests />,
+  },
+  {
+    key: "audit",
+    label: "Audit Logs",
+    shortLabel: "Audit",
+    icon: (
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+        <polyline points="14 2 14 8 20 8"/>
+        <line x1="16" y1="13" x2="8" y2="13"/>
+        <line x1="16" y1="17" x2="8" y2="17"/>
+        <polyline points="10 9 9 9 8 9"/>
+      </svg>
+    ),
+    component: <AuditLogs />,
+  },
+  {
+    key: "exit",
+    label: "Exit Management",
+    shortLabel: "Exit",
+    icon: (
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+        <circle cx="9" cy="7" r="4"/>
+        <line x1="17" y1="8" x2="23" y2="8"/>
+      </svg>
+    ),
+    component: <EmployeeExitManagement />,
+  },
+  {
+    key: "faculty-attendance",
+    label: "Faculty Attendance",
+    shortLabel: "Faculty",
+    icon: (
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+        <path d="M16 2v4" />
+        <path d="M8 2v4" />
+        <path d="M3 10h18" />
+        <path d="M8 14h.01" />
+        <path d="M12 14h.01" />
+        <path d="M16 14h.01" />
+      </svg>
+    ),
+    component: <FacultyAttendanceModule />,
+  },
+];
 
 const SuperAdminDashboard = () => {
-  const { user } = useAuth();
+  const [active, setActive] = useState("directory");
 
-  const [data, setData] = useState(null);
-  const [activeTab, setActiveTab] = useState(null);
-
-  const [search, setSearch] = useState("");
-  const [department, setDepartment] = useState("ALL");
-  const [page, setPage] = useState(1);
-
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-
-  /* ================= FETCH DASHBOARD ================= */
-  useEffect(() => {
-    if (!user?.employeeId) return;
-
-    const fetchDashboard = async () => {
-      try {
-        setLoading(true);
-        setError("");
-
-        const response = await fetch(
-          `http://localhost:9090/getFacultyAndAdmin?rmEmpId=${user.employeeId}`
-        );
-
-        const result = await response.json();
-
-        if (!response.ok) {
-          throw new Error(result.message || "Failed to load dashboard");
-        }
-
-        setData(result);
-      } catch (err) {
-        setError(err.message || "Network error");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchDashboard();
-  }, [user?.employeeId]);
-
-  /* ================= CURRENT LIST ================= */
-  const currentList = useMemo(() => {
-    if (!data) return [];
-
-    if (activeTab === "faculty") return data.FacultyDetails || [];
-    if (activeTab === "admin") return data.AdminDetails || [];
-
-    return [];
-  }, [data, activeTab]);
-
-  /* ================= DEPARTMENT OPTIONS ================= */
-  const departments = useMemo(() => {
-    if (activeTab !== "faculty") return ["ALL"];
-
-    const unique = new Set(
-      (data?.FacultyDetails || []).map((f) => f.facultyDept)
-    );
-
-    return ["ALL", ...unique];
-  }, [data, activeTab]);
-
-  /* ================= FILTER ================= */
-  const filteredData = useMemo(() => {
-    let list = [...currentList];
-
-    if (activeTab === "faculty" && department !== "ALL") {
-      list = list.filter((f) => f.facultyDept === department);
-    }
-
-    if (search) {
-      const s = search.toLowerCase();
-
-      list = list.filter((item) => {
-        const name = `${item.firstName} ${item.lastName}`.toLowerCase();
-
-        return (
-          name.includes(s) ||
-          item.empId?.toLowerCase().includes(s)
-        );
-      });
-    }
-
-    return list;
-  }, [currentList, department, search, activeTab]);
-
-  /* ================= PAGINATION ================= */
-  const totalPages = Math.ceil(filteredData.length / PAGE_SIZE);
-
-  const paginatedData = useMemo(() => {
-    const start = (page - 1) * PAGE_SIZE;
-    return filteredData.slice(start, start + PAGE_SIZE);
-  }, [filteredData, page]);
-
-  /* ================= LOADING ================= */
-  if (loading) {
-    return <div className="text-center py-10">Loading dashboard...</div>;
-  }
-
-  if (error) {
-    return (
-      <div className="bg-red-100 text-red-600 p-4 rounded-lg">
-        {error}
-      </div>
-    );
-  }
+  const current = MODULES.find((m) => m.key === active);
 
   return (
-    <div className="space-y-8">
+    <div className="min-h-screen bg-gray-50">
 
-      {/* ================= STAT CARDS ================= */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-
-        <div
-          onClick={() => {
-            setActiveTab("faculty");
-            setPage(1);
-          }}
-          className="bg-white p-6 rounded-xl shadow-md cursor-pointer hover:shadow-lg"
-        >
-          <h4 className="text-gray-500">Faculty</h4>
-          <div className="text-3xl font-bold text-blue-600">
-            {data.FacultyCount}
-          </div>
+      {/* ─── Top Header ─── */}
+      <div className="bg-white border-b border-gray-200 px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between gap-3">
+        <div className="min-w-0">
+          <h1 className="text-base sm:text-lg font-semibold text-gray-800 truncate">
+            Super Admin Dashboard
+          </h1>
+          <p className="text-[11px] sm:text-xs text-gray-400 mt-0.5 truncate">
+            System-level control panel
+          </p>
         </div>
-
-        <div
-          onClick={() => {
-            setActiveTab("admin");
-            setPage(1);
-          }}
-          className="bg-white p-6 rounded-xl shadow-md cursor-pointer hover:shadow-lg"
-        >
-          <h4 className="text-gray-500">Admins</h4>
-          <div className="text-3xl font-bold text-purple-600">
-            {data.AdminCount}
-          </div>
-        </div>
-
+        <span className="shrink-0 text-[10px] sm:text-xs font-medium px-2.5 sm:px-3 py-1 rounded-full bg-indigo-100 text-indigo-700">
+          Super Admin
+        </span>
       </div>
 
-      {/* ================= SEARCH + FILTER ================= */}
-      {activeTab && (
-        <div className="flex flex-wrap gap-4">
-
-          <input
-            type="text"
-            placeholder="Search name or employee ID"
-            value={search}
-            onChange={(e) => {
-              setSearch(e.target.value);
-              setPage(1);
-            }}
-            className="border px-3 py-2 rounded-md"
-          />
-
-          {activeTab === "faculty" && (
-            <select
-              value={department}
-              onChange={(e) => {
-                setDepartment(e.target.value);
-                setPage(1);
-              }}
-              className="border px-3 py-2 rounded-md"
+      {/* ─── Tab Bar ─── */}
+      <div className="bg-white border-b border-gray-200 px-2 sm:px-6">
+        <div className="flex gap-0.5 sm:gap-1 overflow-x-auto scrollbar-hide">
+          {MODULES.map((m) => (
+            <button
+              key={m.key}
+              onClick={() => setActive(m.key)}
+              className={`flex flex-col sm:flex-row items-center gap-1 sm:gap-2 px-2.5 sm:px-4 py-2.5 sm:py-3 text-[11px] sm:text-sm font-medium border-b-2 transition-colors whitespace-nowrap shrink-0 ${
+                active === m.key
+                  ? "border-indigo-600 text-indigo-600"
+                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+              }`}
             >
-              {departments.map((dept) => (
-                <option key={dept} value={dept}>
-                  {dept}
-                </option>
-              ))}
-            </select>
-          )}
-
+              <span className={active === m.key ? "text-indigo-600" : "text-gray-400"}>
+                {m.icon}
+              </span>
+              <span className="sm:hidden">{m.shortLabel}</span>
+              <span className="hidden sm:inline">{m.label}</span>
+            </button>
+          ))}
         </div>
-      )}
+      </div>
 
-      {/* ================= TABLE ================= */}
-      {activeTab && (
-        <div className="bg-white rounded-xl shadow-md overflow-x-auto">
-
-          <table className="min-w-full">
-
-            <thead className="bg-gray-100">
-              <tr>
-                <th className="text-left p-3">Emp ID</th>
-                <th className="text-left p-3">Name</th>
-                <th className="text-left p-3">Department</th>
-                <th className="text-left p-3">Designation</th>
-                <th className="text-left p-3">Mobile</th>
-              </tr>
-            </thead>
-
-            <tbody>
-              {paginatedData.map((emp) => (
-                <tr key={emp.id} className="border-t">
-
-                  <td className="p-3">{emp.empId}</td>
-
-                  <td className="p-3">
-                    {emp.firstName} {emp.lastName}
-                  </td>
-
-                  <td className="p-3">
-                    {activeTab === "faculty"
-                      ? emp.facultyDept
-                      : emp.adminDept}
-                  </td>
-
-                  <td className="p-3">{emp.designation}</td>
-
-                  <td className="p-3">{emp.mobileNumber}</td>
-
-                </tr>
-              ))}
-            </tbody>
-
-          </table>
-
-        </div>
-      )}
-
-      {/* ================= PAGINATION ================= */}
-      {activeTab && totalPages > 1 && (
-        <div className="flex items-center gap-4">
-
-          <button
-            disabled={page === 1}
-            onClick={() => setPage(page - 1)}
-            className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
-          >
-            Prev
-          </button>
-
-          <span>
-            Page {page} / {totalPages}
-          </span>
-
-          <button
-            disabled={page === totalPages}
-            onClick={() => setPage(page + 1)}
-            className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
-          >
-            Next
-          </button>
-
-        </div>
-      )}
+      {/* ─── Active Module ─── */}
+      <div className="p-3 sm:p-6">
+        {current?.component}
+      </div>
 
     </div>
   );

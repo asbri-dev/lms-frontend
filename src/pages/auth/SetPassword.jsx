@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { API_BASE_URL } from "../../config/api";
 
 const SetPassword = () => {
   const navigate = useNavigate();
@@ -14,6 +15,7 @@ const SetPassword = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   /* Password Rules */
   const rules = {
@@ -57,7 +59,7 @@ const SetPassword = () => {
       setLoading(true);
 
       const response = await fetch(
-        `http://localhost:9090/set-password?domain=${domain}&guid=${guid}`,
+        `${API_BASE_URL}/set-password?domain=${domain}&guid=${guid}`,
         {
           method: "POST",
           headers: {
@@ -76,7 +78,16 @@ const SetPassword = () => {
       setSuccess("Password set successfully! Redirecting to login...");
 
       setTimeout(() => {
-        navigate("/login");
+        if(data.portal==="Leave"){
+          navigate("/login");
+        }
+          else if(data.portal==="Fee"){ 
+            navigate("/login-page");
+          }
+          else{
+            navigate("/");
+          }
+        
       }, 2000);
     } catch (err) {
       setError(err.message || "Something went wrong");
@@ -103,9 +114,10 @@ const SetPassword = () => {
           Set Your Password
         </h2>
 
-        <p className="text-gray-500 text-sm text-center mb-6">
+        <p className="text-gray-500 text-sm font-bold text-center mb-6">
           Create a strong password to secure your account
         </p>
+       
 
         {error && (
           <div className="bg-red-100 text-red-600 text-sm p-3 rounded-lg mb-4">
@@ -121,37 +133,57 @@ const SetPassword = () => {
 
         <form onSubmit={handleSubmit} className="space-y-5">
 
-          {/* Password */}
-          <div>
-            <label className="text-sm text-gray-600 font-medium">
-              New Password
-            </label>
+         
+{/* Password */}
+<div className="relative">
+  <label className="text-sm text-gray-600 font-medium">
+    New Password
+  </label>
 
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Enter strong password"
-              className="mt-1 w-full border border-gray-300 rounded-lg px-3 py-2
-                         focus:outline-none focus:ring-2 focus:ring-[#3f548f]"
-            />
-          </div>
+  <input
+    type={showPassword ? "text" : "password"}
+    value={password}
+    onChange={(e) => setPassword(e.target.value)}
+    placeholder="Enter strong password"
+    className="mt-1 w-full border border-gray-300 rounded-lg px-3 py-2 pr-16
+               focus:outline-none focus:ring-2 focus:ring-[#3f548f]"
+  />
 
-          {/* Confirm Password */}
-          <div>
-            <label className="text-sm text-gray-600 font-medium">
-              Confirm Password
-            </label>
+  <button
+    type="button"
+    onClick={() => setShowPassword(!showPassword)}
+    className="absolute right-3 top-10 text-sm font-medium text-[#1e3a8a] hover:text-[#3b82f6]"
+  >
+    {showPassword ? "Hide" : "Show"}
+  </button>
+</div>
 
-            <input
-              type="password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              placeholder="Re-enter password"
-              className="mt-1 w-full border border-gray-300 rounded-lg px-3 py-2
-                         focus:outline-none focus:ring-2 focus:ring-[#3f548f]"
-            />
-          </div>
+{/* Confirm Password */}
+<div className="relative">
+  <label className="text-sm text-gray-600 font-medium">
+    Confirm Password
+  </label>
+
+  <input
+    type={showPassword ? "text" : "password"}
+    value={confirmPassword}
+    onChange={(e) => setConfirmPassword(e.target.value)}
+    placeholder="Re-enter password"
+    className="mt-1 w-full border border-gray-300 rounded-lg px-3 py-2 pr-16
+               focus:outline-none focus:ring-2 focus:ring-[#3f548f]"
+  />
+
+  <button
+    type="button"
+    onClick={() => setShowPassword(!showPassword)}
+    className="absolute right-3 top-10 text-sm font-medium text-[#1e3a8a] hover:text-[#3b82f6]"
+  >
+    {showPassword ? "Hide" : "Show"}
+  </button>
+</div>
+<p className="text-blue-500 text-sm font-bold text-center mb-6">
+        Don't share your password with anyone !!!
+        </p>
 
           {/* Password Rules */}
           <div className="bg-gray-50 border border-gray-200 p-4 rounded-lg text-sm">
@@ -178,7 +210,7 @@ const SetPassword = () => {
               </li>
 
               <li className={`flex items-center gap-2 ${rules.special ? "text-green-600" : "text-gray-500"}`}>
-                {rules.special ? "✔" : "•"} One special character (@$!%*?&)
+                {rules.special ? "✔" : "•"} One special character (Eg: @$!%*?&)
               </li>
 
             </ul>

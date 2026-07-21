@@ -1,271 +1,904 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
 import { format, startOfMonth, endOfMonth, eachDayOfInterval } from "date-fns";
-import { exportAttendanceExcel } from "../../utils/excel";
+//import { exportAttendanceExcel } from "../../utils/excel";
+import { Search, MapPin, Building2, Calendar, Download } from "lucide-react";
+import toast from "react-hot-toast";
+import { API_BASE_URL } from "../../config/api";
 
+/* ─── Status Map ─── */
 const STATUS_MAP = {
-  Present: { label: "P", color: "bg-green-100 text-green-700" },
-  Absent: { label: "A", color: "bg-red-100 text-red-700" },
-  Holiday: { label: "H", color: "bg-blue-100 text-blue-700" },
-  Offday: { label: "OFF", color: "bg-gray-200 text-gray-700" },
-  "Casual Leave": { label: "CL", color: "bg-purple-100 text-purple-700" },
-  "Medical Leave": { label: "ML", color: "bg-pink-100 text-pink-700" },
-  Onduty: { label: "OD", color: "bg-yellow-100 text-yellow-700" }
+  Present: { label: "P", color: "bg-green-100 text-green-800", display: "Present" },
+  Absent: { label: "A", color: "bg-red-100 text-red-800", display: "Absent" },
+  Holiday: { label: "H", color: "bg-blue-100 text-blue-800", display: "Holiday" },
+  Off: { label: "OFF", color: "bg-gray-200 text-gray-600", display: "Week Off" },
+
+  CL: { label: "CL", color: "bg-purple-100 text-purple-800", display: "Casual Leave" },
+  ML: { label: "ML", color: "bg-pink-100 text-pink-800", display: "Medical Leave" },
+  OD: { label: "OD", color: "bg-yellow-100 text-yellow-800", display: "On Duty" },
+
+  Unknown: { label: "?", color: "bg-gray-100 text-gray-400", display: "Unknown" },
+
+  // aliases
+  cl: { label: "CL", color: "bg-purple-100 text-purple-800", display: "Casual Leave" },
+  ml: { label: "ML", color: "bg-pink-100 text-pink-800", display: "Medical Leave" },
+  Onduty: { label: "OD", color: "bg-yellow-100 text-yellow-800", display: "On Duty" },
+
+  // half-day combinations
+  "Present:Absent": {
+    label: "P/A",
+    color: "bg-orange-100 text-orange-800",
+    display: "Present / Absent",
+  },
+  "Present(O):Present":
+   {
+    label: "P",
+    color: "bg-green-100 text-green-800",
+    display: "Present (Opening) / Present",
+  },
+  "Present:Present(O)": {
+    label: "P",
+    color: "bg-green-100 text-green-800",
+    display: "Present / Present (Opening)",
+  },
+
+  "Absent:Present": {
+    label: "A/P",
+    color: "bg-orange-100 text-orange-800",
+    display: "Absent / Present",
+  },
+
+  "Present:cl": {
+    label: "P/CL",
+    color: "bg-cyan-100 text-cyan-800",
+    display: "Present / Casual Leave",
+  },
+
+  "cl:Present": {
+    label: "CL/P",
+    color: "bg-cyan-100 text-cyan-800",
+    display: "Casual Leave / Present",
+  },
+
+  "Present:ml": {
+    label: "P/ML",
+    color: "bg-pink-100 text-pink-800",
+    display: "Present / Medical Leave",
+  },
+
+  "ml:Present": {
+    label: "ML/P",
+    color: "bg-pink-100 text-pink-800",
+    display: "Medical Leave / Present",
+  },
+
+  "Absent:cl": {
+    label: "A/CL",
+    color: "bg-red-100 text-red-800",
+    display: "Absent / Casual Leave",
+  },
+
+  "cl:Absent": {
+    label: "CL/A",
+    color: "bg-red-100 text-red-800",
+    display: "Casual Leave / Absent",
+  },
+
+  "Absent:ml": {
+    label: "A/ML",
+    color: "bg-red-100 text-red-800",
+    display: "Absent / Medical Leave",
+  },
+
+  "ml:Absent": {
+    label: "ML/A",
+    color: "bg-red-100 text-red-800",
+    display: "Medical Leave / Absent",
+  },
+
+  // permission combinations
+  "PR-Present:Present": {
+    label: "PR-P",
+    color: "bg-green-100 text-green-800",
+    display: "Permission",
+  },
+
+  "Present:Present-PR": {
+    label: "P-PR",
+    color: "bg-green-100 text-green-800",
+    display: "Present + Permission",
+  },
+
+  "PR-Present:Absent": {
+    label: "PR-A",
+    color: "bg-orange-100 text-orange-800",
+    display: "Permission + Absent",
+  },
+
+  "Absent:Present-PR": {
+    label: "A-PR",
+    color: "bg-orange-100 text-orange-800",
+    display: "Absent + Permission",
+  },
+
+  "CL(O)": {
+    label: "CL(O)",
+    color: "bg-purple-100 text-purple-800",
+    display: "Casual Leave Opening",
+  },
+    "CL(O): Present": {
+    label: "CL(O)/P",
+    color: "bg-purple-100 text-purple-800",
+    display: "Casual Leave Opening",
+  },
+    "Present(O)": {
+    label: "P(O)",
+    color: "bg-green-100 text-green-800",
+    display: "Present Opening",
+  },
+  "Present:CL(O)":{
+  label: "P/CL(O)",
+  color: "bg-green-100 text-green-800",
+  display: "Present Opening",
+  },
+  "CL(O):Present":{
+  label: "CL(O)/P",
+  color: "bg-green-100 text-green-800",
+  display: "Present Opening",
+  }
+
 };
 
-const AttendanceMuster = () => {
-  const [month, setMonth] = useState(format(new Date(), "yyyy-MM"));
-  const [data, setData] = useState([]);
-  const [search, setSearch] = useState("");
-  const [loading, setLoading] = useState(false);
 
-  /* ================= Month Range ================= */
+const LEGEND_ENTRIES = [
+  { key: "Present", ...STATUS_MAP.Present },
+  { key: "Absent",  ...STATUS_MAP.Absent  },
+  { key: "CL",      ...STATUS_MAP.CL      },
+  { key: "ML",      ...STATUS_MAP.ML      },
+  { key: "OD",      ...STATUS_MAP.OD      },
+  { key: "Off",     ...STATUS_MAP.Off     },
+  { key: "Holiday", ...STATUS_MAP.Holiday },
+  { key: "Unknown", ...STATUS_MAP.Unknown },
+  { key: "PR-Present:Present", ...STATUS_MAP["PR-Present:Present"] },
+];
+
+const TOTAL_KEYS = ["Total","Present", "Absent", "CL", "ML", "OD", "Off", "Holiday", "Unknown", "Permission"];
+
+/* ─── Derive location from employeeId prefix ─── */
+const getLocation = (employeeId) => {
+  if (!employeeId) return "Unknown";
+  if (employeeId.startsWith("AREP")) return "Palakkad";
+  if (employeeId.startsWith("AREC")) return "Chittoor";
+  return "Unknown";
+};
+
+// /* ─── Normalize status key to canonical form ─── */
+// const normalizeStatus = (status) => {
+//   if (!status) return null;
+//   if (status === "cl" || status === "CL") return "CL";
+//   if (status === "ml" || status === "ML") return "ML";
+//   if (status === "Onduty" || status === "OD") return "OD";
+//   return status;
+// };
+
+const AttendanceMuster = () => {
+  const [month, setMonth]         = useState(format(new Date(), "yyyy-MM"));
+  const [data, setData]           = useState([]);
+  const [search, setSearch]       = useState("");
+  const [department, setDept]     = useState("All");
+  const [location, setLocation]   = useState("All");
+  const [sortField, setSortField] = useState(null); // "name" | "id"
+  const [sortDir, setSortDir]     = useState("asc");
+  const [loading, setLoading]     = useState(false);
+  const [error, setError]         = useState(null);
+
+  const token = sessionStorage.getItem("authToken");
+
+  /* ─── Month Range ─── */
   const { fromDate, endDate } = useMemo(() => {
     const d = new Date(`${month}-01`);
     return {
       fromDate: format(startOfMonth(d), "dd-MMM-yyyy"),
-      endDate: format(endOfMonth(d), "dd-MMM-yyyy")
+      endDate:  format(endOfMonth(d),   "dd-MMM-yyyy"),
     };
   }, [month]);
 
-  /* ================= Month Days ================= */
+  /* ─── Days in month ─── */
   const days = useMemo(() => {
     const start = new Date(`${month}-01`);
-    const end = endOfMonth(start);
-    return eachDayOfInterval({ start, end });
+    return eachDayOfInterval({ start, end: endOfMonth(start) });
   }, [month]);
 
-  /* ================= Fetch Attendance ================= */
-  useEffect(() => {
-    let ignore = false;
+  /* ─── Fetch ─── */
+  const fetchAttendance = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
 
-    const fetchAttendance = async () => {
-      try {
-        setLoading(true);
+      const res = await fetch(
+        `${API_BASE_URL}/getAttendanceMuster?fromDate=${fromDate}&endDate=${endDate}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
 
-        const res = await fetch(
-          `http://localhost:9090/getAttendanceMuster?fromDate=${fromDate}&endDate=${endDate}`
-        );
+      if (!res.ok) throw new Error(`Server error: ${res.status}`);
 
-        const json = await res.json();
+      const json = await res.json();
+      setData(json.AttendanceMuster || []);
+    } catch (e) {
+      setError(e.message || "Failed to load attendance");
+      setData([]);
+    } finally {
+      setLoading(false);
+    }
+  }, [fromDate, endDate, token]);
 
-        if (!res.ok) throw new Error("Failed to load attendance");
+useEffect(() => {
+  fetchAttendance();
+}, [fetchAttendance]);
 
-        if (!ignore) setData(json.AttendanceMuster || []);
-      } catch (e) {
-        console.error(e);
-      } finally {
-        if (!ignore) setLoading(false);
-      }
-    };
+  /* ─── Departments ─── */
+  const departments = useMemo(() => {
+    const set = new Set(data.map(e => e.department).filter(Boolean));
+    return ["All", ...Array.from(set).sort()];
+  }, [data]);
 
-    fetchAttendance();
+  /* ─── Locations (derived from employeeId) ─── */
+  const locations = useMemo(() => {
+    const set = new Set(data.map(e => getLocation(e.employeeId)));
+    return ["All", ...Array.from(set).sort()];
+  }, [data]);
 
-    return () => {
-      ignore = true;
-    };
-  }, [fromDate, endDate]);
-
-  /* ================= Search Filter ================= */
+  /* ─── Filter + Sort ─── */
   const filtered = useMemo(() => {
-    if (!search) return data;
+    let result = data.filter(emp => {
+      const s = search.toLowerCase();
+      const matchSearch =
+        !search ||
+        emp.employeeName?.toLowerCase().includes(s) ||
+        emp.employeeId?.toLowerCase().includes(s);
+      const matchDept     = department === "All" || emp.department === department;
+      const matchLocation = location  === "All" || getLocation(emp.employeeId) === location;
+      return matchSearch && matchDept && matchLocation;
+    });
 
-    const s = search.toLowerCase();
+    if (sortField) {
+      result = [...result].sort((a, b) => {
+        const aVal = sortField === "name" ? a.employeeName : a.employeeId;
+        const bVal = sortField === "name" ? b.employeeName : b.employeeId;
+        const cmp  = (aVal || "").localeCompare(bVal || "");
+        return sortDir === "asc" ? cmp : -cmp;
+      });
+    }
 
-    return data.filter(emp =>
-      emp.employeeName?.toLowerCase().includes(s) ||
-      emp.employeeId?.toLowerCase().includes(s)
+    return result;
+  }, [data, search, department, location, sortField, sortDir]);
+  const [exporting, setExporting] = useState(false);
+
+  const exportAttendanceExcel = async (fromdate, todate, location) => {
+  try {
+    setExporting(true);
+    const response = await fetch(
+      `${API_BASE_URL}/downloadAttendanceMusterExcel?fromDate=${fromdate}&toDate=${todate}&collegeLocation=${location}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
     );
-  }, [data, search]);
+
+    if (!response.ok) {
+      throw new Error("Failed to download Excel");
+    }
+
+    const blob = await response.blob();
+
+    const url = window.URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "Attendance_Muster.xlsx";
+
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    window.URL.revokeObjectURL(url);
+
+    setExporting(false);
+    toast.success("Attendance Muster Excel downloaded successfully");
+
+  } catch (error) {
+    console.error(error);
+    toast.error("Failed to download Attendance Muster Excel");
+  }finally {
+    setExporting(false);
+  }
+  
+};
+
+
+ const summary = useMemo(() => {
+  const totals = {
+    Present: 0,
+    Absent: 0,
+    CL: 0,
+    ML: 0,
+    OD: 0,
+    Off: 0,
+    Holiday: 0,
+    Unknown: 0,
+    Permission: 0
+  };
+
+  filtered.forEach((emp) => {
+    emp.attendanceHistory?.forEach((a) => {
+      switch (a.status) {
+        case "Present":
+        case "Present(O)":
+          totals.Present += 1;
+          break;
+
+        case "Absent":
+          totals.Absent += 1;
+          break;
+
+        case "Present:Absent":
+        case "Absent:Present":
+          totals.Present += 0.5;
+          totals.Absent += 0.5;
+          break;
+
+        case "Present(O):Present":
+        case "Present:Present(O)":
+          totals.Present += 1;
+          break;
+
+        case "Present:cl":
+        case "cl:Present":
+          totals.Present += 0.5;
+          totals.CL += 0.5;
+          break;
+
+        case "Present:ml":
+        case "ml:Present":
+          totals.Present += 0.5;
+          totals.ML += 0.5;
+          break;
+
+        case "Absent:cl":
+        case "cl:Absent":
+          totals.Absent += 0.5;
+          totals.CL += 0.5;
+          break;
+
+        case "Absent:ml":
+        case "ml:Absent":
+          totals.Absent += 0.5;
+          totals.ML += 0.5;
+          break;
+
+        case "PR-Present:Present":
+        case "Present:Present-PR":
+          totals.Present += 1;
+          totals.Permission += 1;
+          break;
+
+        case "PR-Present:Absent":
+        case "Absent:Present-PR":
+          totals.Present += 0.5;
+          totals.Permission += 1;
+          totals.Absent += 0.5;
+          break;
+
+        case "CL":
+        case "cl":
+        case "CL(O)":
+          totals.CL += 1;
+          break;
+
+        case "ML":
+        case "ml":
+          totals.ML += 1;
+          break;
+
+        case "OD":
+        case "Onduty":
+          totals.OD += 1;
+          break;
+
+        case "Holiday":
+          totals.Holiday += 1;
+          break;
+
+        case "Off":
+          totals.Off += 1;
+          break;
+
+        default:
+          totals.Unknown += 1;
+      }
+    });
+  });
+
+  return totals;
+}, [filtered]);
+  /* ─── Sort toggle ─── */
+  const toggleSort = (field) => {
+    if (sortField === field) {
+      setSortDir(d => d === "asc" ? "desc" : "asc");
+    } else {
+      setSortField(field);
+      setSortDir("asc");
+    }
+  };
+
+  const SortIcon = ({ field }) => {
+    if (sortField !== field) return <span className="text-gray-300 ml-1">↕</span>;
+    return <span className="text-indigo-500 ml-1">{sortDir === "asc" ? "↑" : "↓"}</span>;
+  };
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-6 space-y-5">
+      {/* ─── Controls ─── */}
 
-      {/* ================= HEADER ================= */}
-      <div className="flex flex-wrap items-center gap-4">
+      <div className="flex flex-wrap items-center gap-3 bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
+        {/* 🔍 Search */}
+        <div className="relative">
+          <Search className="absolute left-3 top-2.5 text-gray-400" size={16} />
+          <input
+            type="text"
+            placeholder="Search name or ID..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="pl-9 pr-3 py-2 w-56 rounded-lg bg-gray-50 
+                 border border-gray-200 text-sm
+                 focus:outline-none focus:ring-2 focus:ring-[#2b3c6b]/30
+                 focus:bg-white transition"
+          />
+        </div>
 
-        <input
-          type="text"
-          placeholder="Search employee name or ID..."
-          className="border px-3 py-2 rounded-md"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
+        {/* 🏢 Department */}
+        <div className="relative">
+          <Building2
+            className="absolute left-3 top-2.5 text-gray-400"
+            size={16}
+          />
+          <select
+            value={department}
+            onChange={(e) => setDept(e.target.value)}
+            className="pl-9 pr-6 py-2 rounded-lg bg-gray-50 border border-gray-200 text-sm
+                 focus:outline-none focus:ring-2 focus:ring-[#2b3c6b]/30
+                 appearance-none cursor-pointer"
+          >
+            {departments.map((d) => (
+              <option key={d}>{d}</option>
+            ))}
+          </select>
+        </div>
 
-        <input
-          type="month"
-          value={month}
-          onChange={(e) => setMonth(e.target.value)}
-          className="border px-3 py-2 rounded-md"
-        />
+        {/* 📍 Location */}
+        <div className="relative">
+          <MapPin
+            className="absolute left-3 top-2.5 text-gray-400 "
+            size={16}
+          />
+          <select
+            value={location}
+            onChange={(e) => setLocation(e.target.value)}
+            className="pl-9 pr-6 py-2 rounded-lg bg-gray-50 border border-gray-200 text-sm
+                 focus:outline-none focus:ring-2 focus:ring-[#2b3c6b]/30
+                 appearance-none cursor-pointer"
+          >
+            {locations.map((l) => (
+              <option key={l}>{l}</option>
+            ))}
+          </select>
+        </div>
 
+        {/* 📅 Month */}
+        <div className="relative">
+          <input
+            type="month"
+            value={month}
+            onChange={(e) => setMonth(e.target.value)}
+            className="pl-9 pr-3 py-2 rounded-lg bg-gray-50 border border-gray-200 text-sm
+                 focus:outline-none focus:ring-2 focus:ring-[#2b3c6b]/30"
+          />
+        </div>
+
+        {/* ⬇ Export */}
         <button
-          onClick={() => exportAttendanceExcel(filtered, days)}
-          className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700"
+          onClick={() => exportAttendanceExcel(fromDate, endDate, location)}
+          disabled={filtered.length === 0 || loading}
+          className="flex items-center gap-2 px-4 py-2 rounded-lg 
+               bg-gradient-to-r from-[#2b3c6b] to-[#3f548f] 
+               text-white text-sm font-medium
+               hover:opacity-90 transition shadow-sm
+               disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          Export Excel
+          <Download size={16} />
+          {exporting ? "Exporting..." : "Export"}
         </button>
 
+        {/* 📊 Result count */}
+        {(search || department !== "All" || location !== "All") && (
+          <span className="text-sm text-gray-500 ml-auto">
+            Showing <b>{filtered.length}</b> of <b>{data.length}</b>
+          </span>
+        )}
       </div>
 
-      {/* ================= ATTENDANCE LEGEND ================= */}
-      <div className="flex flex-wrap gap-4 text-xs">
-
-        {Object.entries(STATUS_MAP).map(([key, val]) => (
-          <div key={key} className="flex items-center gap-2">
-            <span className={`px-2 py-1 rounded ${val.color}`}>
-              {val.label}
+      {/* ─── Legend ─── */}
+      <div className="flex flex-wrap gap-3">
+        {LEGEND_ENTRIES.map((e) => (
+          <div key={e.key} className="flex items-center gap-1.5">
+            <span
+              className={`px-2 py-0.5 rounded text-xs font-medium ${e.color}`}
+            >
+              {e.label}
             </span>
-            <span className="text-gray-600">{key}</span>
+            <span className="text-xs text-gray-500">{e.display}</span>
           </div>
         ))}
-
       </div>
 
-      {/* ================= TABLE ================= */}
-      <div className="overflow-x-auto border rounded-lg">
+      {/* ─── Summary bar ─── */}
+      {!loading && filtered.length > 0 && (
+        <div className="flex flex-wrap gap-5 bg-gray-50  shadow-sm rounded-lg px-4 py-2.5 text-sm">
+          <span className="text-gray-500 font-medium">Summary:</span>
+          <span className="text-green-700 font-medium">
+            P: {summary.Present}
+          </span>
+          <span className="text-red-600 font-medium">A: {summary.Absent}</span>
+          <span className="text-purple-700">CL: {summary.CL}</span>
+          <span className="text-pink-700">ML: {summary.ML}</span>
+          <span className="text-yellow-700">OD: {summary.OD}</span>
+          <span className="text-gray-500">OFF: {summary.Off}</span>
+          <span className="text-blue-600">H: {summary.Holiday}</span>
+          <span className="text-gray-400">?: {summary.Unknown}</span>
+          <span className="text-green-800">PR: {summary.Permission}</span>
+        </div>
+      )}
 
+      {/* ─── Error ─── */}
+      {error && (
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm flex items-center gap-2">
+          <span>⚠</span>
+          <span>{error}</span>
+          <button
+            onClick={fetchAttendance}
+            className="ml-auto underline text-red-600 text-xs hover:text-red-800"
+          >
+            Retry
+          </button>
+        </div>
+      )}
+
+      {/* ─── Table ─── */}
+      <div className="overflow-x-auto border border-gray-200 rounded-lg">
         <table className="min-w-max text-sm border-collapse">
-
-          <thead className="bg-gray-100">
-
+          <thead className="bg-gray-100 sticky top-0 z-20">
             <tr>
-
-              <th className="p-3 text-left sticky left-0 bg-gray-100 z-10">
-                Employee
+              {/* Employee col — sortable by name & id */}
+              <th className="p-3 text-left sticky left-0 bg-gray-100 z-30 min-w-[180px] border-r border-gray-200">
+                <div className="flex flex-col gap-1">
+                  <button
+                    onClick={() => toggleSort("name")}
+                    className="flex items-center text-left text-xs font-semibold text-gray-600 hover:text-indigo-600 transition-colors hover:text-[#2b3c6b]
+             transition cursor-pointer"
+                  >
+                    Name <SortIcon field="name" />
+                  </button>
+                </div>
+              </th>
+              <th className="p-3 text-left sticky left-0 bg-gray-100 z-20 min-w-[120px] border-r border-gray-200">
+                <div className="flex flex-col gap-1">
+                  <button
+                    onClick={() => toggleSort("id")}
+                    className="flex items-center text-left text-xs font-normal text-gray-400 hover:text-indigo-500 transition-colors hover:text-[#2b3c6b]
+             transition cursor-pointer"
+                  >
+                    ID <SortIcon field="id" />
+                  </button>
+                </div>
               </th>
 
-              {days.map(day => (
-                <th key={day.toISOString()} className="p-2 text-center">
+              {/* Date columns */}
+              {days.map((day) => {
+                const isSun = day.getDay() === 0;
+                const isSat = day.getDay() === 6;
+                return (
+                  <th
+                    key={day.toISOString()}
+                    className={`p-2 text-center min-w-[38px] ${
+                      isSun || isSat ? "bg-blue-50 text-blue-600" : ""
+                    }`}
+                  >
+                    <div className="font-medium text-xs">
+                      {format(day, "dd")}
+                    </div>
+                    <div className="text-xs text-gray-400">
+                      {format(day, "EEE")}
+                    </div>
+                  </th>
+                );
+              })}
 
-                  <div>{format(day, "dd")}</div>
-
-                  <div className="text-xs text-gray-500">
-                    {format(day, "EEE")}
-                  </div>
-
+              {/* Total columns */}
+              {TOTAL_KEYS.map((k) => (
+                <th
+                  key={k}
+                  className="px-2 py-3 text-xs font-semibold text-gray-500 min-w-[34px] text-center"
+                >
+                  {k === "Unknown" ? "?" : k === "Holiday" ? "H" : k}
                 </th>
               ))}
-
-              {/* TOTAL COLUMNS */}
-              <th className="px-3 text-xs">P</th>
-              <th className="px-3 text-xs">A</th>
-              <th className="px-3 text-xs">CL</th>
-              <th className="px-3 text-xs">ML</th>
-              <th className="px-3 text-xs">OD</th>
-              <th className="px-3 text-xs">OFF</th>
-              <th className="px-3 text-xs">H</th>
-
             </tr>
-
           </thead>
 
           <tbody>
+            {/* Skeleton loader */}
+            {loading &&
+              Array.from({ length: 6 }).map((_, i) => (
+                <tr key={i} className="border-t animate-pulse">
+                  <td className="p-3 sticky left-0 bg-white border-r border-gray-100">
+                    <div className="h-4 bg-gray-200 rounded w-32 mb-1.5" />
+                    <div className="h-3 bg-gray-100 rounded w-20 mb-1" />
+                    <div className="h-3 bg-gray-100 rounded w-24" />
+                  </td>
+                  {days.map((d) => (
+                    <td key={d.toISOString()} className="p-2">
+                      <div className="h-5 w-7 bg-gray-100 rounded mx-auto" />
+                    </td>
+                  ))}
+                  {TOTAL_KEYS.map((k) => (
+                    <td key={k} className="px-2">
+                      <div className="h-4 w-5 bg-gray-100 rounded mx-auto" />
+                    </td>
+                  ))}
+                </tr>
+              ))}
 
-            {loading && (
+            {/* Empty state */}
+            {!loading && !error && filtered.length === 0 && (
               <tr>
-                <td colSpan={days.length + 8} className="text-center p-6">
-                  Loading attendance...
+                <td
+                  colSpan={days.length + TOTAL_KEYS.length + 1}
+                  className="text-center py-16 text-gray-400 text-sm"
+                >
+                  <div className="text-3xl mb-2">📋</div>
+                  <div>
+                    {search || department !== "All" || location !== "All"
+                      ? "No employees match your filters"
+                      : "No attendance data for this month"}
+                  </div>
                 </td>
               </tr>
             )}
 
-            {!loading && filtered.map(emp => {
+            {/* Data rows */}
+            {!loading &&
+              filtered.map((emp) => {
+                const map = {};
+                const totals = {
+                  Total: 0,
+                  Present: 0,
+                  Absent: 0,
+                  CL: 0,
+                  ML: 0,
+                  OD: 0,
+                  Off: 0,
+                  Holiday: 0,
+                  Unknown: 0,
+                  Permission: 0,
+                };
 
-              const map = {};
+                emp.attendanceHistory?.forEach((a) => {
+                  map[a.date] = a.status;
 
-              const totals = {
-                Present: 0,
-                Absent: 0,
-                "Casual Leave": 0,
-                "Medical Leave": 0,
-                Onduty: 0,
-                Offday: 0,
-                Holiday: 0
-              };
+                  switch (a.status) {
+                    case "Present":
+                      totals.Present += 1;
+                      totals.Total += 1;
+                      break;
 
-              emp.attendanceHistory?.forEach(a => {
-                map[a.date] = a.status;
+                    case "Absent":
+                      totals.Absent += 1;
+                      break;
 
-                if (totals[a.status] !== undefined) {
-                  totals[a.status]++;
-                }
-              });
+                    case "Present:Absent":
+                    case "Absent:Present":
+                      totals.Present += 0.5;
+                      totals.Absent += 0.5;
+                      totals.Total += 0.5;
+                      break;
+                    
+                    case "Present(O):present":
+                    case "Present:Present(O)":
+                    case "Present(O)":
+                    case "Present(O):Present(O)":
+                    totals.Total +=1;
+                    totals.Present +=1;
+                    break;
 
-              return (
 
-                <tr key={emp.employeeId} className="border-t">
 
-                  {/* EMPLOYEE */}
-                  <td className="p-3 sticky left-0 bg-white z-10">
+                    case "Present:cl":
+                    case "cl:Present":
+                      totals.Present += 0.5;
+                      totals.CL += 0.5;
+                      totals.Total += 1;
+                      break;
 
-                    <div className="font-medium">
-                      {emp.employeeName}
-                    </div>
+                    case "Present:ml":
+                    case "ml:Present":
+                      totals.Present += 0.5;
+                      totals.ML += 0.5;
+                      totals.Total += 1;
+                      break;
 
-                    <div className="text-xs text-gray-500">
+                    case "Absent:cl":
+                    case "cl:Absent":
+                      totals.Absent += 0.5;
+                      totals.CL += 0.5;
+                      totals.Total += 0.5;
+                      break;
+
+                    case "Absent:ml":
+                    case "ml:Absent":
+                      totals.Absent += 0.5;
+                      totals.ML += 0.5;
+                      totals.Total += 0.5;
+                      break;
+
+                    case "PR-Present:Present":
+                    case "Present:Present-PR":
+                      totals.Present += 1;
+                      totals.Permission += 1;
+                      totals.Total += 1;
+                      break;
+
+                    case "PR-Present:Absent":
+                    case "Absent:Present-PR":
+                      totals.Present += 0.5;
+                      totals.Absent += 0.5;
+                      totals.Permission += 1;
+                      totals.Total += 0.5;
+                      break;
+
+                    case "CL":
+                    case "cl":
+                    case "CL(O)":
+                      totals.CL += 1;
+                      totals.Total += 1;
+                      break;
+
+                    case "ML":
+                    case "ml":
+                    case "ML(O)":
+                      totals.ML += 1;
+                      totals.Total += 1;
+                      break;
+
+                    case "OD":
+                    case "Onduty":
+                    case "OD(O)":
+                      totals.OD += 1;
+                      totals.Total += 1;
+                      break;
+
+                    case "Holiday":
+                      totals.Holiday += 1;
+                      totals.Total += 1;
+                      break;
+
+                    case "Off":
+                      totals.Off += 1;
+                      break;
+
+                    default:
+                      totals.Unknown += 1;
+                  }
+                });
+
+                // Low attendance highlight: present < 50% of working days
+                const workingDays = days.length - totals.Off - totals.Holiday;
+                const lowAttendance =
+                  workingDays > 0 && totals.Present / workingDays < 0.5;
+
+                const empLocation = getLocation(emp.employeeId);
+
+                return (
+                  <tr
+                    key={emp.employeeId}
+                    className={`border-t hover:bg-gray-50 transition-colors ${
+                      lowAttendance ? "bg-red-50 hover:bg-red-50" : ""
+                    }`}
+                  >
+                    {/* Employee info */}
+                    <td className="p-3 sticky left-0 z-10 bg-white border-r border-gray-100">
+                      <div className="font-medium text-gray-800">
+                        {emp.employeeName}
+                      </div>
+
+                      <span
+                        className={`inline-block mt-1 text-xs px-1.5 py-0.5 rounded-full font-medium ${
+                          empLocation === "Palakkad"
+                            ? "bg-green-100 text-green-700"
+                            : empLocation === "Chittoor"
+                              ? "bg-orange-100 text-orange-700"
+                              : "bg-gray-100 text-gray-500"
+                        }`}
+                      >
+                        {empLocation}
+                      </span>
+                    </td>
+                    <td className="p-3 sticky left-[180px] z-10 bg-white border-r border-gray-100 text-xs text-gray-500">
                       {emp.employeeId}
-                    </div>
+                    </td>
 
-                    <div className="text-xs text-gray-400">
-                      {emp.department}
-                    </div>
+                    {/* Daily status cells */}
+                    {days.map((day) => {
+                      const dateStr = format(day, "dd-MMM-yyyy");
+                      const rawStatus = map[dateStr];
+                      const statusObj = STATUS_MAP[rawStatus];
+                      const isSun = day.getDay() === 0;
+                      const isSat = day.getDay() === 6;
 
-                  </td>
+                      return (
+                        <td
+                          key={dateStr}
+                          className={`p-1.5 text-center ${isSun || isSat ? "bg-blue-50/30" : ""}`}
+                        >
+                          {statusObj ? (
+                            <span
+                              className={`px-1.5 py-0.5 rounded text-xs font-medium ${statusObj.color}`}
+                            >
+                              {statusObj.label}
+                            </span>
+                          ) : (
+                            <span className="text-gray-200 text-xs">—</span>
+                          )}
+                        </td>
+                      );
+                    })}
 
-                  {/* DAILY STATUS */}
-                  {days.map(day => {
-
-                    const dateStr = format(day, "dd-MMM-yyyy");
-
-                    const status = map[dateStr];
-
-                    const statusObj = STATUS_MAP[status];
-
-                    return (
-                      <td key={dateStr} className="p-2 text-center">
-
-                        {statusObj && (
-                          <span className={`px-2 py-1 rounded text-xs ${statusObj.color}`}>
-                            {statusObj.label}
-                          </span>
-                        )}
-
-                      </td>
-                    );
-
-                  })}
-
-                  {/* TOTALS */}
-                  <td className="text-center font-semibold text-green-700">
-                    {totals.Present}
-                  </td>
-
-                  <td className="text-center font-semibold text-red-600">
-                    {totals.Absent}
-                  </td>
-
-                  <td className="text-center">{totals["Casual Leave"]}</td>
-
-                  <td className="text-center">{totals["Medical Leave"]}</td>
-
-                  <td className="text-center">{totals.Onduty}</td>
-
-                  <td className="text-center">{totals.Offday}</td>
-
-                  <td className="text-center">{totals.Holiday}</td>
-
-                </tr>
-
-              );
-
-            })}
-
+                    {/* Totals */}
+                    <td className="text-center text-xs font-semibold text-gray-600 px-2">
+                      {totals.Total}
+                    </td>
+                    <td className="text-center text-xs font-semibold text-green-700 px-2">
+                      {totals.Present}
+                    </td>
+                    <td className="text-center text-xs font-semibold text-red-600 px-2">
+                      {totals.Absent}
+                    </td>
+                    <td className="text-center text-xs text-purple-700 px-2">
+                      {totals.CL}
+                    </td>
+                    <td className="text-center text-xs text-pink-700 px-2">
+                      {totals.ML}
+                    </td>
+                    <td className="text-center text-xs text-yellow-700 px-2">
+                      {totals.OD}
+                    </td>
+                    <td className="text-center text-xs text-gray-500 px-2">
+                      {totals.Off}
+                    </td>
+                    <td className="text-center text-xs text-blue-600 px-2">
+                      {totals.Holiday}
+                    </td>
+                    <td className="text-center text-xs text-gray-400 px-2">
+                      {totals.Unknown}
+                    </td>
+                    <td className="text-center text-xs text-green-800 px-2">
+                      {totals.Permission}
+                    </td>
+                  </tr>
+                );
+              })}
           </tbody>
-
         </table>
-
       </div>
-
     </div>
   );
 };

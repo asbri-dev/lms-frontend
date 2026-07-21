@@ -14,13 +14,41 @@ export const getMonthRange = (date) => ({
    Status Mapping
 ============================ */
 export const STATUS_MAP = {
-  Present: { label: "P", color: "#16a34a", type: "Present" },
-  Absent: { label: "A", color: "#dc2626", type: "Absent" },
-  Offday: { label: "OFF", color: "#6b7280", type: "Leave" },
-  "Casual Leave": { label: "CL", color: "#2563eb", type: "Leave" },
-  "Medical Leave": { label: "ML", color: "#9333ea", type: "Leave" },
-  Onduty: { label: "OD", color: "#f59e0b", type: "Leave" },
-  Holiday: { label: "H", color: "#0ea5e9", type: "Leave" },
+  Present:                 { label: "P", color: "#D7FDF0", type: "Present",textColor: "#6b7280" },
+  Absent:                  { label: "A", color: "#FBA39D", type: "Absent" },
+  Off:                     { label: "OFF", color: "#F7F7F7", type: "Leave" },
+  cl:                      { label: "CL", color: "#CEF1FD", type: "Leave" },
+  CL:                      { label: "Casual Leave ", color: "#CEF1FD", type: "Leave" },
+  ml:                      { label: "Medical Leave", color: "#79ADDC", type: "Leave" },
+  Onduty:                  { label: "OD", color: "#E9F0DB", type: "Leave" },
+  Holiday:                 { label: "H", color: "#0ea5e9", type: "Leave" },
+  "CL(O)":                 { label: "CL(O)", color: "#79ADDC", type: "Leave" },
+  "Present:CL(O)":         { label: "P/CL(O)", color: "#79ADDC", type: "Leave" },
+  "CL(O):Present":         { label: "CL(O)/P", color: "#79ADDC", type: "Leave" },
+  "ML(O)":                 { label: "Medical Leave", color: "#79ADDC", type: "Leave" },
+  "Present:Absent":        { label: "P/A", color: "#FBA39D", type: "Present/Absent" },
+  "Absent:Present":        { label: "A/P", color: "#FBA39D", type: "Absent/Present" },
+  "Present:cl":            { label: "P/CL", color: "#D7FDF0", type: "Present/Casual Leave" },
+  "cl:Present":            { label: "CL/P", color: "#D7FDF0", type: "Casual Leave/Present" },
+  "Present:ml":            { label: "P/ML", color: "#D7FDF0", type: "Present/Medical Leave" },
+  "ml:Present":            { label: "ML/P", color: "#D7FDF0", type: "Medical Leave/Present" },
+  "Absent:cl":             { label: "A/CL", color: "#F3B7A5", type: "Absent/Casual Leave" },
+  "cl:Absent":             { label: "CL/A", color: "#F3B7A5", type: "Casual Leave/Absent" },
+  "Absent:ml":             { label: "A/ML", color: "#F3B7A5", type: "Absent/Medical Leave" },
+  "ml:Absent":             { label: "ML/A", color: "#F3B7A5", type: "Medical Leave/Absent" },
+  "PR-Present:Present":    { label: "PR-P", color: "#D7FDF0", type: "Present" },
+  "Present:Present-PR":    { label: "P-PR", color: "#D7FDF0", type: "Present" },
+  "PR-Present:Absent":     { label: "PR-A", color: "#FBA39D", type: "Absent" },
+  "Absent:Present-PR":     { label: "A-PR", color: "#FBA39D", type: "Absent" },
+  Unknown:                 { label: "?", color: "#FFD199", type: "Unknown" }, 
+  "Present(O)":            { label: "P", color: "#D7FDF0", type: "Present" },
+  "Present(O):Present":    { label: "P", color: "#D7FDF0", type: "Present" },
+  "Present:Present(O)":    { label: "P", color: "#D7FDF0", type: "Present" },
+  "PR-Present:Present(O)": { label: "PR-P", color: "#D7FDF0", type: "Present" },
+  "Onduty:Present":         { label: "OD/P", color: "#E9F0DB", type: "Leave/Present" },
+  "Present:Onduty":         { label: "P/OD", color: "#E9F0DB", type: "Present/Leave" },
+  
+
 };
 
 /* ============================
@@ -30,6 +58,7 @@ export const transformAttendanceData = (data = []) => {
   if (!Array.isArray(data)) return [];
 
   const uniqueMap = new Map();
+ 
 
   data.forEach((item) => {
     if (item?.Date && !uniqueMap.has(item.Date)) {
@@ -38,35 +67,48 @@ export const transformAttendanceData = (data = []) => {
   });
 
   return Array.from(uniqueMap.values()).map((item) => {
-    const parsedDate = parse(item.Date, "dd-MMM-yyyy", new Date());
-    const formattedDate = format(parsedDate, "yyyy-MM-dd");
+  const parsedDate = parse(item.Date, "dd-MMM-yyyy", new Date());
+  const formattedDate = format(parsedDate, "yyyy-MM-dd");
 
-    const details = item?.AttendanceDetails || {};
-    const statusObj = STATUS_MAP[details.status] || {
-      label: "",
-      color: "#9ca3af",
-      type: "Leave",
-    };
+  const details = item?.AttendanceDetails || {};
+   const isPresentOverride = details.status?.includes("(O)");
+  const statusObj = STATUS_MAP[details.status] || {
+    label: "",
+    color: "#9ca3af",
+    type: "Leave",
+  };
 
-    return {
-      title: statusObj.label,
-      date: formattedDate,
-      color: statusObj.color,
-      extendedProps: {
-        rawDate: item.Date,
-        details: {
-          status: details.status || "Unknown",
-          sessionOne: details.sessionOne || "-",
-          sessionTwo: details.sessionTwo || "-",
-          punchIn: details.punchIn || "-",
-          punchOut: details.punchOut || "-",
-          workDuration: details.workDuration || "-",
-          lateIn: details.lateIn || "-",
-          lateOut: details.lateOut || "-",
-          earlyIn: details.earlyIn || "-",
-          earlyOut: details.earlyOut || "-",
-        },
+  // 🔥 IMPORTANT: add +1 day for background event
+  const endDate = new Date(parsedDate);
+  endDate.setDate(endDate.getDate() + 1);
+
+  return {
+    start: formattedDate,
+    end: format(endDate, "yyyy-MM-dd"),
+
+    display: "background", // ✅ FULL CELL COLOR
+
+    backgroundColor: statusObj.color,
+
+    // 👇 keep data for click
+    extendedProps: {
+      rawDate: item.Date,
+      label: statusObj.label,
+      isPresentOverride,
+      details: {
+        status: details.status || "Unknown",
+        sessionOne: details.sessionOne || "-",
+        sessionTwo: details.sessionTwo || "-",
+        punchIn: details.punchIn || "-",
+        punchOut: details.punchOut || "-",
+        workDuration: details.workDuration || "-",
+        lateIn: details.lateIn || "-",
+        lateOut: details.lateOut || "-",
+        earlyIn: details.earlyIn || "-",
+        earlyOut: details.earlyOut || "-",
+        reason: details.ReasonForOverride,
       },
-    };
-  });
+    },
+  };
+});
 };

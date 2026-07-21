@@ -1,0 +1,8 @@
+{
+  "projects": {
+    "default": "lms-aries",
+    "uat": "lms-asbritech"
+  },
+  "targets": {},
+  "etags": {}
+}
