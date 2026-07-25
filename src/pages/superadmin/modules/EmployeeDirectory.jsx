@@ -1,27 +1,10 @@
-import { useEffect, useMemo, useState, useCallback } from "react";
+import { useEffect, useMemo, useState, useCallback} from "react";
 import { useAuth } from "../../../auth/useAuth";
 import { Search, X } from "lucide-react";
 import { API_BASE_URL } from "../../../config/api";
+import EmployeeAvatar from "../utils/EmployeeAvatar";
 
 // ✅ Helpers
-const getInitials = (name = "") =>
-  name.split(" ").map((n) => n[0]).slice(0, 2).join("").toUpperCase();
-
-const AVATAR_COLORS = [
-  "bg-indigo-100 text-indigo-700 ring-indigo-200",
-  "bg-emerald-100 text-emerald-700 ring-emerald-200",
-  "bg-rose-100 text-rose-700 ring-rose-200",
-  "bg-amber-100 text-amber-700 ring-amber-200",
-  "bg-cyan-100 text-cyan-700 ring-cyan-200",
-  "bg-purple-100 text-purple-700 ring-purple-200",
-];
-
-const avatarColor = (id = "") =>
-  id
-    ? AVATAR_COLORS[
-        id.charCodeAt(id.length - 1) % AVATAR_COLORS.length
-      ]
-    : AVATAR_COLORS[0];
 
 const EmployeeDirectory = () => {
   const [data, setData] = useState([]);
@@ -304,23 +287,34 @@ function BoolField({ label, value }) {
       {/* Filters */}
    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
 
-  {/* Search */}
-  <div>
-    <label className="block text-sm font-medium text-gray-700 mb-1">
-      Search
-    </label>
+{/* Search */}
+<div>
+  <label className="block text-sm font-medium text-gray-700 mb-1">
+    Search
+  </label>
 
-    <div className="relative">
-      <Search className="absolute left-2 top-2.5 w-4 h-4 text-gray-400" />
-
+  {/* thin rotating line traveling around the border, comet-style */}
+  <div className="relative rounded-lg p-[1.5px] overflow-hidden">
+    <div
+      className="absolute inset-[-150%] animate-[spin_2.5s_linear_infinite]"
+      style={{
+        background:
+          "conic-gradient(from 0deg, transparent 0%, transparent 85%, #93C5FD 90%, #3D7DFC 94%, #93C5FD 97%, transparent 100%)",
+      }}
+    />
+    <div className="relative bg-white rounded-[7px]">
+      <Search className="absolute left-2 top-2.5 w-4 h-4 text-gray-400 z-10" />
       <input
-        className="pl-8 shadow-sm p-2 rounded w-full"
+        className="relative pl-8 p-2 rounded-[7px] w-full bg-white outline-none z-10"
         placeholder="Search..."
         value={search}
         onChange={(e) => setSearch(e.target.value)}
       />
     </div>
   </div>
+</div>
+
+
 
   {/* Department */}
   <div>
@@ -376,9 +370,7 @@ function BoolField({ label, value }) {
             className="bg-white p-4 rounded shadow cursor-pointer active:scale-[0.99] transition-transform"
           >
             <div className="flex gap-3 items-center">
-              <div className={`w-10 h-10 shrink-0 flex items-center justify-center rounded-xl ${avatarColor(emp.employeeId)}`}>
-                {getInitials(emp.employeeName)}
-              </div>
+             <EmployeeAvatar empId={emp.employeeId} name={emp.employeeName} token={token} />
 
               <div className="min-w-0">
                 <h3 className="font-bold truncate">{emp.employeeName}</h3>
@@ -417,10 +409,13 @@ function BoolField({ label, value }) {
           </div>
         ) : (
           <div className="flex items-center gap-3 sm:gap-4 pr-6">
-            <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-[#3D7DFC] flex items-center justify-center text-white text-lg sm:text-xl font-bold shrink-0">
-              {(details?.personal?.firstName?.[0] ?? "?")}
-              {(details?.personal?.lastName?.[0] ?? "")}
-            </div>
+            <EmployeeAvatar
+  empId={selectedEmp}
+  name={details?.personal?.firstName ? `${details.personal.firstName} ${details.personal.lastName}` : selectedEmp}
+  token={token}
+  size="w-12 h-12 sm:w-14 sm:h-14 text-lg sm:text-xl rounded-full"
+  editable
+/>
             <div className="min-w-0">
               <h2 className="text-white text-base sm:text-lg font-semibold leading-tight truncate">
                 {[
