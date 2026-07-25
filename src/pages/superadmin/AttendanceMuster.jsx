@@ -135,6 +135,11 @@ const STATUS_MAP = {
     color: "bg-green-100 text-green-800",
     display: "Present Opening",
   },
+  "Absent(O)": {                               // check  add here only for cal need to add
+    label: "A(O)",
+    color: "bg-red-100 text-red-800",
+    display: "Absent Opening",
+  },
   "Present:CL(O)":{
   label: "P/CL(O)",
   color: "bg-green-100 text-green-800",
