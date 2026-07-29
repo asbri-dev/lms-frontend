@@ -68,7 +68,7 @@ const calcTotals = (fees) => {
     totalPaid += Number(f.amountPaid) || 0;
     totalFine += Number(f.fineAmount) || 0;
   });
-  const balance = totalAmount - totalPaid;
+  const balance = totalAmount - totalPaid - totalFine ;
   return { totalAmount, totalPaid, totalFine, balance };
 };
 
@@ -207,7 +207,7 @@ function FeeTable({ fees }) {
         </thead>
         <tbody>
           {fees.map((fee, idx) => {
-            const balance = Number(fee.amountToBePaid) - Number(fee.amountPaid);
+            const balance = Number(fee.amountToBePaid) - Number(fee.amountPaid) - Number(fee.fineAmount);
             const hasFine = Number(fee.fineAmount) > 0;
             return (
               <tr

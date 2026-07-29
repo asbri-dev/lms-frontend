@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState, useCallback} from "react";
 import { useAuth } from "../../../auth/useAuth";
-import { Search, X } from "lucide-react";
 import { API_BASE_URL } from "../../../config/api";
+import { Search, X } from "lucide-react";
+
 import EmployeeAvatar from "../utils/EmployeeAvatar";
 
 // ✅ Helpers
@@ -287,25 +288,33 @@ function BoolField({ label, value }) {
       {/* Filters */}
    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
 
-{/* Search */}
+ {/* Search */}
 <div>
   <label className="block text-sm font-medium text-gray-700 mb-1">
     Search
   </label>
 
-  {/* thin rotating line traveling around the border, comet-style */}
-  <div className="relative rounded-lg p-[1.5px] overflow-hidden">
-    <div
-      className="absolute inset-[-150%] animate-[spin_2.5s_linear_infinite]"
-      style={{
-        background:
-          "conic-gradient(from 0deg, transparent 0%, transparent 85%, #93C5FD 90%, #3D7DFC 94%, #93C5FD 97%, transparent 100%)",
-      }}
-    />
-    <div className="relative bg-white rounded-[7px]">
-      <Search className="absolute left-2 top-2.5 w-4 h-4 text-gray-400 z-10" />
+  {/* Outer container with padding acting as the border thickness */}
+  <div className="relative overflow-hidden rounded-[6.5px] p-[3px]">
+    
+    {/* Wrapper to center the spinning square without conflicting with animations */}
+    <div className="absolute left-1/2 top-1/2 aspect-square w-[200%] -translate-x-1/2 -translate-y-1/2">
+      
+      {/* The actual spinning gradient */}
+      <div
+        className="h-full w-full animate-[spin_2.5s_linear_infinite]"
+        style={{
+          background:
+            "conic-gradient(from 0deg, transparent 0%, transparent 85%, #93C5FD 90%, #3D7DFC 94%, #93C5FD 97%, transparent 100%)",
+        }}
+      />
+    </div>
+
+    {/* Inner container blocking the middle, leaving only the "border" visible */}
+    <div className="relative z-10 flex w-full items-center rounded-[6.5px] bg-white px-3 py-2">
+      <Search className="mr-2 h-4 w-4 shrink-0 text-gray-400" />
       <input
-        className="relative pl-8 p-2 rounded-[7px] w-full bg-white outline-none z-10"
+        className="w-full bg-transparent text-sm outline-none"
         placeholder="Search..."
         value={search}
         onChange={(e) => setSearch(e.target.value)}
@@ -313,7 +322,6 @@ function BoolField({ label, value }) {
     </div>
   </div>
 </div>
-
 
 
   {/* Department */}

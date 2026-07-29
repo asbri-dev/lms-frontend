@@ -5,6 +5,7 @@ import PendingRequests from "./modules/PendingRequests";
 import EmployeeExitManagement from "./modules/EmployeeExitManagement";
 import AuditLogs from "./modules/AuditLogs";
 import FacultyAttendanceModule from "./modules/FacultyAttendanceModule";
+import ApplyOnBehalf from "./modules/Applyonbehalf";
 
 const MODULES = [
   {
@@ -89,6 +90,23 @@ const MODULES = [
     ),
     component: <FacultyAttendanceModule />,
   },
+  {
+    key: "apply-on-behalf",
+    label: "Apply on Behalf",
+    shortLabel: "Apply",
+    icon: (
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">   
+      <path d="M12 20h9" />
+      <path d="M12 4h9" />
+      <path d="M12 12h9" />
+      <path d="M4 6h.01" />
+      <path d="M4 18h.01" />
+      <path d="M4 12h.01" />
+      </svg>
+    ),
+    component: <ApplyOnBehalf />,
+  },
+
 ];
 
 const SuperAdminDashboard = () => {

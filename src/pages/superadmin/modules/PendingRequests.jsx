@@ -85,6 +85,10 @@ const APPROVE_API = {
   OD:         "/odApprove",
 };
 
+
+
+
+
 const resolveStatus = (s) => STATUS_LABEL[s] || s || "Unknown";
 
 /* ─── Badge ─── */
@@ -288,7 +292,7 @@ const ODCard = ({ item, onAction, actionLoadingId }) => {
 /* ════════════════════════════════════════
    ALL REQUESTS — Table row
 ════════════════════════════════════════ */
-const AllRequestRow = ({ item, type }) => {
+const AllRequestRow = ({ item, type, onRevokeClick }) => {
   const empId = item.employeeId || item.empId || "—";
   const loc   = getLocation(empId);
   const statusLabel = resolveStatus(item.status);
@@ -323,9 +327,104 @@ const AllRequestRow = ({ item, type }) => {
       </td>
       <td className="px-4 py-3"><Badge label={format(detail) || "—"} style={DETAILS_STYLE[format(detail) || "—"]} /></td>
       <td className="px-4 py-3">
+  {resolveStatus(item.status) === "Approved" && (
+    <button
+      onClick={() => onRevokeClick(item, type)}
+      className="px-3 py-1 rounded-md bg-red-600 text-white text-xs hover:bg-red-700"
+    >
+      Revoke
+    </button>
+  )}
+</td>
+      <td className="px-4 py-3">
         <Badge label={statusLabel} style={STATUS_STYLE[item.status] || "bg-gray-100 text-gray-500"} />
       </td>
     </tr>
+  );
+};
+
+/* ════════════════════════════════════════
+   REVOKE REASON MODAL
+════════════════════════════════════════ */
+const RevokeModal = ({ target, onClose, onConfirm, submitting }) => {
+  const [reason, setReason] = useState("");
+  const [touched, setTouched] = useState(false);
+
+  if (!target) return null;
+
+  const { item, type } = target;
+  const empId = item.employeeId || item.empId || "—";
+  const empName = item.empName || empId;
+
+  const trimmed = reason.trim();
+  const error =
+    trimmed.length === 0
+      ? "Reason is required"
+      : trimmed.length > 300
+      ? "Reason must be 300 characters or fewer"
+      : null;
+
+  const handleConfirm = () => {
+    setTouched(true);
+    if (error) return;
+    onConfirm(trimmed);
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+      <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-5 space-y-4">
+        <div>
+          <h3 className="text-sm font-semibold text-gray-800">Revoke {type} request</h3>
+          <p className="text-xs text-gray-500 mt-0.5">
+            {empName} <span className="text-gray-400">({empId})</span>
+          </p>
+        </div>
+
+        <div>
+          <label className="block text-xs font-semibold text-gray-500 mb-1">
+            Reason for revoking <span className="text-red-500">*</span>
+          </label>
+          <textarea
+            value={reason}
+            onChange={(e) => setReason(e.target.value)}
+            onBlur={() => setTouched(true)}
+            rows={3}
+            maxLength={300}
+            placeholder="Enter reason for revoking this request..."
+            className={`w-full border rounded-lg px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 ${
+              touched && error
+                ? "border-red-300 focus:ring-red-300"
+                : "border-gray-200 focus:ring-indigo-400"
+            }`}
+          />
+          <div className="flex items-center justify-between mt-1">
+            <span className={`text-xs ${touched && error ? "text-red-500" : "text-gray-400"}`}>
+              {touched && error ? error : `${trimmed.length}/300`}
+            </span>
+          </div>
+        </div>
+
+        <div className="flex justify-end gap-2 pt-1">
+          <button
+            type="button"
+            onClick={onClose}
+            disabled={submitting}
+            className="px-4 py-2 rounded-lg text-sm font-medium bg-gray-100 text-gray-600 hover:bg-gray-200 disabled:opacity-50 transition-colors"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            onClick={handleConfirm}
+            disabled={submitting}
+            className="px-4 py-2 rounded-lg text-sm font-medium bg-red-600 text-white hover:bg-red-700 disabled:opacity-50 transition-colors flex items-center gap-2"
+          >
+            {submitting && <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />}
+            {submitting ? "Revoking..." : "Confirm Revoke"}
+          </button>
+        </div>
+      </div>
+    </div>
   );
 };
 
@@ -349,6 +448,10 @@ const PendingRequests = () => {
 
   /* Per-card action loading */
   const [actionLoadingId, setActionLoadingId] = useState(null);
+
+  /* Revoke modal */
+  const [revokeTarget, setRevokeTarget] = useState(null); // { item, type }
+  const [revokeSubmitting, setRevokeSubmitting] = useState(false);
 
   /* All tab filters */
   const [filterType,   setFilterType]   = useState("All");
@@ -484,7 +587,6 @@ const PendingRequests = () => {
 
       toast.success(`${type} ${status.toLowerCase()} successfully`);
 
-      // Reload only My Requests after action
       await fetchMyRequests();
     } catch (e) {
       toast.error(e.message || "Action failed");
@@ -492,6 +594,93 @@ const PendingRequests = () => {
       setActionLoadingId(null);
     }
   }, [token, fetchMyRequests,user]);
+
+  /* ─── Revoke: open modal ─── */
+  const openRevokeModal = useCallback((item, type) => {
+    setRevokeTarget({ item, type });
+  }, []);
+
+  const closeRevokeModal = useCallback(() => {
+    if (revokeSubmitting) return;
+    setRevokeTarget(null);
+  }, [revokeSubmitting]);
+
+   // ===========================
+    // ✅ Refresh both my requests and all requests after action
+    // ===========================
+  const handleRevoke = async (revokeReason) => {
+  if (!revokeTarget) return;
+  const { item, type } = revokeTarget;
+
+  try {
+    setRevokeSubmitting(true);
+
+    let body = {};
+    const empId = item.empId || item.employeeId;
+
+    if (type === "Leave") {
+      body = {
+        adminEmpId: user.employeeId,
+        empId,
+        leaveFrom: item.leaveFrom,
+        leaveTo: item.leaveTo,
+        sessionFrom: item.sessionFrom,
+        sessionTo: item.sessionTo,
+        noOfLeaves: item.noOfDays,
+        typeOfLeave: item.typeOfLeave,
+        reasonForLeave: item.reasonForLeave,
+        leaveStatus: "Revoke",
+        revokeReason,
+      };
+    } else if (type === "Permission") {
+      body = {
+        empId,
+        permissionDate: item.permissionDate || item.Date,
+        permissionType: item.permissionType,
+        reasonForPermission: item.reasonForPermission,
+        permissionStatus: "Revoke",
+        revokeReason,
+      };
+    } else {
+      body = {
+        adminEmpId: item.adminEmpId,
+        empId,
+        onDutyFrom: item.onDutyFrom,
+        onDutyTo: item.onDutyTo,
+        sessionFrom: item.sessionFrom,
+        sessionTo: item.sessionTo,
+        noOfDays: item.noOfDays,
+        reason: item.reason,
+        appliedOn: item.appliedOn,
+        status: "Revoke",
+        revokeReason,
+      };
+    }
+
+    const endpoint = `${API_BASE_URL}${APPROVE_API[type]}`;
+
+    const res = await fetch(endpoint, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(body),
+    });
+
+    if (!res.ok) throw new Error("Failed to revoke");
+
+    toast.success("Request revoked successfully");
+
+    setRevokeTarget(null);
+    fetchAllRequests();
+    fetchMyRequests();
+  } catch (err) {
+    toast.error(err.message);
+  } finally {
+    setRevokeSubmitting(false);
+  }
+};
 
   /* ─── Flatten All Requests ─── */
   const flatAll = useMemo(() => {
@@ -846,12 +1035,13 @@ if (filterMonthYear !== "All") {
                     <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500">Type</th>
                     <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 whitespace-nowrap">Date / Period</th>
                     <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500">Details</th>
+                    <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500">Action</th>
                     <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500">Status</th>
                   </tr>
                 </thead>
                 <tbody>
                   {filteredAll.map((item, i) => (
-                    <AllRequestRow key={i} item={item} type={item._type} />
+                    <AllRequestRow key={i} item={item} type={item._type} onRevokeClick={openRevokeModal} />
                   ))}
                 </tbody>
               </table>
@@ -859,6 +1049,14 @@ if (filterMonthYear !== "All") {
           )}
         </div>
       )}
+
+      {/* ─── Revoke Reason Modal ─── */}
+      <RevokeModal
+        target={revokeTarget}
+        onClose={closeRevokeModal}
+        onConfirm={handleRevoke}
+        submitting={revokeSubmitting}
+      />
     </div>
   );
 };
