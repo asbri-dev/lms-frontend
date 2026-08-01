@@ -126,6 +126,9 @@ const EmployeeDirectory = () => {
         designation: f.designation,
         email: f.email,
         dateOfJoining: f.dateOfJoining,
+        casualLeaves: f.casualLeaves,
+        medicalLeaves: f.medicalLeaves,
+        permissionRequests: f.permissionRequests,
         location: f.collegeLocation || "Unknown",
         isAdmin: false,
       }));
