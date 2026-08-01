@@ -6,6 +6,63 @@ import { Search, X } from "lucide-react";
 import EmployeeAvatar from "../utils/EmployeeAvatar";
 
 // ✅ Helpers
+function Section({ title, children }) {
+  return (
+    <div>
+      <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-2">
+        {title}
+      </p>
+      <div className="bg-slate-50 rounded-xl px-3 sm:px-4 py-3 space-y-2.5">
+        {children}
+      </div>
+    </div>
+  );
+}
+
+function Field({ label, value }) {
+  return (
+    <div className="flex justify-between items-start gap-3 sm:gap-4 text-sm">
+      <span className="text-slate-500 shrink-0">{label}</span>
+      <span className="text-slate-800 font-medium text-right break-all">
+        {value || "—"}
+      </span>
+    </div>
+  );
+}
+
+// For boolean fields like isPhysicallyChallenged
+function BoolField({ label, value }) {
+  return (
+    <div className="flex justify-between items-center gap-3 sm:gap-4 text-sm">
+      <span className="text-slate-500 shrink-0">{label}</span>
+      <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
+        value
+          ? "bg-blue-100 text-blue-700"
+          : "bg-slate-200 text-slate-500"
+      }`}>
+        {value ? "Yes" : "No"}
+      </span>
+    </div>
+  );
+}
+
+function EduBlock({ label, course, spec, college, university, start, end, status }) {
+  return (
+    <div className="pt-1">
+      <p className="text-xs text-[#3D7DFC] font-semibold uppercase tracking-wide mb-1.5">
+        {label}
+      </p>
+      <div className="space-y-2 pl-2 border-l-2 border-slate-200">
+        {course && <Field label="Course" value={course} />}
+        {spec && <Field label="Specialization" value={spec} />}
+        {college && <Field label="College" value={college} />}
+        {university && <Field label="University" value={university} />}
+        {start && <Field label="Duration" value={`${start} → ${end ?? "Present"}`} />}
+        {status && <Field label="Status" value={status} />}
+      </div>
+    </div>
+  );
+}
 
 const EmployeeDirectory = () => {
   const [data, setData] = useState([]);
@@ -68,6 +125,7 @@ const EmployeeDirectory = () => {
         department: f.facultyDept || "Unknown",
         designation: f.designation,
         email: f.email,
+        dateOfJoining: f.dateOfJoining,
         location: f.collegeLocation || "Unknown",
         isAdmin: false,
       }));
@@ -157,63 +215,6 @@ const EmployeeDirectory = () => {
         : (bVal || "").localeCompare(aVal || "");
     });
   }, [data, search, department, location, sortField, sortDir]);
-
-function Section({ title, children }) {
-  return (
-    <div>
-      <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-2">
-        {title}
-      </p>
-      <div className="bg-slate-50 rounded-xl px-3 sm:px-4 py-3 space-y-2.5">
-        {children}
-      </div>
-    </div>
-  );
-}
-
-function Field({ label, value }) {
-  return (
-    <div className="flex justify-between items-start gap-3 sm:gap-4 text-sm">
-      <span className="text-slate-500 shrink-0">{label}</span>
-      <span className="text-slate-800 font-medium text-right break-all">
-        {value || "—"}
-      </span>
-    </div>
-  );
-}
-
-// For boolean fields like isPhysicallyChallenged
-function BoolField({ label, value }) {
-  return (
-    <div className="flex justify-between items-center gap-3 sm:gap-4 text-sm">
-      <span className="text-slate-500 shrink-0">{label}</span>
-      <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
-        value
-          ? "bg-blue-100 text-blue-700"
-          : "bg-slate-200 text-slate-500"
-      }`}>
-        {value ? "Yes" : "No"}
-      </span>
-    </div>
-  );
-}
- function EduBlock({ label, course, spec, college, university, start, end, status }) {
-  return (
-    <div className="pt-1">
-      <p className="text-xs text-[#3D7DFC] font-semibold uppercase tracking-wide mb-1.5">
-        {label}
-      </p>
-      <div className="space-y-2 pl-2 border-l-2 border-slate-200">
-        {course     && <Field label="Course"         value={course} />}
-        {spec       && <Field label="Specialization" value={spec} />}
-        {college    && <Field label="College"        value={college} />}
-        {university && <Field label="University"     value={university} />}
-        {start      && <Field label="Duration"       value={`${start} → ${end ?? "Present"}`} />}
-        {status     && <Field label="Status"         value={status} />}
-      </div>
-    </div>
-  );
-}
 
   return (
     <div className="p-3 sm:p-6 bg-gray-50 min-h-screen">
@@ -363,36 +364,67 @@ function BoolField({ label, value }) {
       {error && <p className="text-red-500 text-center">{error}</p>}
 
       {/* Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-        {filtered.map((emp) => (
-          <div
-            key={emp.employeeId}
-            onClick={() => {
-              if (!emp.isAdmin) {
-                fetchEmployeeDetails(emp.employeeId);
-              } else {
-                setSelectedEmp(emp.employeeId);
-                setDetails({ personal: emp });
-              }
-            }}
-            className="bg-white p-4 rounded shadow cursor-pointer active:scale-[0.99] transition-transform"
-          >
-            <div className="flex gap-3 items-center">
-             <EmployeeAvatar empId={emp.employeeId} name={emp.employeeName} token={token} />
+<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+  {filtered.map((emp) => (
+    <div
+      key={emp.employeeId}
+      onClick={() => {
+        if (!emp.isAdmin) {
+          fetchEmployeeDetails(emp.employeeId);
+        } else {
+          setSelectedEmp(emp.employeeId);
+          setDetails({ personal: emp });
+        }
+      }}
+      className="group bg-white rounded-xl shadow-sm hover:shadow-md border border-gray-100  cursor-pointer active:scale-[0.98] transition-all duration-200 overflow-hidden"
+    >
+      {/* Top: avatar + identity */}
+      <div className="flex items-center gap-3 p-4">
+        <EmployeeAvatar empId={emp.employeeId} name={emp.employeeName} token={token} />
 
-              <div className="min-w-0">
-                <h3 className="font-bold truncate">{emp.employeeName}</h3>
-                <p className="text-sm text-gray-500 truncate">{emp.employeeId}</p>
-              </div>
-            </div>
-
-            <div className="mt-2 text-sm text-gray-600 truncate">
-              {emp.department} - {emp.designation}
-            </div>
-          </div>
-        ))}
+        <div className="min-w-0 flex-1">
+          <h3 className="font-bold text-gray-900 truncate">{emp.employeeName}</h3>
+          <p className="text-xs text-gray-400 truncate">{emp.employeeId}</p>
+        </div>
       </div>
 
+      {/* Middle: role/dept + joining date */}
+      <div className="px-4 pb-3">
+        <p className="text-sm text-gray-600 truncate">
+          {emp.department} <span className="text-gray-300 mx-1">·</span> {emp.designation}
+        </p>
+        {emp.dateOfJoining && (
+          <p className="text-xs text-gray-400 mt-0.5">
+            Joined{" "}
+            {new Date(emp.dateOfJoining).toLocaleDateString("en-IN", {
+              day: "2-digit",
+              month: "short",
+              year: "numeric",
+            })}
+          </p>
+        )}
+      </div>
+
+      {/* Footer: stats strip, separated by a divider */}
+      <div className="flex items-center justify-between gap-2 px-4 py-2.5 bg-gray-50 border-t border-gray-100">
+        <div className="flex items-center gap-1.5">
+          <span className="text-[10px] uppercase tracking-wide text-gray-400">CL</span>
+          <span className="text-sm font-semibold text-[#3D7DFC]">{emp.casualLeaves ?? "0.0"}</span>
+        </div>
+        <div className="w-px h-4 bg-gray-200" />
+        <div className="flex items-center gap-1.5">
+          <span className="text-[10px] uppercase tracking-wide text-gray-400">ML</span>
+          <span className="text-sm font-semibold text-emerald-600">{emp.medicalLeaves ?? "0.0"}</span>
+        </div>
+        <div className="w-px h-4 bg-gray-200" />
+        <div className="flex items-center gap-1.5">
+          <span className="text-[10px] uppercase tracking-wide text-gray-400">PR</span>
+          <span className="text-sm font-semibold text-amber-600">{emp.permissionRequests ?? "—"}</span>
+        </div>
+      </div>
+    </div>
+  ))}
+</div>
       {/* Modal */}
 {selectedEmp && (
   <div className="fixed inset-0 z-50 flex items-center sm:items-center justify-center bg-black/60 backdrop-blur-sm p-0 sm:p-4">
@@ -499,7 +531,9 @@ function BoolField({ label, value }) {
                     : null
                 }
               />
-              <Field label="Date of Joining"  value={details?.personal?.dateOfJoining} />
+              <Field
+               label="Date of Joining"
+                value={details?.personal?.dateOfJoining ? new Date(details.personal.dateOfJoining).toLocaleDateString("en-GB").replace(/\//g, "-"): "-"}/>
               <Field label="Salary Mode"      value={details?.personal?.salaryPaymentMode} />
               <Field label="Last Working Day" value={details?.personal?.lastWorkingDay} />
             </Section>
@@ -507,7 +541,7 @@ function BoolField({ label, value }) {
             {/* ── Personal ── */}
             <Section title="Personal">
               <Field label="Gender"         value={details?.personal?.gender} />
-              <Field label="Date of Birth"  value={details?.personal?.dateOfBirth} />
+              <Field label="Date of Birth"  value={details?.personal?.dateOfBirth ? new Date(details.personal.dateOfBirth).toLocaleDateString("en-GB").replace(/\//g, "-"): "-" } />
               <Field label="Blood Group"    value={details?.personal?.bloodGroup} />
               <Field label="Marital Status" value={details?.personal?.martialStatus} />
               <Field label="Marriage Date"  value={details?.personal?.marriageDate} />
