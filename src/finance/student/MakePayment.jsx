@@ -39,14 +39,37 @@ const FEE_LABELS = {
   hostelAndMessFee: "Hostel & Mess Fee",
 };
 
+const Pass_Fee ={
+  firstYearTuitionFee: "tuitionFee",
+  secondYearTuitionFee: "tuitionFee",
+  thirdYearTuitionFee: "tuitionFee",
+
+  firstYearBookFee: "bookFee",
+  secondYearBookFee: "bookFee",
+  thirdYearBookFee: "bookFee",
+
+  firstYearAffiliationFee: "affiliationFee",
+  secondYearAffiliationFee: "affiliationFee",
+  thirdYearAffiliationFee: "affiliationFee",
+
+  firstYearHostelAndMessFee:"hostelAndMessFee",
+  secondYearHostelAndMessFee:"hostelAndMessFee",
+  thirdYearHostelAndMessFee:"hostelAndMessFee",
+  
+  firstYearLibraryAndLaboratoryFee:"libraryAndLaboratoryFee",
+  secondYearLibraryAndLaboratoryFee:"libraryAndLaboratoryFee",
+  thirdYearLibraryAndLaboratoryFee:"libraryAndLaboratoryFee",
+  
+}
+
 const getFeeLabel = (name) => {
   if (!name) return name;
   // handle prefixed names like "secondYearTuitionFee"
-  const suffixMatch = name.match(/^(?:first|second|third|fourth)Year(.+)$/i);//
+  const suffixMatch = name.match(/^(?:first|second|third|fourth)Year(.+)$/i); //
   if (suffixMatch) {
     const base = suffixMatch[1].charAt(0).toLowerCase() + suffixMatch[1].slice(1);
     const prefix = name.match(/^(\w+?)Year/i)[1];
-    const yearMap = { first: "1st", second: "2nd", third: "3rd", fourth: "4th" };
+    const yearMap = { first: "I", second: "II", third: "III", fourth: "4th" };
     const yr = yearMap[prefix.toLowerCase()] ?? prefix;
     return `${FEE_LABELS[base] ?? base} (${yr} Year)`;
   }
@@ -544,14 +567,14 @@ export default function PaymentPage() {
         amountToBePaid: selectedFee.amountToBePaid,
         email: pageData.email,
         mobileNumber: pageData.mobileNumber,
-        feeName: selectedFee.feeName,
+        feeName: Pass_Fee[selectedFee.feeName],
         curentYear: pageData.currentYear,
       };
-
+      const formData = new URLSearchParams(payload).toString();
       const res = await fetch(`${API_BASE_URL}/payments/initiateSale`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: formData,
       });
 
       const data = await res.json();

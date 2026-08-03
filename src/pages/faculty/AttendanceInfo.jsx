@@ -3,7 +3,7 @@ import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import { useAuth } from "../../auth/useAuth";
 import { API_BASE_URL } from "../../config/api";
-import { SquarePen } from "lucide-react";
+import { SquarePen,NotepadText  } from "lucide-react";
 import {
   getMonthRange,
   transformAttendanceData,
@@ -315,6 +315,16 @@ return (
                  <span>Reason for Override:</span>
                  <span className="font-medium text-gray-700">
                    {selectedDetails.details.reason}
+                 </span>
+               </div>
+              )}  {/* Show only if Override Reason exists */}
+              {selectedDetails.details.leaveReason && (
+               <div className="flex items-center gap-2 text-gray-500 text-xs sm:text-sm mt-2">
+                 <NotepadText  size={14} className="text-gray-400" />
+                 <span>Reason for Leave:</span>
+                 <span className="font-medium text-gray-700">
+                   {selectedDetails.details.leaveReason}
+
                  </span>
                </div>
               )} 
