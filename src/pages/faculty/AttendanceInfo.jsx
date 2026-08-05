@@ -3,12 +3,12 @@ import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import { useAuth } from "../../auth/useAuth";
 import { API_BASE_URL } from "../../config/api";
-import { SquarePen,NotepadText  } from "lucide-react";
+import { SquarePen,NotepadText,TriangleRight,Cable,Briefcase,Zap  } from "lucide-react";
 import {
   getMonthRange,
   transformAttendanceData,
 } from "../../utils/attendanceUtils";
-import { ChevronLeft, ChevronRight, CalendarDays, Clock, AlarmClockCheck } from "lucide-react";
+import { ChevronLeft, ChevronRight, CalendarDays, Clock, AlarmClockCheck , } from "lucide-react";
 
 const AttendanceInfo = ({ employeeId }) => {
 
@@ -117,7 +117,7 @@ const AttendanceInfo = ({ employeeId }) => {
   }, [currentMonth, empId]);
 
   useEffect(() => {
-    fetchAttendance();
+    fetchAttendance(); 
   }, [fetchAttendance]);
 
   const normalizeStatus = (status)=>{
@@ -163,7 +163,6 @@ return (
 
         {/* Controls */}
         <div className="flex items-center justify-between sm:justify-end gap-1.5 sm:gap-2 bg-white/10 backdrop-blur-sm px-2 py-1.5 rounded-xl">
-
           <button
             onClick={() => handleMonthChange("prev")}
             disabled={navLock || loading}
@@ -241,7 +240,7 @@ return (
               }}
 
               eventContent={(arg) => {
-                const { label, isPresentOverride } = arg.event.extendedProps;
+                const { label, isPresentOverride, isPremission } = arg.event.extendedProps;
 
                 return (
                   <div className="relative w-full h-full flex items-center justify-center py-0.5">
@@ -253,6 +252,13 @@ return (
                       <SquarePen
                         size={11}
                         className="absolute top-0 left-0 text-gray-400 sm:!w-[15px] sm:!h-[15px]"
+                      />
+                    )}
+                    {isPremission && (
+                      <TriangleRight 
+                        className="absolute bottom-0 right-0 w-[20px] h-[20px] text-[#355834]"
+                         fill="currentColor"
+                         strokeWidth={0}
                       />
                     )}
                   </div>
@@ -328,6 +334,27 @@ return (
                  </span>
                </div>
               )} 
+               {selectedDetails.details.holidayReason && (
+               <div className="flex items-center gap-2 text-gray-500 text-xs sm:text-sm mt-2">
+                 <Briefcase size={14} className="text-blue-400" />
+                 <span>Reason for Holiday:</span>
+                 <span className="font-medium text-gray-700">
+                   {selectedDetails.details.holidayReason}
+
+                 </span>
+               </div>
+              )}
+              {selectedDetails.details.permissionReason && (
+               <div className="flex items-center gap-2 text-gray-500 text-xs sm:text-sm mt-2">
+                 <Zap size={14} className="text-yellow-400" 
+                  fill="currentColor"/>
+                 <span>Reason for Permission:</span>
+                 <span className="font-medium text-gray-700">
+                   {selectedDetails.details.permissionReason}
+
+                 </span>
+               </div>
+              )}
             </div>
 
             {/* SESSION */}
@@ -415,13 +442,13 @@ return (
 
             {[
               { label: "Present", color: "#D7FDF0", short: "P" },
-              { label: "Absent", color: "#FBA39D", short: "A" },
-              { label: "CL", color: "#CEF1FD", short: "CL" },
-              { label: "ML", color: "#79ADDC", short: "ML" },
-              { label: "Off", color: "#F7F7F7", short: "OFF" },
+              { label: "Absent",  color: "#FBA39D", short: "A" },
+              { label: "CL",      color: "#CEF1FD", short: "CL" },
+              { label: "ML",      color: "#79ADDC", short: "ML" },
+              { label: "Off",     color: "#F7F7F7", short: "OFF" },
               { label: "Holiday", color: "#0ea5e9", short: "H" },
-              { label: "OD", color: "#E9F0DB", short: "OD" },
-              { label: "PR", color: "#9333ea", short: "PR" },
+              { label: "OD",      color: "#E9F0DB", short: "OD" },
+              { label: "PR",      color: "#D7FDF0", short: "PR" },
               
             ].map((item, i) => (
               <div key={i} className="flex items-center gap-1.5 px-1.5 py-1 rounded-lg">
@@ -447,6 +474,14 @@ return (
             <SquarePen size={14} className="text-gray-600" />
             <span className="text-gray-700 text-xs sm:text-sm">
               Override (O)
+            </span>
+            <TriangleRight 
+             size={14}  
+             className=" text-[#223127]"
+             fill="currentColor"
+             strokeWidth={0} />
+            <span className="text-gray-700 text-xs sm:text-sm">
+              Permission (PR)
             </span>
           </div>
         </div>

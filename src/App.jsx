@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 
 
@@ -105,7 +105,7 @@ function App() {
             <DashboardLayout />
           </ProtectedRoute>
         }
-      >  
+      > <Route index element={<Navigate to="dashboard" replace />} />    //  again added this line to redirect to dashboard when /superadmin is accessed
         <Route path="dashboard" element={<SuperAdminDashboard />} />
         <Route path="attendance-muster" element={<AttendanceMuster />} />
         <Route path="holiday-settings" element={<HolidaySettings />} /> 
@@ -177,7 +177,7 @@ function App() {
       
    
       <Route
-        path="headadmin"
+        path="/headadmin"
         element={
           <ProtectedRoute allowedRoles={["FHADMIN"]}>
             <DashboardLayout />
@@ -189,7 +189,7 @@ function App() {
       
       {/* FINANCE ADMIN */}
       <Route
-        path="fadmin"
+        path="/fadmin"
         element={
           <ProtectedRoute allowedRoles={["FADMIN"]}>
             <DashboardLayout />
@@ -203,7 +203,7 @@ function App() {
 
       {/* STUDENT */}
       <Route
-        path="student"
+        path="/student"
         element={
           <ProtectedRoute allowedRoles={["STUDENT"]}>
             <DashboardLayout />

@@ -63,26 +63,7 @@ const EmployeeAvatar = ({ empId, name, token, size = "w-10 h-10 text-sm rounded-
     return () => listeners.get(empId)?.delete(setter);
   }, [empId]);
 
-  useEffect(() => {
-    if (!empId || src || failed) return;
 
-    const el = ref.current;
-    if (!el) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting) {
-          observer.disconnect();
-          loadImage();
-        }
-      },
-      { rootMargin: "100px" } // start fetching just before it scrolls into view
-    );
-    observer.observe(el);
-
-    return () => observer.disconnect();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [empId]);
 
   const loadImage = async () => {
     if (imageCache.has(empId)) {
@@ -122,7 +103,26 @@ const EmployeeAvatar = ({ empId, name, token, size = "w-10 h-10 text-sm rounded-
     if (url === "ERROR") setFailed(true);
     else setSrc(url);
   };
+  useEffect(() => {
+    if (!empId || src || failed) return;
 
+    const el = ref.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          observer.disconnect();
+          loadImage();
+        }
+      },
+      { rootMargin: "100px" } // start fetching just before it scrolls into view
+    );
+    observer.observe(el);
+
+    return () => observer.disconnect();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [empId]);
   const handlePickFile = (e) => {
     e.stopPropagation(); // avoid triggering a card's onClick (opens the modal)
     fileInputRef.current?.click();

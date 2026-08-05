@@ -79,10 +79,10 @@ const Sidebar = ({ onClose }) => {
             </NavLink>
 
             <p className={sectionTitle}>Management</p>
-            <NavLink to="/superadmin/admin-management" className={linkClasses} onClick={() => onClose?.()}>
+            {/* <NavLink to="/superadmin/admin-management" className={linkClasses} onClick={() => onClose?.()}>
               <Users size={18} />
               Admin Management
-            </NavLink>
+            </NavLink> */}
             <NavLink to="/superadmin/excel-uploads" className={linkClasses} onClick={() => onClose?.()}>
               <Upload size={18} />
               Excel Uploads

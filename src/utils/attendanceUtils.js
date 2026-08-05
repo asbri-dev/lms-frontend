@@ -73,6 +73,7 @@ export const transformAttendanceData = (data = []) => {
 
   const details = item?.AttendanceDetails || {};
    const isPresentOverride = details.status?.includes("(O)");
+   const isPremission = details.status?.includes("PR-") || details.status?.includes("-PR");
   const statusObj = STATUS_MAP[details.status] || {
     label: "",
     color: "#9ca3af",
@@ -96,6 +97,7 @@ export const transformAttendanceData = (data = []) => {
       rawDate: item.Date,
       label: statusObj.label,
       isPresentOverride,
+      isPremission,
       details: {
         status:       details.status || "Unknown",
         sessionOne:   details.sessionOne || "-",
@@ -109,6 +111,8 @@ export const transformAttendanceData = (data = []) => {
         earlyOut:     details.earlyOut || "-",
         reason:       details.ReasonForOverride,
         leaveReason:  details.reason || details.reasonForLeave || details.reasonForOd,
+        permissionReason: details.reasonForPermission,
+        holidayReason: details.reasonForHoliday,
       },
     },
   };
