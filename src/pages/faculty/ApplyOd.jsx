@@ -5,11 +5,13 @@ import { API_BASE_URL } from "../../config/api";
 import DatePicker from "react-datepicker";
 import { format, eachDayOfInterval, isSunday } from "date-fns";
 import "react-datepicker/dist/react-datepicker.css";
-import { CalendarDays, FileText, Upload } from "lucide-react";
+import { CalendarDays, FileText, Upload ,Download} from "lucide-react";  
+import toast from "react-hot-toast";
 
 const ApplyOd = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const location = user?.employeeId?.startsWith("AREP") ? "Palakkad" : "Chittoor";
 
   /* ================= STATE ================= */
   const [fromDate, setFromDate] = useState(null);
@@ -69,6 +71,16 @@ const ApplyOd = () => {
     }
 
     return null;
+  };
+    /* ================= RESET ================= */
+  const resetForm = () => {
+    setFromDate(null);
+    setToDate(null);
+    setSessionFrom("1");
+    setSessionTo("2");
+    setReason("");
+    setFile(null);
+    setEligible(false);
   };
 
   /* ================= AUTO CHECK ================= */
@@ -144,16 +156,50 @@ const ApplyOd = () => {
     }
   }, [fromDate, toDate, sessionFrom, sessionTo, totalDays]);
 
-  /* ================= RESET ================= */
-  const resetForm = () => {
-    setFromDate(null);
-    setToDate(null);
-    setSessionFrom("1");
-    setSessionTo("2");
-    setReason("");
-    setFile(null);
-    setEligible(false);
-  };
+
+
+
+  /* ================= EXCEL ========== */
+  const [exporting, setExporting] = useState(false);
+
+  const exportAttendanceExcel = async (location) => {
+  try {
+    setExporting(true);
+    const response = await fetch(
+      `${API_BASE_URL}/download-template/${location}`,
+      
+   
+    );
+
+    if (!response.ok) {
+      throw new Error("Failed to download Excel");
+    }
+
+    const blob = await response.blob();
+
+    const url = window.URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "Excel.xlsx";
+
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    window.URL.revokeObjectURL(url);
+
+    setExporting(false);
+    toast.success("OD Excel downloaded successfully");
+
+  } catch (error) {
+    console.error(error);
+    toast.error("Failed to download ");
+  }finally {
+    setExporting(false);
+  }
+  
+};
 
   /* ================= SUBMIT ================= */
   const handleSubmit = async (e) => {
@@ -226,12 +272,26 @@ const ApplyOd = () => {
   <div className="p-6 max-w-2xl mx-auto">
 
     <div className="bg-white rounded-2xl shadow-[0_6px_18px_rgba(0,0,0,0.08)] p-6 space-y-5">
-
+      <div  className="text-xl font-semibold text-gray-800">
       {/* TITLE */}
-      <h2 className="text-xl font-semibold text-gray-800">
+      <h2 >
         Apply On Duty
       </h2>
-
+       {/* ⬇ Export */}
+        <div className="flex justify-end gap-3 pt-2">
+              <button
+                onClick={() => exportAttendanceExcel(location)}
+                disabled={ loading}
+                className="flex items-center gap-2 px-4 py-2 rounded-lg 
+                     bg-gradient-to-r from-[#2b3c6b] to-[#3f548f] 
+                     text-white text-sm font-medium
+                     hover:opacity-90 transition shadow-sm
+                     disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <Download size={16} />
+                {exporting ? "Exporting..." : "Export"}
+              </button>
+        </div> </div>
       {/* MESSAGE */}
       {message && (
         <div className={`p-3 rounded-lg text-sm ${
@@ -321,6 +381,7 @@ const ApplyOd = () => {
             value={reason}
             onChange={(e) => setReason(e.target.value)}
             rows={3}
+            maxLength={100}
             className="w-full pl-10 pr-3 py-2 rounded-lg bg-gray-50 shadow-sm 
                        focus:outline-none focus:ring-2 focus:ring-[#3f548f]"
           />

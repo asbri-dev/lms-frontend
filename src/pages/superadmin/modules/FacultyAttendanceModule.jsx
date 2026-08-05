@@ -45,23 +45,34 @@ const FacultyAttendance = () => {
   const [showInactive,  setShowInactive]  = useState(false);
 
   /* ─── Fetch faculty list ─── */
-  const fetchFaculty = useCallback(async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const res = await fetch(
-        `${API_BASE_URL}/getFacultyAndAdmin?rmEmpId=${user?.employeeId}`,
-        { headers: { Authorization: `Bearer ${sessionStorage.getItem("authToken")}` } }
-      );
-      if (!res.ok) throw new Error(`Server error: ${res.status}`);
-      const json = await res.json();
-      setFaculty(json.FacultyDetails || []);
-    } catch (e) {
-      setError(e.message || "Failed to load faculty");
-    } finally {
-      setLoading(false);
-    }
-  }, [user?.employeeId]);
+ const employeeId = user?.employeeId;
+
+const fetchFaculty = useCallback(async () => {
+  if (!employeeId) return;
+
+  try {
+    setLoading(true);
+    setError(null);
+
+    const res = await fetch(
+      `${API_BASE_URL}/getFacultyAndAdmin?rmEmpId=${employeeId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${sessionStorage.getItem("authToken")}`,
+        },
+      }
+    );
+
+    if (!res.ok) throw new Error(`Server error: ${res.status}`);
+
+    const json = await res.json();
+    setFaculty(json.FacultyDetails || []);
+  } catch (e) {
+    setError(e.message || "Failed to load faculty");
+  } finally {
+    setLoading(false);
+  }
+}, [employeeId]);
 
   useEffect(() => {
     fetchFaculty();

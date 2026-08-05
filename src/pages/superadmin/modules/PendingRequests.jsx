@@ -330,7 +330,7 @@ const AllRequestRow = ({ item, type, onRevokeClick }) => {
   {resolveStatus(item.status) === "Approved" && (
     <button
       onClick={() => onRevokeClick(item, type)}
-      className="px-3 py-1 rounded-md bg-red-600 text-white text-xs hover:bg-red-700"
+      className="px-3 py-1 rounded-md bg-[#f93a42] text-xs text-white font-medium hover:bg-[#84181d]"
     >
       Revoke
     </button>

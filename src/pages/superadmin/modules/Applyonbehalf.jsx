@@ -956,6 +956,8 @@ const ApplyOnBehalf = () => {
 
   const [dashboardDetails, setDashboardDetails] = useState(null);
   const [dashboardLoading, setDashboardLoading] = useState(false);
+  
+  const employeeId = user?.employeeId;
 
   /* ---------- fetch faculty list ---------- */
   const fetchFaculty = useCallback(async () => {
@@ -973,7 +975,7 @@ const ApplyOnBehalf = () => {
     } finally {
       setLoadingFaculty(false);
     }
-  }, [user?.employeeId]);
+  }, [employeeId]);
 
   useEffect(() => {
     fetchFaculty();
@@ -1005,10 +1007,13 @@ const ApplyOnBehalf = () => {
     if (selectedEmployee?.empId) fetchDashboard(selectedEmployee.empId);
   }, [selectedEmployee?.empId, fetchDashboard]);
 
-  const refreshDashboard = useCallback(() => {
-    if (selectedEmployee?.empId) fetchDashboard(selectedEmployee.empId);
-  }, [selectedEmployee?.empId, fetchDashboard]);
+const empId = selectedEmployee?.empId;
 
+const refreshDashboard = useCallback(() => {
+  if (empId) {
+    fetchDashboard(empId);
+  }
+}, [empId, fetchDashboard]);
   /* ---------- filtered list ---------- */
   const filteredFaculty = useMemo(() => {
     const term = searchTerm.trim().toLowerCase();
