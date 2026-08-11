@@ -1,9 +1,11 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, forwardRef } from "react";
 import { useAuth } from "../../auth/useAuth";
 import toast from "react-hot-toast";
 import { API_BASE_URL } from "../../config/api";
-import { Download } from "lucide-react";
-
+import { Download, Calendar } from "lucide-react";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import "../../styles/MonthPicker.css";
 
 // ─── Status config ───────────────────────────────────────────────────────────
 const STATUS_OPTIONS = [
@@ -79,6 +81,39 @@ const getDefaultToDate = () => {
   return last.toISOString().split("T")[0];
 };
 
+/* ─── Custom Month Input (mirrors AttendanceMuster) ─── */
+const MonthInput = forwardRef(({ value, onClick }, ref) => (
+  <button
+    type="button"
+    onClick={onClick}
+    ref={ref}
+    className="relative flex items-center pl-9 pr-3 py-2 min-w-[140px]
+               rounded-lg bg-gray-50 border border-gray-200 text-sm text-left
+               focus:outline-none focus:ring-2 focus:ring-[#2b3c6b]/30
+               cursor-pointer"
+    style={{
+      position: "relative",
+      display: "flex",
+      alignItems: "center",
+      paddingLeft: 36,
+      paddingRight: 12,
+      minWidth: 150,
+      borderRadius: 12,
+      background: "#f8fafc",
+      border: "1px solid #e2e8f0",
+      fontSize: 12,
+      color: "#334155",
+      textAlign: "left",
+      cursor: "pointer",
+      outline: "none",
+    }}
+  >
+    <Calendar className="absolute left-3 text-gray-400" size={16} style={{ position: "absolute", left: 12, color: "#94a3b8" }} />
+    <span className="pl-5 text-gray-700" style={{ paddingLeft: 20, color: "#475569" }}>{value}</span>
+  </button>
+));
+MonthInput.displayName = "MonthInput";
+
 const getDayName = (dateStr) => {
   const parts = dateStr.split("-");
   const months = { Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11 };
@@ -87,7 +122,7 @@ const getDayName = (dateStr) => {
 };
 
 // ─── ReasonModal ─────────────────────────────────────────────────────────────
-function ReasonModal({ date, empName, onConfirm, onCancel }) {
+function ReasonModal({ date, empName, title = "Reason for Override", subtitle, confirmLabel = "Confirm Override", onConfirm, onCancel }) {
   const [reason, setReason] = useState("");
   const trimmed = reason.trim();
 
@@ -136,10 +171,10 @@ function ReasonModal({ date, empName, onConfirm, onCancel }) {
           </div>
           <div>
             <div style={{ fontSize: 15, fontWeight: 700, color: "#1e293b" }}>
-              Reason for Override
+              {title}
             </div>
             <div style={{ fontSize: 12, color: "#94a3b8", marginTop: 2 }}>
-              {empName} &mdash; {date}
+              {subtitle || (empName ? `${empName} — ${date}` : date)}
             </div>
           </div>
         </div>
@@ -155,10 +190,10 @@ function ReasonModal({ date, empName, onConfirm, onCancel }) {
           </label>
           <textarea
             autoFocus
-            placeholder="e.g. Biometric failure, duty reassignment, manual correction after verification…"
+            placeholder="e.g. Reason for …"
             value={reason}
             onChange={(e) => setReason(e.target.value)}
-            maxLength={300}
+            maxLength={100}
             rows={4}
             style={{
               width: "100%", padding: "10px 12px",
@@ -176,7 +211,7 @@ function ReasonModal({ date, empName, onConfirm, onCancel }) {
           <div style={{
             fontSize: 11, color: "#cbd5e1", textAlign: "right", marginTop: 4,
           }}>
-            {reason.length}/300
+            {reason.length}/100
           </div>
         </div>
 
@@ -211,7 +246,7 @@ function ReasonModal({ date, empName, onConfirm, onCancel }) {
               transition: "all 0.15s",
             }}
           >
-            Confirm Override
+            {confirmLabel}
           </button>
         </div>
       </div>
@@ -360,9 +395,11 @@ function ToggleSwitch({ value, onChange, disabled }) {
 }
 
 // ─── AttendanceRow ────────────────────────────────────────────────────────────
-function AttendanceRow({ record, empName, empId, onSave, isSaving }) {
+function AttendanceRow({ record, empName, empId, onSave, isSaving, monthLocked }) {
   const { user } = useAuth();
-  const locked = isLocked(record.AttendanceDetails?.status);
+  const locked =
+    monthLocked ||
+    isLocked(record.AttendanceDetails?.status);
   const originalStatus = record.AttendanceDetails?.status || "";
   const originalS1 = record.AttendanceDetails?.sessionOne;
   const originalS2 = record.AttendanceDetails?.sessionTwo;
@@ -534,7 +571,10 @@ const isDirty =
           </div>
         </td>
 
-        {/* Status */}
+
+
+
+        {/* Status */}    {/* Status */}
         <td style={{ padding: "10px 14px" }}>
           {locked ? (
             <StatusBadge status={normalizeStatus(status)} />
@@ -632,11 +672,35 @@ export default function AttendanceModifier() {
     const d = new Date();
     return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}`;
   });
+  const [monthDate, setMonthDate] = useState(() => new Date());
+  const [monthLocked, setMonthLocked] = useState(false);
 
+useEffect(() => {
+  if (!selectedMonth) return;
+
+  const [year, month] = selectedMonth.split("-");
+
+  fetch(
+    `${API_BASE_URL}/lockMonthSave?month=${month}&year=${year}`
+  )
+    .then(res => res.json())
+    .then(data => {
+      console.log("Month Lock Response:", data);
+
+      setMonthLocked(data.status === "locked");
+    })
+    .catch(err => {
+      console.error("Month lock check failed:", err);
+      setMonthLocked(false);
+    });
+
+}, [selectedMonth]);
   // Attendance records
   const [records, setRecords] = useState([]);
   const [loadingRecords, setLoadingRecords] = useState(false);
   const [savingRow, setSavingRow] = useState(null);
+  const [showMonthReasonModal, setShowMonthReasonModal] = useState(false);
+  const [monthAction, setMonthAction] = useState("lock");
 
   // ── Load employees on mount ──────────────────────────────────────────────
   useEffect(() => {
@@ -727,6 +791,13 @@ export default function AttendanceModifier() {
     setFromDate(first);
     setToDate(last);
     if (selectedEmp) loadAttendance(selectedEmp, first, last);
+  };
+
+  const handleMonthDatePickerChange = (date) => {
+    if (!date) return;
+    setMonthDate(date);
+    const monthVal = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+    handleMonthChange(monthVal);
   };
 
   // ── Download excel Api ───────────────────────────────────────────────────
@@ -821,6 +892,90 @@ export default function AttendanceModifier() {
       toast.error("Network error. Please try again.");
     } finally {
       setSavingRow(null);
+    }
+  };
+
+
+  const lockMonth = async (reason) => {
+    const [year, month] = selectedMonth.split("-");
+
+    try {
+      const res = await fetch(`${API_BASE_URL}/lockMonth`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          status:"locked",
+          month: month,
+          year: year,
+          lockedBy: user.employeeId,
+          lockReason: reason,
+          timestamp: new Date().toISOString(),
+        }),
+      });
+
+      if (!res.ok) {
+        toast.error("Failed to lock month");
+        return;
+      }
+
+      setMonthLocked(true);
+      toast.success("Month locked successfully");
+    } catch (err) {
+      console.error(err);
+      toast.error("Something went wrong");
+    }
+  };
+
+  const unlockMonth = async (reason) => {
+    const [year, month] = selectedMonth.split("-");
+
+    try {
+      const res = await fetch(`${API_BASE_URL}/lockMonth`, { 
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          status:"unlocked",
+          month: month,
+          year: year,
+          unlockedBy: user.employeeId,
+          unlockReason: reason,
+          timestamp: new Date().toISOString(),
+        }),
+      });
+
+      if (!res.ok) {
+        toast.error("Failed to unlock month");
+        return;
+      }
+
+      setMonthLocked(false);
+      toast.success("Month unlocked successfully");
+    } catch (err) {
+      console.error(err);
+      toast.error("Something went wrong");
+    }
+  };
+
+  const openMonthReasonModal = (action) => {
+    console.log("Button clicked");
+    setMonthAction(action);
+    setShowMonthReasonModal(true);
+  };
+
+  const closeMonthReasonModal = () => {
+    setShowMonthReasonModal(false);
+  };
+
+  const handleMonthReasonConfirm = async (reason) => {
+    setShowMonthReasonModal(false);
+    if (monthAction === "lock") {
+      await lockMonth(reason);
+    } else {
+      await unlockMonth(reason);
     }
   };
 
@@ -1000,19 +1155,14 @@ export default function AttendanceModifier() {
               <label style={{ fontSize: 10, color: "#94a3b8", fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.5 }}>
                 Month
               </label>
-              <input
-                type="month"
-                value={selectedMonth}
-                onChange={(e) => handleMonthChange(e.target.value)}
-                style={{
-                  padding: "7px 10px", borderRadius: 8,
-                  border: "1.5px solid #6366f1",
-                  fontSize: 12, color: "#6366f1", outline: "none",
-                  cursor: "pointer", fontWeight: 600,
-                  background: "#eef2ff",
-                }}
-                onFocus={(e) => (e.target.style.borderColor = "#4f46e5")}
-                onBlur={(e)  => (e.target.style.borderColor = "#6366f1")}
+              <DatePicker
+                selected={monthDate}
+                onChange={handleMonthDatePickerChange}
+                showMonthYearPicker
+                showFourColumnMonthYearPicker
+                dateFormat="MMMM yyyy"
+                customInput={<MonthInput />}
+                popperPlacement="bottom-start"
               />
             </div>
 
@@ -1101,8 +1251,64 @@ export default function AttendanceModifier() {
               <Download size={16} />
               {exporting ? "Exporting..." : `Export${locationFilter !== "All" ? ` (${locationFilter})` : ""}`}
             </button>
-          </div>
-        </div>
+
+            <button
+                onClick={() => openMonthReasonModal(monthLocked ? "unlock" : "lock")}
+                disabled={!selectedEmp || loadingRecords}
+                style={{
+                  padding: "8px 14px",
+                  borderRadius: 8,
+                  border: monthLocked ? "1.5px solid #dc2626" : "1.5px solid #16a34a",
+                  background:
+                    !selectedEmp || loadingRecords
+                      ? "#f8fafc"
+                      : monthLocked
+                      ? "#fef2f2"
+                      : "#f0fdf4",
+                  color:
+                    !selectedEmp || loadingRecords
+                      ? "#94a3b8"
+                      : monthLocked
+                      ? "#dc2626"
+                      : "#16a34a",
+                  fontSize: 13,
+                  fontWeight: 600,
+                  cursor:
+                    !selectedEmp || loadingRecords
+                      ? "not-allowed"
+                      : "pointer",
+                  transition: "all 0.15s",
+                  marginTop: 14,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 6,
+                }}
+                  onMouseEnter={(e) => {
+                    if (!selectedEmp || loadingRecords) return;
+                 
+                    e.currentTarget.style.transform = "translateY(-1px)";
+                    e.currentTarget.style.boxShadow =
+                      "0 4px 12px rgba(0,0,0,0.08)";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = "translateY(0)";
+                    e.currentTarget.style.boxShadow = "none";
+                        }}
+                    >
+                      {monthLocked ? "🔓 Unlock Month" : "🔒 Lock Month"}
+                    </button>
+                   </div>
+               </div>
+
+        {showMonthReasonModal && (
+          <ReasonModal
+            title={monthAction === "lock" ? "Lock Month Reason" : "Unlock Month Reason"}
+            subtitle={`Month ${selectedMonth}`}
+            confirmLabel={monthAction === "lock" ? "Confirm Lock" : "Confirm Unlock"}
+            onConfirm={handleMonthReasonConfirm}
+            onCancel={closeMonthReasonModal}
+          />
+        )}
 
         {/* Stats bar */}
         {records.length > 0 && (
@@ -1214,6 +1420,7 @@ export default function AttendanceModifier() {
                     empId={empId}
                     onSave={handleSave}
                     isSaving={savingRow === record.Date}
+                    monthLocked={monthLocked}
                   />
                 ))}
               </tbody>
