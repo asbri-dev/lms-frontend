@@ -132,7 +132,7 @@ export default function PaymentSuccess() {
       setDownloading(true);
 
       const response = await fetch(
-        `${API_BASE_URL}/payments/downloadReceipt?txnId=${txnData.transactionId}`
+        `${API_BASE_URL}/downloadPaymentInvoice?txnId=${txnData.transactionId}`
       );
 
       if (!response.ok) throw new Error("Failed to download receipt");
@@ -269,7 +269,7 @@ export default function PaymentSuccess() {
             />
             <DetailRow
               label="Academic Year"
-              value={`${txnData.curentYear} · Sem ${txnData.currentSemester}`}
+              value={`${txnData.currentYear} · Sem ${txnData.currentSemester}`}
             />
             {/* Total row */}
             <div

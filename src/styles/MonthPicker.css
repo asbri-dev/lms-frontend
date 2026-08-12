@@ -113,7 +113,7 @@
   grid-template-columns: repeat(4, 1fr) !important;
   grid-auto-rows: 38px !important;
   align-items: center !important;
-  gap: 6px !important;
+  gap: 10px !important;
   margin: 0 !important;
   width: 100% !important;
 }
@@ -191,4 +191,16 @@
 /* Hide default triangle */
 .react-datepicker__triangle {
   display: none !important;
+}
+.react-datepicker__month-year-grid {
+    display: grid !important;
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: 10px !important;
+    width: 100% !important;
+}
+
+.react-datepicker__month-year-grid .react-datepicker__month-text,
+.react-datepicker__month-year-grid .react-datepicker__month-year-text {
+    width: 100% !important;
+    margin: 0 !important;
 }
