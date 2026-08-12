@@ -99,23 +99,46 @@ export default function ReportsDashboard() {
     <div className="min-h-screen bg-gray-50">
 
       {/* Header */}
-      <div className="bg-white border-shadow border-shadow px-6 py-4 flex items-center justify-between">
+<div className="relative bg-white border-shadow px-6 py-4 flex items-center justify-between overflow-hidden">
 
-        <div>
-          <h1 className="text-lg font-semibold text-gray-800">
-            Reports Dashboard
-          </h1>
+  <div>
+    <h1 className="text-lg font-semibold text-gray-800">
+      Reports Dashboard
+    </h1>
 
-          <p className="text-xs text-gray-500 mt-1">
-            Attendance and Leave Analytics
-          </p>
-        </div>
+    <p className="text-xs text-gray-500 mt-1">
+      Attendance and Leave Analytics
+    </p>
+  </div>
 
-        <span className="px-3 py-1 rounded-full bg-indigo-100 text-indigo-700 text-xs font-medium">
-          Reports
-        </span>
+  <span className="px-3 py-1 rounded-full bg-indigo-100 text-indigo-700 text-xs font-medium">
+    Reports
+  </span>
 
-      </div>
+  {/* Moving blue light */}
+  <div className="absolute bottom-0 left-0 w-full h-[2px] overflow-hidden">
+    <div
+      className="absolute top-0 left-[-30%] w-[30%] h-full
+                 bg-gradient-to-r from-transparent via-indigo-500 to-transparent
+                 blur-[2px]"
+      style={{
+        animation: "reportsLineFlow 3s linear infinite",
+      }}
+    />
+  </div>
+
+  <style>{`
+    @keyframes reportsLineFlow {
+      0% {
+        left: -30%;
+      }
+      100% {
+        left: 100%;
+      }
+    }
+  `}</style>
+
+</div>
 
       {/* Tabs */}
 

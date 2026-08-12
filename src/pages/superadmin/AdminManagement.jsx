@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import {  useMemo, useState } from "react";
 import CreateAdminModal from "../../components/admin/CreateAdminModal";
 import DeleteAdminModal from "../../components/admin/DeleteAdminModal";
 import { useAuth } from "../../auth/useAuth";
@@ -64,9 +64,7 @@ const AdminManagement = () => {
     }
   };
 
-  useEffect(() => {
-    fetchData();
-  }, []);
+ 
 
   /* ==============================
      FILTER DATA

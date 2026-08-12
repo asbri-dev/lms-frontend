@@ -19,11 +19,7 @@ const OtpVerify = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  useEffect(() => {
-    startTimer();
-    inputRefs.current[0]?.focus();
-    return () => clearInterval(timerRef.current);
-  }, []);
+
 
   const startTimer = () => {
     clearInterval(timerRef.current);
@@ -41,7 +37,11 @@ const OtpVerify = () => {
       });
     }, 1000);
   };
-
+    useEffect(() => {
+    startTimer();
+    inputRefs.current[0]?.focus();
+    return () => clearInterval(timerRef.current);
+  }, []);
   const handleChange = (value, index) => {
     if (!/^\d?$/.test(value)) return;
 

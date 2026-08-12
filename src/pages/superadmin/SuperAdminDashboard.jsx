@@ -27,7 +27,7 @@ const MODULES = [
     label: "Top Leave Takers",
     shortLabel: "Leave",
     icon: (
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="red" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
         <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
       </svg>
     ),
@@ -95,7 +95,7 @@ const MODULES = [
     label: "Apply on Behalf",
     shortLabel: "Apply",
     icon: (
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">   
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="green" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">   
       <path d="M12 20h9" />
       <path d="M12 4h9" />
       <path d="M12 12h9" />
@@ -115,45 +115,99 @@ const SuperAdminDashboard = () => {
   const current = MODULES.find((m) => m.key === active);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+ <div className="min-h-screen bg-gray-50">
 
       {/* ─── Top Header ─── */}
-      <div className="bg-white border-b border-gray-200 px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between gap-3">
-        <div className="min-w-0">
-          <h1 className="text-base sm:text-lg font-semibold text-gray-800 truncate">
-            Super Admin Dashboard
-          </h1>
-          <p className="text-[11px] sm:text-xs text-gray-400 mt-0.5 truncate">
-            System-level control panel
-          </p>
-        </div>
-        <span className="shrink-0 text-[10px] sm:text-xs font-medium px-2.5 sm:px-3 py-1 rounded-full bg-indigo-100 text-indigo-700">
-          Super Admin
-        </span>
-      </div>
+   <div className="relative bg-white border-b border-gray-200 px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between gap-3 overflow-hidden">
+
+  <div className="min-w-0">
+    <h1 className="text-base sm:text-lg font-semibold text-gray-800 truncate">
+      Super Admin Dashboard
+    </h1>
+
+    <p className="text-[11px] sm:text-xs text-gray-400 mt-0.5 truncate">
+      System-level control panel
+    </p>
+  </div>
+
+  <span className="shrink-0 text-[10px] sm:text-xs font-medium px-2.5 sm:px-3 py-1 rounded-full bg-indigo-100 text-indigo-700">
+    Super Admin
+  </span>
+
+  {/* Moving blue light */}
+  <div className="absolute bottom-[-1px] left-0 w-full h-[3px] overflow-hidden">
+    <div
+      className="absolute top-0 left-[-30%] w-[30%] h-full
+                 bg-gradient-to-r from-transparent via-blue-500 to-transparent
+                 blur-[1px]"
+      style={{
+        animation: "lineFlow 3s linear 500ms infinite",
+      }}
+    />
+  </div>
+
+  <style>{`
+    @keyframes lineFlow {
+      0% {
+        left: -30%;
+      }
+      100% {
+        left: 100%;
+      }
+    }
+  `}</style>
+</div>
 
       {/* ─── Tab Bar ─── */}
-      <div className="bg-white border-b border-gray-200 px-2 sm:px-6">
-        <div className="flex gap-0.5 sm:gap-1 overflow-x-auto scrollbar-hide">
-          {MODULES.map((m) => (
-            <button
-              key={m.key}
-              onClick={() => setActive(m.key)}
-              className={`flex flex-col sm:flex-row items-center gap-1 sm:gap-2 px-2.5 sm:px-4 py-2.5 sm:py-3 text-[11px] sm:text-sm font-medium border-b-2 transition-colors whitespace-nowrap shrink-0 ${
-                active === m.key
-                  ? "border-indigo-600 text-indigo-600"
-                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-              }`}
-            >
-              <span className={active === m.key ? "text-indigo-600" : "text-gray-400"}>
-                {m.icon}
-              </span>
-              <span className="sm:hidden">{m.shortLabel}</span>
-              <span className="hidden sm:inline">{m.label}</span>
-            </button>
-          ))}
-        </div>
-      </div>
+<div className="relative bg-white border-b border-gray-200 px-2 sm:px-6">
+  <div className="flex flex-wrap gap-0.5 sm:gap-1">
+    {MODULES.map((m) => (
+      <button
+        key={m.key}
+        onClick={() => setActive(m.key)}
+        className={`flex flex-col sm:flex-row items-center gap-1 sm:gap-2 px-2.5 sm:px-4 py-2.5 sm:py-3 text-[11px] sm:text-sm font-medium border-b-2 transition-colors whitespace-nowrap shrink-0 ${
+          active === m.key
+            ? "border-indigo-600 text-indigo-600"
+            : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+        }`}
+      >
+        <span
+          className={
+            active === m.key ? "text-indigo-600" : "text-gray-400"
+          }
+        >
+          {m.icon}
+        </span>
+
+        <span className="sm:hidden">{m.shortLabel}</span>
+        <span className="hidden sm:inline">{m.label}</span>
+      </button>
+    ))}
+  </div>
+
+  {/* Moving blue light */}
+  <div className="absolute bottom-[-1px] left-0 w-full h-[2px] overflow-hidden pointer-events-none">
+    <div
+      className="absolute top-0 left-[-30%] w-[30%] h-full
+                 bg-gradient-to-r from-transparent via-blue-500 to-transparent
+                 blur-[1px]"
+      style={{
+        animation: "lineFlow 3s linear infinite",
+      }}
+    />
+  </div>
+
+  <style>{`
+    @keyframes lineFlow {
+      0% {
+        left: -30%;
+      }
+      100% {
+        left: 100%;
+      }
+    }
+  `}</style>
+</div>
 
       {/* ─── Active Module ─── */}
       <div className="p-3 sm:p-6">
