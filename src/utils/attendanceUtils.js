@@ -22,6 +22,8 @@ export const STATUS_MAP = {
   ml:                      { label: "Medical Leave",   color: "#79ADDC", type: "Leave" },
   Onduty:                  { label: "OD",              color: "#E9F0DB", type: "Leave" },
   Holiday:                 { label: "H",               color: "#0ea5e9", type: "Leave" },
+  "Onduty:Absent":         { label: "OD/A",            color: "#F3B7A5", type: "Leave/Absent" },
+  "Absent:Onduty":         { label: "A/OD",            color: "#F3B7A5", type: "Absent/Leave" },
   "CL(O)":                 { label: "CL(O)",           color: "#79ADDC", type: "Leave" },
   "Present:CL(O)":         { label: "P/CL(O)",         color: "#79ADDC", type: "Leave" },
   "CL(O):Present":         { label: "CL(O)/P",         color: "#79ADDC", type: "Leave" },
