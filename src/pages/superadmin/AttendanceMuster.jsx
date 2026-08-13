@@ -156,7 +156,17 @@ const STATUS_MAP = {
   label: "CL(O)/P",
   color: "bg-green-100 text-green-800",
   display: "Present Opening",
-  }
+  },
+  "Onduty:Absent":{
+    label: "OD/A",
+    color: "bg-red-100 text-red-800",
+    display:"OD + Absent"
+  },
+  "Onduty:Present":{
+    label: "OD/A",
+    color: "bg-green-100 text-green-800",
+    display:"OD + Present"
+  },
 
 };
 
@@ -369,6 +379,8 @@ useEffect(() => {
       switch (a.status) {
         case "Present":
         case "Present(O)":
+        case "Onduty:Present":
+        case "Present:Onduty":
           totals.Present += 1;
           break;
 
@@ -378,6 +390,8 @@ useEffect(() => {
 
         case "Present:Absent":
         case "Absent:Present":
+        case "Onduty:Absent":
+        case "Absent:Onduty":
           totals.Present += 0.5;
           totals.Absent += 0.5;
           break;
@@ -729,8 +743,11 @@ useEffect(() => {
 
                   switch (a.status) {
                     case "Present":
+                    case "Onduty:Present":
+                    case "Present:Onduty":
                       totals.Present += 1;
                       totals.Total += 1;
+
                       break;
 
                     case "Absent":
@@ -739,6 +756,8 @@ useEffect(() => {
 
                     case "Present:Absent":
                     case "Absent:Present":
+                    case "Onduty:Absent":
+                    case "Absent:Onduty":
                       totals.Present += 0.5;
                       totals.Absent += 0.5;
                       totals.Total += 0.5;
