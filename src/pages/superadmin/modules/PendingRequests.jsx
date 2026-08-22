@@ -569,10 +569,10 @@ const ApproveModal = ({ target, onClose, onConfirm, submitting }) => {
             type="button"
             onClick={handleConfirm}
             disabled={submitting}
-            className="px-4 py-2 rounded-lg text-sm font-medium bg-red-600 text-white hover:bg-red-700 disabled:opacity-50 transition-colors flex items-center gap-2"
+            className="px-4 py-2 rounded-lg text-sm font-medium bg-green-600 text-white hover:bg-green-700 disabled:opacity-50 transition-colors flex items-center gap-2"
           >
             {submitting && <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />}
-            {submitting ? "Revoking..." : "Confirm Revoke"}
+            {submitting ? "Approving..." : "Confirm Approve"}
           </button>
         </div>
       </div>
