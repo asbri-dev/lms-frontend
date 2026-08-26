@@ -16,7 +16,7 @@ import ExcelUploads from "./pages/superadmin/ExcelUploads";
 import AdminManagement from "./pages/superadmin/AdminManagement";
 import AttendanceModifier from "./pages/superadmin/AttendanceModifier";
 import ReportsDashboard from "./pages/superadmin/ReportsDashboard";
-
+import FeeDashboard from "./pages/superadmin/FeeDashboard";
 
 
 import HeadDashboard from "./pages/head/HeadDashboard";
@@ -118,7 +118,7 @@ function App() {
         <Route path="admin-management" element={<AdminManagement />} />
         <Route path="attendance-modifier" element={<AttendanceModifier />} />
         <Route path="report-dashboard"  element={<ReportsDashboard />} />
-        <Route path="fee-dashboard"  element={<Feedashboard />} />
+        <Route path="fee-dashboard"  element={<FeeDashboard />} />
       </Route>
       
       {/* HEAD */}
