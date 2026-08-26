@@ -109,7 +109,7 @@ const MODULES = [
 
 ];
 
-const SuperAdminDashboard = () => {
+const FeeDashboard = () => {
   const [active, setActive] = useState("directory");
 
   const current = MODULES.find((m) => m.key === active);
@@ -135,8 +135,7 @@ const SuperAdminDashboard = () => {
   </span>
 
   {/* Moving blue light */}
-    {/* Moving blue light */}
-  <div className="absolute bottom-[-1px] left-0 w-full h-[2px] overflow-hidden pointer-events-none">
+  <div className="absolute bottom-[-1px] left-0 w-full h-[3px] overflow-hidden">
     <div
       className="absolute top-0 left-[-30%] w-[30%] h-full
                  bg-gradient-to-r from-transparent via-blue-500 to-transparent
@@ -146,7 +145,6 @@ const SuperAdminDashboard = () => {
       }}
     />
   </div>
-
 
   <style>{`
     @keyframes lineFlow {
@@ -220,4 +218,4 @@ const SuperAdminDashboard = () => {
   );
 };
 
-export default SuperAdminDashboard;
+export default FeeDashboard;

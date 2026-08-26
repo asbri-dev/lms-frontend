@@ -16,6 +16,7 @@ import ExcelUploads from "./pages/superadmin/ExcelUploads";
 import AdminManagement from "./pages/superadmin/AdminManagement";
 import AttendanceModifier from "./pages/superadmin/AttendanceModifier";
 import ReportsDashboard from "./pages/superadmin/ReportsDashboard";
+import Feedashboard from "./pages/superadmin/Feedashboard";
 
 
 import HeadDashboard from "./pages/head/HeadDashboard";
@@ -41,12 +42,16 @@ import FacultyProfile from "./components/profile/Facultyprofile";
 
 import HeadAdminDashboard from "./finance/headadmin/FHAdminDashboard";
 import FacultyAttendanceModule from "./pages/head/FacultyAttendance";
+import HeadAdminApprovals from "./finance/headadmin/HeadAdminApprovalPage";
+import DueDateSetPage from "./finance/headadmin/DueDateSetPage"
 
 
 
 import FAdminDashboard from "./finance/fadmin/FAdminDashboard";
 import AdminFeeStructurePage from "./finance/fadmin/AdminFeeStructurePage";
 import AdminStudentPage from "./finance/fadmin/AdminStudentPage";
+import FeechangeRequestPage from "./finance/fadmin/Feechangerequestpage";
+import FeeAssignment from "./finance/headadmin/Fee Assignment";
 
 
 
@@ -113,6 +118,7 @@ function App() {
         <Route path="admin-management" element={<AdminManagement />} />
         <Route path="attendance-modifier" element={<AttendanceModifier />} />
         <Route path="report-dashboard"  element={<ReportsDashboard />} />
+        <Route path="fee-dashboard"  element={<Feedashboard />} />
       </Route>
       
       {/* HEAD */}
@@ -185,6 +191,9 @@ function App() {
         }
       >  
         <Route path="dashboard" element={<HeadAdminDashboard />} />
+        <Route path="fee-approvals" element={<HeadAdminApprovals />} />
+        <Route path="due-date" element={<DueDateSetPage/>}/>
+        <Route path="fee-assignment" element={<FeeAssignment/>}/>
       </Route>
       
       {/* FINANCE ADMIN */}
@@ -199,6 +208,7 @@ function App() {
         <Route path="dashboard" element={<FAdminDashboard />} />
         <Route path="fee-structure" element={<AdminFeeStructurePage />} />
         <Route path="student-management" element={<AdminStudentPage />} />
+        <Route path="fee-change-requests" element={<FeechangeRequestPage />} />
       </Route>
 
       {/* STUDENT */}

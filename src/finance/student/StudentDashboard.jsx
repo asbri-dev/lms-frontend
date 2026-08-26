@@ -26,6 +26,9 @@ const feeLabel = (key) => {
     idCardFee: "ID Card Fee",
     applicationFee: "Application Fee",
     hostelAndMessFee: "Hostel & Mess Fee",
+    oneOneTuitionFee: "Tuition Fee (SEM I)",
+    oneTwoTuitionFee: "Tuition Fee (SEM II)",
+    uniformAndDrawingFee:"Uniform & Drawing Fee"
   };
   return map[key] || key;
 };
@@ -200,23 +203,107 @@ export default function StudentDashboard() {
   useEffect(() => { fetchDashboard(); }, [fetchDashboard]);
 
   // ── Loading ──
-  if (loading) return (
-    <div style={{
-      minHeight:"100vh", display:"flex", flexDirection:"column",
-      alignItems:"center", justifyContent:"center",
-      background:"linear-gradient(135deg,#E9F3FF 0%,#f8faff 60%,#D8E4FA 100%)",
-      fontFamily:"'DM Sans',sans-serif",
-    }}>
-      <SnowflakeBg />
-      <div style={{ position:"relative", zIndex:1, textAlign:"center" }}>
-        <div style={{ animation:"spin 2s linear infinite", color:"#3D7DFC", marginBottom:16 }}>
-          <Snowflake size={48} strokeWidth={1.5} />
+if (loading) return (
+  <div style={{
+    minHeight: "100vh", display: "flex", flexDirection: "column",
+    alignItems: "center", justifyContent: "center",
+    background: "linear-gradient(135deg,#E9F3FF 0%,#f8faff 60%,#D8E4FA 100%)",
+    fontFamily: "'DM Sans',sans-serif",
+    position: "relative",
+    overflow: "hidden",
+  }}>
+    <style>{`
+      @keyframes sunSpin {
+        from { transform: rotate(0deg); }
+        to   { transform: rotate(360deg); }
+      }
+      @keyframes orbit {
+        from { transform: rotate(0deg) translateX(42px) rotate(0deg); }
+        to   { transform: rotate(360deg) translateX(42px) rotate(-360deg); }
+      }
+      @keyframes pulseRing {
+        0%, 100% { transform: scale(0.92); opacity: 0.35; }
+        50%      { transform: scale(1.08); opacity: 0.7; }
+      }
+      @keyframes barShine {
+        0%   { transform: translateX(-100%); }
+        100% { transform: translateX(220%); }
+      }
+      @keyframes fadeUpSoft {
+        from { opacity: 0; transform: translateY(10px); }
+        to   { opacity: 1; transform: translateY(0); }
+      }
+      @keyframes dotBounce {
+        0%, 80%, 100% { transform: translateY(0); opacity: 0.4; }
+        40%           { transform: translateY(-6px); opacity: 1; }
+      }
+      .load-sun   { animation: sunSpin 10s linear infinite; }
+      .load-orbit { animation: orbit 3.2s linear infinite; }
+      .load-ring  { animation: pulseRing 2.4s ease-in-out infinite; }
+      .load-shine { animation: barShine 1.6s ease-in-out infinite; }
+      .load-fade  { animation: fadeUpSoft 0.55s ease both; }
+      .load-dot   { width: 6px; height: 6px; border-radius: 999px; background: #3D7DFC; animation: dotBounce 1.2s ease-in-out infinite; }
+    `}</style>
+
+    <SnowflakeBg />
+
+    <div style={{ position: "relative", zIndex: 1, textAlign: "center" }} className="load-fade">
+      <div style={{ position: "relative", width: 96, height: 96, margin: "0 auto 20px" }}>
+        {/* Pulsing ring */}
+        <div
+          className="load-ring"
+          style={{
+            position: "absolute", inset: 0,
+            borderRadius: "999px",
+            border: "1.5px solid #3D7DFC",
+          }}
+        />
+
+        {/* Orbiting dot */}
+        <div
+          className="load-orbit"
+          style={{ position: "absolute", top: "50%", left: "50%", width: 0, height: 0, animationDuration: "2.8s" }}
+        >
+          <span
+            style={{
+              position: "absolute", top: -4, left: -4,
+              width: 8, height: 8,
+              borderRadius: "999px", background: "#3D7DFC",
+            }}
+          />
         </div>
-        <p style={{ color:"#3D7DFC", fontWeight:600, fontSize:15 }}>Loading your dashboard…</p>
+
+        {/* Center disc with spinning snowflake */}
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            background: "#fff",
+            borderRadius: "999px",
+            boxShadow: "0 8px 24px #3D7DFC25",
+          }}
+        >
+          <div className="load-sun" style={{ color: "#3D7DFC", animationDuration: "8s" }}>
+            <Snowflake size={40} strokeWidth={1.5} />
+          </div>
+        </div>
+      </div>
+
+      <p style={{ color: "#3D7DFC", fontWeight: 600, fontSize: 15, marginBottom: 8 }}>
+        Loading your dashboard…
+      </p>
+
+      <div style={{ display: "flex", gap: 5, justifyContent: "center" }}>
+        <span className="load-dot" style={{ animationDelay: "0s" }} />
+        <span className="load-dot" style={{ animationDelay: ".15s" }} />
+        <span className="load-dot" style={{ animationDelay: ".3s" }} />
       </div>
     </div>
-  );
-
+  </div>
+);
   // ── Error ──
   if (error) return (
     <div style={{

@@ -37,6 +37,9 @@ const FEE_LABELS = {
   transportationFee: "Transportation Fee",
   libraryAndLaboratoryFee: "Library & Laboratory Fee",
   hostelAndMessFee: "Hostel & Mess Fee",
+      oneOneTuitionFee: "Tuition Fee (SEM I)",
+    oneTwoTuitionFee: "Tuition Fee (SEM II)",
+    uniformAndDrawingFee:"Uniform & Drawing Fee"
 };
 
 const Pass_Fee = (feeName) => {
@@ -462,12 +465,17 @@ function FeeCard({ fee, onPay }) {
 
             {/* Status badge */}
             <span
-              className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold"
-              style={{ background: "#FEF2F2", color: "#ef4444" }}
-            >
-              <Clock size={10} strokeWidth={2.5} />
-              Unpaid
-            </span>
+  className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold"
+  style={{
+    background:
+      fee.feeStatus === "Partially Waived" ? "#FFF7ED" : "#FEF2F2",
+    color:
+      fee.feeStatus === "Partially Waived" ? "#0ba3e9" : "#ef4444",
+  }}
+>
+  <Clock size={10} strokeWidth={2.5} />
+  {fee.feeStatus === "Partially Waived" ? "Partially Waived" : "Unpaid"}
+</span>
           </div>
         </div>
       </div>
@@ -553,7 +561,7 @@ export default function PaymentPage() {
       if (!res.ok) throw new Error(`Server error: ${res.status}`);
       const json = await res.json();
       setPageData(json);
-      setUnpaidFees((json.fees ?? []).filter((f) => f.feeStatus === "Unpaid"));
+      setUnpaidFees((json.fees ?? []).filter((f) => f.feeStatus === "Unpaid"||f.feeStatus === "Partially Waived"));
     } catch (err) {
       setPageError(err.message);
     } finally {
@@ -577,7 +585,7 @@ export default function PaymentPage() {
         amountToBePaid: selectedFee.amountToBePaid,
         email: pageData.email,
         mobileNumber: pageData.mobileNumber,
-        feeName: Pass_Fee(selectedFee.feeName),
+        feeName: selectedFee.feeName,
         curentYear: pageData.currentYear,
       };
       const formData = new URLSearchParams(payload).toString();

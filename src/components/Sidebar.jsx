@@ -30,11 +30,34 @@ const Sidebar = ({ onClose }) => {
 
   return (
     <aside
-      className={`w-64 h-full border-r border-gray-100 ${currentModule?.theme?.background} ${currentModule.theme.Ntext} flex flex-col p-4 sm:p-6 overflow-y-auto`}
+      className={`w-64 h-full border-r border-gray-100 ${currentModule?.theme?.background} ${currentModule.theme.Ntext} flex flex-col p-4 sm:p-6`}
     >
+      {/* ── Custom slim scrollbar (scoped to this sidebar only) ── */}
+      <style>{`
+        .sidebar-scroll {
+          scrollbar-width: thin;
+          scrollbar-color: rgba(255, 255, 255, 0.18) transparent;
+        }
+        .sidebar-scroll::-webkit-scrollbar {
+          width: 5px;
+        }
+        .sidebar-scroll::-webkit-scrollbar-track {
+          background: transparent;
+        }
+        .sidebar-scroll::-webkit-scrollbar-thumb {
+          background-color: rgba(255, 255, 255, 0.18);
+          border-radius: 999px;
+        }
+        .sidebar-scroll:hover::-webkit-scrollbar-thumb {
+          background-color: rgba(255, 255, 255, 0.32);
+        }
+        .sidebar-scroll::-webkit-scrollbar-thumb:hover {
+          background-color: rgba(255, 255, 255, 0.45);
+        }
+      `}</style>
 
-      {/* ── Logo + Close button (close only shows on mobile) ── */}
-      <div className="flex items-center justify-between mb-2">
+      {/* ── Logo + Close button (close only shows on mobile) — fixed, never scrolls ── */}
+      <div className="flex items-center justify-between mb-2 shrink-0">
         <div className="min-w-0">
           <h2 className={`flex items-center gap-2 text-xl ${currentModule.theme.Ntext} font-bold tracking-wide border-b border-gray-300 pb-2 w-50`}>
             {currentModule?.icon && (
@@ -56,8 +79,8 @@ const Sidebar = ({ onClose }) => {
         </button>
       </div>
 
-      {/* ── Navigation ── */}
-      <nav className="space-y-1 flex-1">
+      {/* ── Navigation — this is the ONLY scrollable region ── */}
+      <nav className="sidebar-scroll space-y-1 flex-1 overflow-y-auto pr-1 min-h-0">
 
         {/* SUPERADMIN */}
         {user?.role === "SUPERADMIN" && (
@@ -78,10 +101,10 @@ const Sidebar = ({ onClose }) => {
               Attendance Modifier
             </NavLink>
 
-            <p className={sectionTitle}>Management</p>
+            <p className={sectionTitle}>DATA MANAGEMENT</p>
             {/* <NavLink to="/superadmin/admin-management" className={linkClasses} onClick={() => onClose?.()}>
               <Users size={18} />
-              Admin Management
+              Admin Management                                                                                        
             </NavLink> */}
             <NavLink to="/superadmin/excel-uploads" className={linkClasses} onClick={() => onClose?.()}>
               <Upload size={18} />
@@ -90,6 +113,12 @@ const Sidebar = ({ onClose }) => {
             <NavLink to="/superadmin/report-dashboard" className={linkClasses} onClick={() => onClose?.()}>
               <BarChart3 size={18} />
               Reports
+            </NavLink>
+
+            <p className={sectionTitle}>FEE Management</p>
+            <NavLink to="/superadmin/fee-dashboard" className={linkClasses} onClick={() => onClose?.()}>
+              <Users size={18} />
+              Fee Dashboard
             </NavLink>
 
             <p className={sectionTitle}>Settings</p>
@@ -215,6 +244,18 @@ const Sidebar = ({ onClose }) => {
               <LayoutDashboard size={18} />
               Dashboard
             </NavLink>
+            <NavLink to="/headadmin/fee-approvals" className={linkClasses} onClick={() => onClose?.()}>
+              <ClipboardCheck size={18} />
+              Fee Approvals
+            </NavLink>
+            <NavLink to="/headadmin/due-date" className={linkClasses} onClick={() => onClose?.()}>
+              <CalendarCheck size={18} />
+              Due Date Settings
+            </NavLink>
+            <NavLink to="/headadmin/fee-assignment" className={linkClasses} onClick={() => onClose?.()}>
+              <IndianRupee size={18} />
+              Fee Assignment
+            </NavLink>
           </>
         )}
 
@@ -233,6 +274,10 @@ const Sidebar = ({ onClose }) => {
             <NavLink to="/fadmin/student-management" className={linkClasses} onClick={() => onClose?.()}>
               <Users size={18} />
               Student Management
+            </NavLink>
+            <NavLink to="/fadmin/fee-change-requests" className={linkClasses} onClick={() => onClose?.()}>
+              <ClipboardCheck size={18} />
+              Fee Change Requests
             </NavLink>
           </>
         )}
@@ -262,8 +307,8 @@ const Sidebar = ({ onClose }) => {
 
       </nav>
 
-      {/* ── Logout ── */}
-      <div className="mt-auto pt-6">
+      {/* ── Logout — fixed, never scrolls ── */}
+      <div className="mt-2 pt-4 border-t border-white/10 shrink-0">
         <button
           onClick={logout}
           className="w-full flex items-center gap-3 px-4 py-2.5 sm:py-2 rounded-lg text-red-500 font-bold hover:bg-red-500 hover:text-white transition"
@@ -273,8 +318,8 @@ const Sidebar = ({ onClose }) => {
         </button>
       </div>
 
-      {/* ── Footer ── */}
-      <div className="text-xs text-gray-400 mt-6">© 2026</div>
+      {/* ── Footer — fixed, never scrolls ── */}
+      <div className="text-xs text-gray-400 mt-3 shrink-0">© 2026</div>
 
     </aside>
   );
