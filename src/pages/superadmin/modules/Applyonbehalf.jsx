@@ -1033,8 +1033,8 @@ const refreshDashboard = useCallback(() => {
   return (
     <div className="max-w-7xl mx-auto px-3 sm:px-4 py-5 sm:py-8">
       {/* Header */}
-      <div className="mb-5">
-        <div className="flex items-center gap-2 text-xs uppercase tracking-wide text-amber-600 font-semibold mb-1">
+      <div className="mb-5"> 
+        <div className="flex items-center gap-2 text-xs uppercase tracking-wide text-amber-600 font-semibold mb-1"> 
           <Users size={14} /> SuperAdmin
         </div>
         <h2 className="text-xl sm:text-2xl font-semibold text-gray-800">Apply On Behalf</h2>

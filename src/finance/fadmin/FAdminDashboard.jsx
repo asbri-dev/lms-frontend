@@ -9,6 +9,7 @@ import {
 } from "recharts";
 import { API_BASE_URL } from "../../config/api";
 import { useAuth } from "../../auth/useAuth";
+import { CURRENT_ACADEMIC_YEAR } from "../../utils/academicYear";
 
 // ── helpers ───────────────────────────────────────────────────────────────────
 const fmt = (val) =>
@@ -194,7 +195,7 @@ export default function FAdminDashboard() {
 
   try {
     const res = await fetch(
-      `${API_BASE_URL}/admin/feeAdminDashBoardDetails?empId=${user.employeeId}`,
+      `${API_BASE_URL}/admin/feeAdminDashBoardDetails?empId=${user.employeeId}&academicYear=${CURRENT_ACADEMIC_YEAR}`,
       {
         method: "GET",
         headers: {
@@ -202,13 +203,9 @@ export default function FAdminDashboard() {
         },
       }
     );
-
     const result = await res.json();
-
     setData(result);
     setLastSync(new Date());
-    
-
   } catch (err) {
     setError(err.message || "Failed to load dashboard");
   } finally {
@@ -222,22 +219,36 @@ export default function FAdminDashboard() {
   useEffect(() => { setPage(1); }, [searchAdm, yearFilter]);
 
   // derived data
-  const years = useMemo(() => {
-    if (!data) return [];
-    const s = new Set(data.students.map(s => s.currentYear));
-    return ["All", ...Array.from(s).sort()];
-  }, [data]);
+ const students = Array.isArray(data?.students) ? data.students : [];
 
-  const filtered = useMemo(() => {
-    if (!data) return [];
-    return data.students.filter(s => {
-      const matchYear = yearFilter === "All" || s.currentYear === yearFilter;
-      const matchAdm  = s.admissionNo.toLowerCase().includes(searchAdm.toLowerCase()) ||
-                        s.studentName.toLowerCase().includes(searchAdm.toLowerCase());
-      return matchYear && matchAdm;
-    });
-  }, [data, yearFilter, searchAdm]);
+const years = useMemo(() => {
+  const s = new Set(
+    students
+      .map(student => student.currentYear)
+      .filter(Boolean)
+  );
 
+  return ["All", ...Array.from(s).sort()];
+}, [students]);
+
+const filtered = useMemo(() => {
+  const search = searchAdm.trim().toLowerCase();
+
+  return students.filter(student => {
+    const admissionNo = String(student.admissionNo ?? "").toLowerCase();
+    const studentName = String(student.studentName ?? "").toLowerCase();
+
+    const matchYear =
+      yearFilter === "All" ||
+      student.currentYear === yearFilter;
+
+    const matchAdm =
+      admissionNo.includes(search) ||
+      studentName.includes(search);
+
+    return matchYear && matchAdm;
+  });
+}, [students, yearFilter, searchAdm]);
   const totalPages  = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const paginated   = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
@@ -252,23 +263,84 @@ export default function FAdminDashboard() {
   const PIE_COLORS = ["#16a34a", "#ea580c"];
 
   // ── Loading ──
-  if (loading) return (
-    <div style={{
-      minHeight:"100vh", display:"flex", flexDirection:"column",
-      alignItems:"center", justifyContent:"center",
-      background:"linear-gradient(135deg,#f0fdf4 0%,#fafffe 60%,#dcfce7 100%)",
-      fontFamily:"'DM Sans',sans-serif",
-      
-    }}>
-      <LeafBg />
-      <div style={{ position:"relative", zIndex:1, textAlign:"center" }}>
-        <div style={{ animation:"spin 3s linear infinite", color:"#16a34a", marginBottom:16 }}>
-          <Leaf size={48} strokeWidth={1.5} />
+if (loading) return (
+  <div style={{
+    minHeight: "100vh", display: "flex", flexDirection: "column",
+    alignItems: "center", justifyContent: "center",
+    background: "linear-gradient(135deg,#f0fdf4 0%,#fafffe 60%,#dcfce7 100%)",
+    fontFamily: "'DM Sans',sans-serif",
+    position: "relative",
+    overflow: "hidden",
+  }}>
+    <style>{`
+      @keyframes leafSpin {
+        0%   { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+      @keyframes ringPulse {
+        0%, 100% { transform: scale(1); opacity: .35; }
+        50%      { transform: scale(1.15); opacity: .1; }
+      }
+      @keyframes textFade {
+        0%, 100% { opacity: .55; }
+        50%      { opacity: 1; }
+      }
+      @keyframes dotBounce2 {
+        0%, 80%, 100% { transform: translateY(0); opacity: .4; }
+        40%           { transform: translateY(-5px); opacity: 1; }
+      }
+      .leaf-ring {
+        position: absolute;
+        border-radius: 999px;
+        border: 2px solid #16a34a;
+        animation: ringPulse 2.4s ease-in-out infinite;
+      }
+      .leaf-spin { animation: leafSpin 3s linear infinite; }
+      .leaf-loading-text { animation: textFade 1.8s ease-in-out infinite; }
+      .leaf-dot {
+        width: 6px; height: 6px; border-radius: 999px;
+        background: #16a34a;
+        animation: dotBounce2 1.2s ease-in-out infinite;
+      }
+    `}</style>
+
+    <LeafBg />
+
+    <div style={{ position: "relative", zIndex: 1, textAlign: "center" }}>
+      {/* Pulsing rings behind the leaf */}
+      <div style={{ position: "relative", width: 96, height: 96, margin: "0 auto 20px" }}>
+        <div className="leaf-ring" style={{ inset: 0 }} />
+        <div className="leaf-ring" style={{ inset: 0, animationDelay: ".6s" }} />
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            background: "#fff",
+            borderRadius: "999px",
+            boxShadow: "0 8px 24px #16a34a25",
+          }}
+        >
+          <div className="leaf-spin" style={{ color: "#16a34a" }}>
+            <Leaf size={40} strokeWidth={1.5} />
+          </div>
         </div>
-        <p style={{ color:"#16a34a", fontWeight:600, fontSize:15 }}>Loading admin dashboard…</p>
+      </div>
+
+      <p className="leaf-loading-text" style={{ color: "#16a34a", fontWeight: 600, fontSize: 15, marginBottom: 8 }}>
+        Loading admin dashboard…
+      </p>
+
+      <div style={{ display: "flex", gap: 5, justifyContent: "center" }}>
+        <span className="leaf-dot" style={{ animationDelay: "0s" }} />
+        <span className="leaf-dot" style={{ animationDelay: ".15s" }} />
+        <span className="leaf-dot" style={{ animationDelay: ".3s" }} />
       </div>
     </div>
-  );
+  </div>
+);
 
   // ── Error ──
   if (error) return (
@@ -304,7 +376,6 @@ export default function FAdminDashboard() {
     }}>
       <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet" />
       <LeafBg />
-
       <div style={{ position:"relative", zIndex:1, maxWidth:1200, margin:"0 auto", padding:"28px 20px 48px" }}>
 
         {/* ── Header ── */}
@@ -348,49 +419,115 @@ export default function FAdminDashboard() {
           </div>
         </div>
 
-        {/* ── Welcome Card ── */}
-        <div style={{
-          background:"linear-gradient(120deg,#16a34a 0%,#22c55e 60%,#4ade80 100%)",
-          borderRadius:20, padding:"28px 32px",
-          marginBottom:24, position:"relative", overflow:"hidden",
-          boxShadow:"0 8px 32px #16a34a35",
-          animation:"fadeUp .5s ease both",
-        }}>
-          {/* decorative leaves */}
-          <div style={{ position:"absolute", right:28, top:"50%", transform:"translateY(-50%)", opacity:.12 }}>
-            <Leaf size={120} color="#fff" strokeWidth={1} />
-          </div>
-          <div style={{ position:"absolute", right:140, top:8, opacity:.08 }}>
-            <Leaf size={60} color="#fff" strokeWidth={1} />
-          </div>
+{/* ── Welcome Card ── */}
+<div style={{
+  background: "linear-gradient(120deg,#16a34a 0%,#22c55e 60%,#4ade80 100%)",
+  borderRadius: 20,
+  padding: "28px 32px",
+  marginBottom: 24,
+  position: "relative",
+  overflow: "hidden",
+  boxShadow: "0 8px 32px #16a34a35",
+  animation: "fadeUp .5s ease both",
+}}>
+  <style>{`
+    @keyframes breezeFlow {
+      0%   { transform: translateY(-50%) translateX(0px) rotate(-6deg); }
+      25%  { transform: translateY(calc(-50% - 10px)) translateX(-10px) rotate(4deg); }
+      50%  { transform: translateY(calc(-50% - 16px)) translateX(-22px) rotate(10deg); }
+      75%  { transform: translateY(calc(-50% - 8px)) translateX(-10px) rotate(2deg); }
+      100% { transform: translateY(-50%) translateX(0px) rotate(-6deg); }
+    }
+    .breeze-leaves { animation: breezeFlow 6s ease-in-out infinite; }
 
-          <div style={{ position:"relative", zIndex:1 }}>
-            <p style={{ margin:"0 0 4px", fontSize:13, color:"rgba(255,255,255,.75)", fontWeight:500 }}>
-              Welcome back 👋
-            </p>
-            <h1 style={{
-              margin:"0 0 16px", fontSize:26, fontWeight:700, color:"#fff",
-              fontFamily:"'DM Serif Display',serif", letterSpacing:"-0.5px",
-            }}>
-              {user.name || user.employeeId}
-            </h1>
-            <div style={{ display:"flex", flexWrap:"wrap", gap:8 }}>
-              {[
-                { icon: Users,  label: `${data.totalStudents||0} Students` },
-                { icon: MapPin, label: data.campus },
-              ].map(({ icon: Icon, label }) => (
-                <span key={label} style={{
-                  background:"rgba(255,255,255,.18)", backdropFilter:"blur(4px)",
-                  borderRadius:8, padding:"5px 12px", fontSize:12, color:"#fff", fontWeight:500,
-                  border:"1px solid rgba(255,255,255,.25)",
-                  display:"inline-flex", alignItems:"center", gap:6,
-                }}>
-                  {Icon && <Icon size={13} strokeWidth={2.2} />} {label}
-                </span>
-              ))}
-            </div>
-          </div>
-        </div>
+    @keyframes airDrift {
+      0%   { transform: translateX(0) scaleX(1); opacity: 0; }
+      15%  { opacity: .55; }
+      50%  { transform: translateX(-60px) scaleX(1.3); opacity: .35; }
+      85%  { opacity: .12; }
+      100% { transform: translateX(-140px) scaleX(1.5); opacity: 0; }
+    }
+    .air-stream {
+      position: absolute;
+      right: 0;
+      height: 2px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, rgba(191,233,255,0) 0%, rgba(191,233,255,.9) 50%, rgba(191,233,255,0) 100%);
+      pointer-events: none;
+      filter: blur(0.5px);
+    }
+    .air-1 { top: 30%; width: 130px; animation: airDrift 4.5s ease-in-out infinite; }
+    .air-2 { top: 48%; width: 90px;  animation: airDrift 5.5s ease-in-out infinite .8s; }
+    .air-3 { top: 64%; width: 110px; animation: airDrift 5s ease-in-out infinite 1.6s; }
+    .air-4 { top: 76%; width: 70px;  animation: airDrift 6s ease-in-out infinite 2.4s; }
+  `}</style>
+
+  {/* Light blue air/breeze streaks */}
+  <div className="air-stream air-1" />
+  <div className="air-stream air-2" />
+  <div className="air-stream air-3" />
+  <div className="air-stream air-4" />
+
+  {/* Leaf cluster — right side only, single breeze animation */}
+  <div
+    className="breeze-leaves"
+    style={{
+      position: "absolute",
+      right: 28,
+      top: "50%",
+      opacity: 0.14,
+      pointerEvents: "none",
+    }}
+  >
+    <Leaf size={120} color="#fff" strokeWidth={1} />
+  </div>
+
+  <div style={{ position: "relative", zIndex: 1 }}>
+    <p style={{
+      margin: "0 0 4px",
+      fontSize: 13,
+      color: "rgba(255,255,255,.75)",
+      fontWeight: 500,
+    }}>
+      Welcome back 👋
+    </p>
+    <h1 style={{
+      margin: "0 0 16px",
+      fontSize: 26,
+      fontWeight: 700,
+      color: "#fff",
+      fontFamily: "'DM Serif Display',serif",
+      letterSpacing: "-0.5px",
+    }}>
+      {user.name || user.employeeId}
+    </h1>
+    <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+      {[
+        { icon: Users, label: `${data.totalStudents || 0} Students` },
+        { icon: MapPin, label: data.campus },
+      ].map(({ icon: Icon, label }) => (
+        <span
+          key={label}
+          style={{
+            background: "rgba(255,255,255,.18)",
+            backdropFilter: "blur(4px)",
+            borderRadius: 8,
+            padding: "5px 12px",
+            fontSize: 12,
+            color: "#fff",
+            fontWeight: 500,
+            border: "1px solid rgba(255,255,255,.25)",
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 6,
+          }}
+        >
+          {Icon && <Icon size={13} strokeWidth={2.2} />} {label}
+        </span>
+      ))}
+    </div>
+  </div>
+</div>
 
         {/* ── 4 Stat Cards ── */}
         <div style={{
@@ -500,7 +637,7 @@ export default function FAdminDashboard() {
             <div>
               <h2 style={{ margin:0, fontSize:16, fontWeight:700, color:"#0f172a" }}>Student Fee Status</h2>
               <p style={{ margin:"3px 0 0", fontSize:12, color:"#94a3b8" }}>
-                {filtered.length} of {data.students.length} students
+                {filtered.length} of {students.length} students
                 {hasActiveFilter && " (filtered)"}
               </p>
             </div>

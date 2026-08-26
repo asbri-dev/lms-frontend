@@ -131,6 +131,9 @@ const handleVerifyOtp = async () => {
     if (data.role === "HEAD" && data.superAdminId) {
       userData.superAdminId = data.superAdminId;
     }
+    if(data.role === "FADMIN" && data.superAdminId){
+      userData.superAdminId = data.superAdminId;
+    }
 
     // ✅ Store in AuthContext
     handleLoginSuccess(otpToken, userData);

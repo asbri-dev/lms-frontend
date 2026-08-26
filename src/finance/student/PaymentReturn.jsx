@@ -23,7 +23,7 @@ export default function PaymentReturn() {
 
   useEffect(() => {
     if (!txnId) {
-      navigate("/finance/student/fees", { replace: true });
+      navigate("/student/make-payment", { replace: true });
       return;
     }
 

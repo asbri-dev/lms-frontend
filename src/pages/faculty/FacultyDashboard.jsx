@@ -312,25 +312,25 @@ const mlAvailed = data.approvedLeaveList?.filter(l => l.typeOfLeave === "ml").le
         {/* STATS */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
 
+           <StatCard
+            icon={<CalendarDays size={18} />}
+            title="Casual Leave (CL)"
+            value={basic.casualLeaves}
+            applied={clApplied}
+            availed={clAvailed}
+            bgImage={casualImg}
+            onClick={() => navigate("/faculty/apply-leave")}
+          />
+          
           <StatCard
-  icon={<CalendarDays size={18} />}
-  title="Casual Leave (CL)"
-  value={basic.casualLeaves}
-  applied={clApplied}
-  availed={clAvailed}
-  bgImage={casualImg}
-  onClick={() => navigate("/faculty/apply-leave")}
-/>
-
-<StatCard
-  icon={<CalendarDays size={18} />}
-  title="Medical Leave (ML)"
-  value={basic.medicalLeaves}
-  applied={mlApplied}
-  availed={mlAvailed}
-  bgImage={medical}
-  onClick={() => navigate("/faculty/apply-leave")}
-/>
+            icon={<CalendarDays size={18} />}
+            title="Medical Leave (ML)"
+            value={basic.medicalLeaves}
+            applied={mlApplied}
+            availed={mlAvailed}
+            bgImage={medical}
+            onClick={() => navigate("/faculty/apply-leave")}
+          />
           <StatCard
             icon={<FileText size={18} />}
             title="Permissions"

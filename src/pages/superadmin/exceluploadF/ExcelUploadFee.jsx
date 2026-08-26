@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { Upload, FileCheck, FileSpreadsheet,IndianRupee, Users, GraduationCap, X, CloudUpload,CalendarDays,ClipboardPen } from "lucide-react";
+import { Upload, FileCheck, FileSpreadsheet,IndianRupee, Users, GraduationCap, X, CloudUpload,CalendarDays,ClipboardPen,Bus  } from "lucide-react";
 import toast from "react-hot-toast";
 import { API_BASE_URL } from "../../../config/api";
 
@@ -17,7 +17,7 @@ const UPLOAD_CONFIG = {
   },
  
     feeP: {
-    title: "Fee Data for Palakkad",
+    title: "Fee Structure for Palakkad",
     subtitle: "Import fee records",
     icon: IndianRupee,
     endpoint: (base) => `${base}/feeStructureExcelUpload?collegeLocation=Palakkad`,
@@ -28,7 +28,7 @@ const UPLOAD_CONFIG = {
   },
 
   feeC: {
-    title: "Fee Data for Chittoor",
+    title: "Fee Structure for Chittoor",
     subtitle: "Import fee records",
     icon: IndianRupee,
     endpoint: (base) => `${base}/feeStructureExcelUpload?collegeLocation=Chittoor`,
@@ -36,6 +36,27 @@ const UPLOAD_CONFIG = {
     gradient: "from-green-500 to-green-600",
     light: "bg-green-50 text-green-700 border-green-200",
     ring: "ring-green-400",
+  },
+
+  busFeeC:{
+    title:"Bus Route for Chittoor",
+    subtitle: "Import Bus Route",
+    icon: Bus,
+    endpoint: (base) => `${base}/busFares?collegeLocation=Chittoor`,
+    color: "blue",
+    gradient: "from-blue-500 to-blue-600",
+    light: "bg-blue-50 text-blue-700 border-blue-200",
+    ring: "ring-blue-400",
+  },
+   busFeeP:{
+    title:"Bus Route for Palakkad",
+    subtitle: "Import Bus Route",
+    icon: Bus,
+    endpoint: (base) => `${base}/busFares?collegeLocation=Palakkad`,
+    color: "yellow",
+    gradient: "from-yellow-500 to-yellow-600",
+    light: "bg-yellow-50 text-yellow-700 border-yellow-200",
+    ring: "ring-yellow-400",
   },
 };
 
@@ -131,7 +152,7 @@ const UploadCard = ({ type, config, file, onFileChange, onClear, uploading }) =>
             <div className="flex flex-col items-center justify-center py-8 gap-2">
               <CloudUpload size={28} className="text-gray-300" />
               <p className="text-sm text-gray-400">
-                <span className={`font-medium text-${config.color}-500`}>Click to browse</span>
+                <span className={`font-medium text-${config.color}-600`}>Click to browse</span>
                 {" "}or drag & drop
               </p>
             </div>
