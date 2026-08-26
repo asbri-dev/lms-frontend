@@ -16,7 +16,7 @@ import ExcelUploads from "./pages/superadmin/ExcelUploads";
 import AdminManagement from "./pages/superadmin/AdminManagement";
 import AttendanceModifier from "./pages/superadmin/AttendanceModifier";
 import ReportsDashboard from "./pages/superadmin/ReportsDashboard";
-import Feedashboard from "./pages/superadmin/Feedashboard";
+
 
 
 import HeadDashboard from "./pages/head/HeadDashboard";
