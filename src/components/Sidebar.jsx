@@ -116,10 +116,7 @@ const Sidebar = ({ onClose }) => {
             </NavLink>
 
             <p className={sectionTitle}>FEE Management</p>
-            <NavLink to="/superadmin/fee-dashboard" className={linkClasses} onClick={() => onClose?.()}>
-              <Users size={18} />
-              Fee Dashboard
-            </NavLink>
+          
 
             <p className={sectionTitle}>Settings</p>
             <NavLink to="/superadmin/holiday-settings" className={linkClasses} onClick={() => onClose?.()}>
