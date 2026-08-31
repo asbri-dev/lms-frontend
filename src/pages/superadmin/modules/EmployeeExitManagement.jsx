@@ -17,6 +17,7 @@ const EXIT_TYPES = [
   "Contract end",
   "Termination",
   "Absconded",
+  "Left without Notice Period"
 ];
 
 const fullName = (f) =>
