@@ -24,6 +24,10 @@ const STATUS_STYLE = {
   default:   { bg: "#f1f5f9", color: "#475569", dot: "#64748b" },
 };
 
+
+const MONTH_LOCK_PASSWORD = "Admin@123";
+
+
 const backendStatusMap = (status) => {
   if (!status) return "Present";
   if (status === "CL" || status === "cl") return "CL";
@@ -56,7 +60,7 @@ const getStatusStyle = (status) => {
   return STATUS_STYLE[key] || STATUS_STYLE.default;
 };
 
-const LOCKED_STATUSES = [ "holiday"];
+const LOCKED_STATUSES = [ "ml"];
 const isLocked = (status) =>
   LOCKED_STATUSES.includes((status || "").toLowerCase());
 
