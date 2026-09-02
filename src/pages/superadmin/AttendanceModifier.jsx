@@ -67,10 +67,15 @@ const isLocked = (status) =>
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 const formatDateForApi = (dateStr) => {
   if (!dateStr) return "";
+
   const d = new Date(dateStr);
-  return d.toLocaleDateString("en-GB", {
-    day: "2-digit", month: "short", year: "numeric",
-  }).replace(/ /g, "-");
+
+  const months = [
+    "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+  ];
+
+  return `${String(d.getDate()).padStart(2, "0")}-${months[d.getMonth()]}-${d.getFullYear()}`;
 };
 
 const getDefaultFromDate = () => {
