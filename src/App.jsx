@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 
 
@@ -16,6 +16,7 @@ import ExcelUploads from "./pages/superadmin/ExcelUploads";
 import AdminManagement from "./pages/superadmin/AdminManagement";
 import AttendanceModifier from "./pages/superadmin/AttendanceModifier";
 import ReportsDashboard from "./pages/superadmin/ReportsDashboard";
+import FeeDashboard from "./pages/superadmin/FeeDashboard";
 
 
 import HeadDashboard from "./pages/head/HeadDashboard";
@@ -41,12 +42,16 @@ import FacultyProfile from "./components/profile/Facultyprofile";
 
 import HeadAdminDashboard from "./finance/headadmin/FHAdminDashboard";
 import FacultyAttendanceModule from "./pages/head/FacultyAttendance";
+import HeadAdminApprovals from "./finance/headadmin/HeadAdminApprovalPage";
+import DueDateSetPage from "./finance/headadmin/DueDateSetPage"
 
 
 
 import FAdminDashboard from "./finance/fadmin/FAdminDashboard";
 import AdminFeeStructurePage from "./finance/fadmin/AdminFeeStructurePage";
 import AdminStudentPage from "./finance/fadmin/AdminStudentPage";
+import FeechangeRequestPage from "./finance/fadmin/Feechangerequestpage";
+import FeeAssignment from "./finance/headadmin/Fee Assignment";
 
 
 
@@ -105,7 +110,7 @@ function App() {
             <DashboardLayout />
           </ProtectedRoute>
         }
-      >  
+      > <Route index element={<Navigate to="dashboard" replace />} />    //  again added this line to redirect to dashboard when /superadmin is accessed
         <Route path="dashboard" element={<SuperAdminDashboard />} />
         <Route path="attendance-muster" element={<AttendanceMuster />} />
         <Route path="holiday-settings" element={<HolidaySettings />} /> 
@@ -113,6 +118,7 @@ function App() {
         <Route path="admin-management" element={<AdminManagement />} />
         <Route path="attendance-modifier" element={<AttendanceModifier />} />
         <Route path="report-dashboard"  element={<ReportsDashboard />} />
+        <Route path="fee-dashboard"  element={<FeeDashboard />} />
       </Route>
       
       {/* HEAD */}
@@ -177,7 +183,7 @@ function App() {
       
    
       <Route
-        path="headadmin"
+        path="/headadmin"
         element={
           <ProtectedRoute allowedRoles={["FHADMIN"]}>
             <DashboardLayout />
@@ -185,11 +191,14 @@ function App() {
         }
       >  
         <Route path="dashboard" element={<HeadAdminDashboard />} />
+        <Route path="fee-approvals" element={<HeadAdminApprovals />} />
+        <Route path="due-date" element={<DueDateSetPage/>}/>
+        <Route path="fee-assignment" element={<FeeAssignment/>}/>
       </Route>
       
       {/* FINANCE ADMIN */}
       <Route
-        path="fadmin"
+        path="/fadmin"
         element={
           <ProtectedRoute allowedRoles={["FADMIN"]}>
             <DashboardLayout />
@@ -199,11 +208,12 @@ function App() {
         <Route path="dashboard" element={<FAdminDashboard />} />
         <Route path="fee-structure" element={<AdminFeeStructurePage />} />
         <Route path="student-management" element={<AdminStudentPage />} />
+        <Route path="fee-change-requests" element={<FeechangeRequestPage />} />
       </Route>
 
       {/* STUDENT */}
       <Route
-        path="student"
+        path="/student"
         element={
           <ProtectedRoute allowedRoles={["STUDENT"]}>
             <DashboardLayout />

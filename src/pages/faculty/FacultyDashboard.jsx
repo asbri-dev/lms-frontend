@@ -112,31 +112,53 @@ const handleNextMonth = () => {
   }
 };
 const fetchExtraData = async () => {
+  // 🔹 Today Leave
   try {
-    // 🔹 Today Leave
-    const leaveRes = await fetch(`${API_BASE_URL}/todayLeave?empId=${user.employeeId}`);
+    const leaveRes = await fetch(
+      `${API_BASE_URL}/todayLeave?empId=${user.employeeId}`
+    );
+
+    if (!leaveRes.ok) {
+      throw new Error(`Today Leave API failed: ${leaveRes.status}`);
+    }
+
     const leaveData = await leaveRes.json();
 
-    // ⚠️ flatten array
-    setTodayLeaves(leaveData?.flat() || []);
+    setTodayLeaves(
+      Array.isArray(leaveData) ? leaveData.flat() : []
+    );
+  } catch (err) {
+    console.error("Today Leave fetch failed:", err);
+    setTodayLeaves([]);
+  }
 
-    // 🔹 Birthday
+  // 🔹 Birthday
+  try {
+    console.log("Calling Birthday API...");
+
     const bdayRes = await fetch(`${API_BASE_URL}/isBirthday`);
+
+    if (!bdayRes.ok) {
+      throw new Error(`Birthday API failed: ${bdayRes.status}`);
+    }
+
     const bdayData = await bdayRes.json();
 
-    setBirthdays(bdayData || []);
+    console.log("Birthday API response:", bdayData);
 
+    setBirthdays(Array.isArray(bdayData) ? bdayData : []);
   } catch (err) {
-    console.error("Extra data fetch failed", err);
+    console.error("Birthday fetch failed:", err);
+    setBirthdays([]);
   }
 };
 useEffect(() => {
-  if (user?.employeeId) {
-    fetchDashboard();
-    fetchAttendanceSummary();
-    fetchExtraData();
-  }
-}, [user?.employeeId, selectedMonth]); // 🔥 ADD selectedMonth
+  if (!user?.employeeId) return;
+
+  fetchDashboard();
+  fetchAttendanceSummary();
+  fetchExtraData();
+}, [user?.employeeId, selectedMonth]);// 🔥 ADD selectedMonth
 
   /* ================= WITHDRAW ================= */
  const handleWithdraw = async (leave) => {
@@ -290,25 +312,25 @@ const mlAvailed = data.approvedLeaveList?.filter(l => l.typeOfLeave === "ml").le
         {/* STATS */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
 
+           <StatCard
+            icon={<CalendarDays size={18} />}
+            title="Casual Leave (CL)"
+            value={basic.casualLeaves}
+            applied={clApplied}
+            availed={clAvailed}
+            bgImage={casualImg}
+            onClick={() => navigate("/faculty/apply-leave")}
+          />
+          
           <StatCard
-  icon={<CalendarDays size={18} />}
-  title="Casual Leave (CL)"
-  value={basic.casualLeaves}
-  applied={clApplied}
-  availed={clAvailed}
-  bgImage={casualImg}
-  onClick={() => navigate("/faculty/apply-leave")}
-/>
-
-<StatCard
-  icon={<CalendarDays size={18} />}
-  title="Medical Leave (ML)"
-  value={basic.medicalLeaves}
-  applied={mlApplied}
-  availed={mlAvailed}
-  bgImage={medical}
-  onClick={() => navigate("/faculty/apply-leave")}
-/>
+            icon={<CalendarDays size={18} />}
+            title="Medical Leave (ML)"
+            value={basic.medicalLeaves}
+            applied={mlApplied}
+            availed={mlAvailed}
+            bgImage={medical}
+            onClick={() => navigate("/faculty/apply-leave")}
+          />
           <StatCard
             icon={<FileText size={18} />}
             title="Permissions"

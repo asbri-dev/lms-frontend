@@ -1,9 +1,16 @@
-import { useEffect, useMemo, useState, useCallback } from "react";
+import { useEffect, useMemo, useState, useCallback, forwardRef } from "react";
 import { format, startOfMonth, endOfMonth, eachDayOfInterval } from "date-fns";
 //import { exportAttendanceExcel } from "../../utils/excel";
 import { Search, MapPin, Building2, Calendar, Download } from "lucide-react";
 import toast from "react-hot-toast";
 import { API_BASE_URL } from "../../config/api";
+
+import DatePicker from "react-datepicker";
+
+import "react-datepicker/dist/react-datepicker.css";
+import "../../styles/MonthPicker.css";
+
+
 
 /* ─── Status Map ─── */
 const STATUS_MAP = {
@@ -149,7 +156,17 @@ const STATUS_MAP = {
   label: "CL(O)/P",
   color: "bg-green-100 text-green-800",
   display: "Present Opening",
-  }
+  },
+  "Onduty:Absent":{
+    label: "OD/A",
+    color: "bg-red-100 text-red-800",
+    display:"OD + Absent"
+  },
+  "Onduty:Present":{
+    label: "OD/A",
+    color: "bg-green-100 text-green-800",
+    display:"OD + Present"
+  },
 
 };
 
@@ -176,6 +193,11 @@ const getLocation = (employeeId) => {
   return "Unknown";
 };
 
+const SortIcon = ({ field, sortField, sortDir }) => {
+  if (sortField !== field) return <span className="text-gray-300 ml-1">↕</span>;
+  return <span className="text-indigo-500 ml-1">{sortDir === "asc" ? "↑" : "↓"}</span>;
+};
+
 // /* ─── Normalize status key to canonical form ─── */
 // const normalizeStatus = (status) => {
 //   if (!status) return null;
@@ -185,8 +207,26 @@ const getLocation = (employeeId) => {
 //   return status;
 // };
 
+/* ─── Custom Month Input (keeps existing Tailwind look + Calendar icon) ─── */
+const MonthInput = forwardRef(({ value, onClick }, ref) => (
+  <button
+    type="button"
+    onClick={onClick}
+    ref={ref}
+    className="relative flex items-center pl-9 pr-3 py-2 min-w-[140px]
+               rounded-lg bg-gray-50 border border-gray-200 text-sm text-left
+               focus:outline-none focus:ring-2 focus:ring-[#2b3c6b]/30
+               cursor-pointer"
+  >
+    <Calendar className="absolute left-3 text-gray-400" size={16} />
+    <span className="pl-5 text-gray-700">{value}</span>
+  </button>
+));
+MonthInput.displayName = "MonthInput";
+
 const AttendanceMuster = () => {
-  const [month, setMonth]         = useState(format(new Date(), "yyyy-MM"));
+ const [monthDate, setMonthDate] = useState(new Date());
+const month = useMemo(() => format(monthDate, "yyyy-MM"), [monthDate]);
   const [data, setData]           = useState([]);
   const [search, setSearch]       = useState("");
   const [department, setDept]     = useState("All");
@@ -339,6 +379,8 @@ useEffect(() => {
       switch (a.status) {
         case "Present":
         case "Present(O)":
+        case "Onduty:Present":
+        case "Present:Onduty":
           totals.Present += 1;
           break;
 
@@ -348,6 +390,8 @@ useEffect(() => {
 
         case "Present:Absent":
         case "Absent:Present":
+        case "Onduty:Absent":
+        case "Absent:Onduty":
           totals.Present += 0.5;
           totals.Absent += 0.5;
           break;
@@ -436,11 +480,6 @@ useEffect(() => {
     }
   };
 
-  const SortIcon = ({ field }) => {
-    if (sortField !== field) return <span className="text-gray-300 ml-1">↕</span>;
-    return <span className="text-indigo-500 ml-1">{sortDir === "asc" ? "↑" : "↓"}</span>;
-  };
-
   return (
     <div className="p-6 space-y-5">
       {/* ─── Controls ─── */}
@@ -499,14 +538,16 @@ useEffect(() => {
           </select>
         </div>
 
-        {/* 📅 Month */}
+       {/* 📅 Month */}
         <div className="relative">
-          <input
-            type="month"
-            value={month}
-            onChange={(e) => setMonth(e.target.value)}
-            className="pl-9 pr-3 py-2 rounded-lg bg-gray-50 border border-gray-200 text-sm
-                 focus:outline-none focus:ring-2 focus:ring-[#2b3c6b]/30"
+         <DatePicker
+            selected={monthDate}
+            onChange={(date) => date && setMonthDate(date)}
+            showMonthYearPicker
+            showFourColumnMonthYearPicker
+            dateFormat="MMMM yyyy"
+            customInput={<MonthInput />}
+            popperPlacement="bottom-start"
           />
         </div>
 
@@ -591,7 +632,7 @@ useEffect(() => {
                     className="flex items-center text-left text-xs font-semibold text-gray-600 hover:text-indigo-600 transition-colors hover:text-[#2b3c6b]
              transition cursor-pointer"
                   >
-                    Name <SortIcon field="name" />
+                    Name <SortIcon field="name" sortField={sortField} sortDir={sortDir} />
                   </button>
                 </div>
               </th>
@@ -602,7 +643,7 @@ useEffect(() => {
                     className="flex items-center text-left text-xs font-normal text-gray-400 hover:text-indigo-500 transition-colors hover:text-[#2b3c6b]
              transition cursor-pointer"
                   >
-                    ID <SortIcon field="id" />
+                    ID <SortIcon field="id" sortField={sortField} sortDir={sortDir} />
                   </button>
                 </div>
               </th>
@@ -702,8 +743,11 @@ useEffect(() => {
 
                   switch (a.status) {
                     case "Present":
+                    case "Onduty:Present":
+                    case "Present:Onduty":
                       totals.Present += 1;
                       totals.Total += 1;
+
                       break;
 
                     case "Absent":
@@ -712,6 +756,8 @@ useEffect(() => {
 
                     case "Present:Absent":
                     case "Absent:Present":
+                    case "Onduty:Absent":
+                    case "Absent:Onduty":
                       totals.Present += 0.5;
                       totals.Absent += 0.5;
                       totals.Total += 0.5;

@@ -292,7 +292,7 @@ const ODCard = ({ item, onAction, actionLoadingId }) => {
 /* ════════════════════════════════════════
    ALL REQUESTS — Table row
 ════════════════════════════════════════ */
-const AllRequestRow = ({ item, type, onRevokeClick }) => {
+const AllRequestRow = ({ item, type, onRevokeClick, onApproveClick }) => {
   const empId = item.employeeId || item.empId || "—";
   const loc   = getLocation(empId);
   const statusLabel = resolveStatus(item.status);
@@ -326,15 +326,81 @@ const AllRequestRow = ({ item, type, onRevokeClick }) => {
         {fromDate}{toDate && toDate !== "—" ? ` → ${toDate}` : ""}
       </td>
       <td className="px-4 py-3"><Badge label={format(detail) || "—"} style={DETAILS_STYLE[format(detail) || "—"]} /></td>
-      <td className="px-4 py-3">
-  {resolveStatus(item.status) === "Approved" && (
-    <button
-      onClick={() => onRevokeClick(item, type)}
-      className="px-3 py-1 rounded-md bg-red-600 text-white text-xs hover:bg-red-700"
-    >
+      <td className="px-2 py-3">
+   {resolveStatus(item.status) === "Pending" && (
+  <button
+    onClick={() => onApproveClick(item, type)}
+    className="
+      group relative inline-flex items-center gap-1.5
+      px-3.5 py-1.5
+      rounded-md
+      bg-gradient-to-r from-emerald-500 to-green-500
+      text-xs font-semibold text-white
+      shadow-sm shadow-green-200
+      transition-all duration-200 ease-out
+      hover:-translate-y-0.5
+      hover:shadow-md hover:shadow-green-300
+      active:translate-y-0
+      active:scale-95
+      overflow-hidden
+    "
+  >
+    {/* Shine animation */}
+    <span
+      className="
+        absolute inset-0
+        -translate-x-full
+        bg-gradient-to-r
+        from-transparent via-white/30 to-transparent
+        group-hover:translate-x-full
+        transition-transform duration-700
+      "
+    />
+
+    
+    <span className="relative">
+      Approve
+    </span>
+  </button>
+)}    
+ {resolveStatus(item.status) === "Approved" && (
+  <button
+    onClick={() => onRevokeClick(item, type)}
+    className="
+      group relative inline-flex items-center gap-1.5
+      px-3.5 py-1.5
+      rounded-md
+      bg-gradient-to-r from-red-500 to-rose-500
+      text-xs font-semibold text-white
+      shadow-sm shadow-red-200
+      transition-all duration-200 ease-out
+      hover:-translate-y-0.5
+      hover:shadow-md hover:shadow-red-300
+      active:translate-y-0
+      active:scale-95
+      overflow-hidden
+    "
+  >
+    {/* Shine animation */}
+    <span
+      className="
+        absolute inset-0
+        -translate-x-full
+        bg-gradient-to-r
+        from-transparent via-white/30 to-transparent
+        group-hover:translate-x-full
+        transition-transform duration-700
+      "
+    />
+
+    {/* Revoke icon */}
+   
+
+    <span className="relative">
       Revoke
-    </button>
-  )}
+    </span>
+  </button>
+)}
 </td>
       <td className="px-4 py-3">
         <Badge label={statusLabel} style={STATUS_STYLE[item.status] || "bg-gray-100 text-gray-500"} />
@@ -428,6 +494,92 @@ const RevokeModal = ({ target, onClose, onConfirm, submitting }) => {
   );
 };
 
+
+/* ════════════════════════════════════════
+   APPROVE REASON MODAL
+════════════════════════════════════════ */
+const ApproveModal = ({ target, onClose, onConfirm, submitting }) => {
+  const [reason, setReason] = useState("");
+  const [touched, setTouched] = useState(false);
+
+  if (!target) return null;
+
+  const { item, type } = target;
+  const empId = item.employeeId || item.empId || "—";
+  const empName = item.empName || empId;
+
+  const trimmed = reason.trim();
+  const error =
+    trimmed.length === 0
+      ? "Reason is required"
+      : trimmed.length > 300
+      ? "Reason must be 300 characters or fewer"
+      : null;
+
+  const handleConfirm = () => {
+    setTouched(true);
+    if (error) return;
+    onConfirm(trimmed);
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+      <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-5 space-y-4">
+        <div>
+          <h3 className="text-sm font-semibold text-gray-800">Approve {type} request</h3>
+          <p className="text-xs text-gray-500 mt-0.5">
+            {empName} <span className="text-gray-400">({empId})</span>
+          </p>
+        </div>
+
+        <div>
+          <label className="block text-xs font-semibold text-gray-500 mb-1">
+            Reason for approving <span className="text-red-500">*</span>
+          </label>
+          <textarea
+            value={reason}
+            onChange={(e) => setReason(e.target.value)}
+            onBlur={() => setTouched(true)}
+            rows={3}
+            maxLength={300}
+            placeholder="Enter reason for approving this request..."
+            className={`w-full border rounded-lg px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 ${
+              touched && error
+                ? "border-red-300 focus:ring-red-300"
+                : "border-gray-200 focus:ring-indigo-400"
+            }`}
+          />
+          <div className="flex items-center justify-between mt-1">
+            <span className={`text-xs ${touched && error ? "text-red-500" : "text-gray-400"}`}>
+              {touched && error ? error : `${trimmed.length}/300`}
+            </span>
+          </div>
+        </div>
+
+        <div className="flex justify-end gap-2 pt-1">
+          <button
+            type="button"
+            onClick={onClose}
+            disabled={submitting}
+            className="px-4 py-2 rounded-lg text-sm font-medium bg-gray-100 text-gray-600 hover:bg-gray-200 disabled:opacity-50 transition-colors"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            onClick={handleConfirm}
+            disabled={submitting}
+            className="px-4 py-2 rounded-lg text-sm font-medium bg-green-600 text-white hover:bg-green-700 disabled:opacity-50 transition-colors flex items-center gap-2"
+          >
+            {submitting && <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />}
+            {submitting ? "Approving..." : "Confirm Approve"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 /* ════════════════════════════════════════
    MAIN COMPONENT
 ════════════════════════════════════════ */
@@ -452,6 +604,10 @@ const PendingRequests = () => {
   /* Revoke modal */
   const [revokeTarget, setRevokeTarget] = useState(null); // { item, type }
   const [revokeSubmitting, setRevokeSubmitting] = useState(false);
+
+    /* Revoke modal */
+  const [approveTarget, setApproveTarget] = useState(null); // { item, type }
+  const [approveSubmitting, setApproveSubmitting] = useState(false);
 
   /* All tab filters */
   const [filterType,   setFilterType]   = useState("All");
@@ -679,6 +835,97 @@ const PendingRequests = () => {
     toast.error(err.message);
   } finally {
     setRevokeSubmitting(false);
+  }
+};
+
+
+ const openApproveModal = useCallback((item, type) => {
+    setApproveTarget({ item, type });
+  }, []);
+
+  const closeApproveModal = useCallback(() => {
+    if (approveSubmitting) return;
+    setApproveTarget(null);
+  }, [approveSubmitting]);
+
+
+
+   // ===========================
+    // ✅ Refresh both my requests and all requests after action
+    // ===========================
+  const handleApprove = async (approveReason) => {
+  if (!approveTarget) return;
+  const { item, type } = approveTarget;
+
+  try {
+    setApproveSubmitting(true);
+
+    let body = {};
+    const empId = item.empId || item.employeeId;
+
+    if (type === "Leave") {
+      body = {
+        adminEmpId: user.employeeId,
+        empId,
+        leaveFrom: item.leaveFrom,
+        leaveTo: item.leaveTo,
+        sessionFrom: item.sessionFrom,
+        sessionTo: item.sessionTo,
+        noOfLeaves: item.noOfDays,
+        typeOfLeave: item.typeOfLeave,
+        reasonForLeave: item.reasonForLeave,
+        leaveStatus: "Approved",
+        approveReason,
+      };
+    } else if (type === "Permission") {
+      body = {
+        empId,
+        permissionDate: item.permissionDate || item.Date,
+        permissionType: item.permissionType,
+        reasonForPermission: item.reasonForPermission,
+        permissionStatus: "Approved",
+        approveReason,
+      };
+    } else {
+      body = {
+        adminEmpId: item.adminEmpId,
+        empId,
+        onDutyFrom: item.onDutyFrom,
+        onDutyTo: item.onDutyTo,
+        sessionFrom: item.sessionFrom,
+        sessionTo: item.sessionTo,
+        noOfDays: item.noOfDays,
+        reason: item.reason,
+        appliedOn: item.appliedOn,
+        status: "Approved",
+        approveReason,
+      };
+    }
+
+    const endpoint = `${API_BASE_URL}${APPROVE_API[type]}`;
+
+    const res = await fetch(endpoint, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(body),
+    });
+     const text = await res.text();
+    if (!res.ok) throw new Error(text||"Failed too approve");
+
+    
+
+    toast.success("Request approved successfully");
+
+    setApproveTarget(null);
+    fetchAllRequests();
+    fetchMyRequests();
+  } catch (err) {
+    toast.error(err.message);
+  } finally {
+    setApproveSubmitting(false);
   }
 };
 
@@ -1041,8 +1288,9 @@ if (filterMonthYear !== "All") {
                 </thead>
                 <tbody>
                   {filteredAll.map((item, i) => (
-                    <AllRequestRow key={i} item={item} type={item._type} onRevokeClick={openRevokeModal} />
+                    <AllRequestRow key={i} item={item} type={item._type} onRevokeClick={openRevokeModal} onApproveClick={openApproveModal} />
                   ))}
+                
                 </tbody>
               </table>
             </div>
@@ -1056,6 +1304,15 @@ if (filterMonthYear !== "All") {
         onClose={closeRevokeModal}
         onConfirm={handleRevoke}
         submitting={revokeSubmitting}
+      />
+
+
+      {/* ─── Approve Reason Modal ─── */}
+      <ApproveModal
+        target={approveTarget}
+        onClose={closeApproveModal}
+        onConfirm={handleApprove}
+        submitting={approveSubmitting}
       />
     </div>
   );

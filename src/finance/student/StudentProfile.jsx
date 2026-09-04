@@ -146,7 +146,7 @@ const StudentProfile = () => {
                   {fmt(s.studentFullName)}
                 </h1>
                 <p className="text-sm text-slate-500 mt-0.5 font-medium">
-                  {fmt(s.department)} &nbsp;·&nbsp; {fmt(s.currentAcademicYear)}
+                  {fmt(s.department)} &nbsp;·&nbsp; {fmt(s.studentBatch)}
                 </p>
 
                 <div className="flex flex-wrap gap-2 mt-2.5">

@@ -1,0 +1,206 @@
+/* ─── Month/Year Picker Theme — Fixed Grid Alignment ─── */
+
+.react-datepicker-popper {
+  z-index: 50 !important;
+}
+
+.react-datepicker,
+.react-datepicker * {
+  box-sizing: border-box;
+}
+
+.react-datepicker {
+  font-family: inherit;
+  border: 1px solid #e5e7eb !important;
+  border-radius: 0.75rem !important;
+  overflow: hidden;
+  box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.15), 0 2px 6px -2px rgba(0, 0, 0, 0.06) !important;
+  background: #ffffff;
+  width: 300px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Fix react-datepicker internal float layout */
+.react-datepicker__month-container {
+  float: none !important;
+  width: 100% !important;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ─── Header Alignment ─── */
+.react-datepicker__header {
+  position: relative !important;
+  background: #f9fafb !important;
+  border-bottom: 1px solid #e5e7eb !important;
+  padding: 12px 16px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-height: 48px;
+}
+
+.react-datepicker__current-month {
+  text-align: center;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1;
+  color: #111827;
+  margin: 0 !important;
+}
+
+/* Navigation Arrows Positioning */
+.react-datepicker__navigation {
+  position: absolute !important;
+  top: 10% !important;
+  transform: translateY(-50%) !important;
+  width: 28px !important;
+  height: 28px !important;
+  display: flex !important;
+  align-items: top !important;
+  justify-content: center !important;
+  border-radius: 6px !important;
+  transition: background-color 0.15s ease;
+}
+.react-datepicker__navigation--previous {
+  left: 10px !important;
+}
+
+.react-datepicker__navigation--next {
+  right: 10px !important;
+}
+
+.react-datepicker__navigation:hover {
+  background-color: #f3f4f6 !important;
+}
+
+/* Centering the arrow chevron icons */
+.react-datepicker__navigation-icon {
+  position: relative !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.react-datepicker__navigation-icon::before {
+  position: relative !important;
+  top: 0 !important;
+  left: 0 !important;
+  border-color: #6b7280 !important;
+  border-width: 2px 2px 0 0 !important;
+  width: 7px !important;
+  height: 7px !important;
+}
+.react-datepicker__navigation:hover .react-datepicker__navigation-icon::before {
+  border-color: #2b3c6b !important;
+}
+/* ─── Month Grid Alignment ─── */
+.react-datepicker__month {
+  padding: 12px !important;
+  margin: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 8px !important;
+}
+
+.react-datepicker__month-wrapper {
+  display: grid !important;
+  grid-template-columns: repeat(4, 1fr) !important;
+  grid-auto-rows: 38px !important;
+  align-items: center !important;
+  gap: 10px !important;
+  margin: 0 !important;
+  width: 100% !important;
+}
+
+.react-datepicker__month-text {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  width: 100% !important;
+  height: 100% !important;
+
+  margin: 0 !important;
+  padding: 0 !important;
+
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1;
+  color: #374151;
+  cursor: pointer;
+
+  outline: none;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.react-datepicker__month-text:hover {
+  background: #f3f4f6 !important;
+  color: #1f2937 !important;
+}
+
+/* Focus reset state */
+.react-datepicker__month-text--keyboard-selected:not(.react-datepicker__month-text--selected) {
+  background: transparent !important;
+  color: #374151 !important;
+  font-weight: 500 !important;
+}
+
+.react-datepicker__month-text--keyboard-selected:not(.react-datepicker__month-text--selected):hover {
+  background: #f3f4f6 !important;
+  color: #1f2937 !important;
+}
+
+/* Selected state */
+.react-datepicker__month-text--selected {
+  background: #2b3c6b !important;
+  color: #ffffff !important;
+  font-weight: 600 !important;
+}
+
+.react-datepicker__month-text--selected:hover {
+  background: #2b3c6b !important;
+  color: #ffffff !important;
+}
+
+/* Today indicator */
+.react-datepicker__month-text--today:not(.react-datepicker__month-text--selected) {
+  background: transparent !important;
+  color: #2b3c6b !important;
+  font-weight: 600 !important;
+  box-shadow: inset 0 0 0 1.5px #cbd5e1;
+}
+
+/* Disabled state */
+.react-datepicker__month-text--disabled {
+  color: #d1d5db !important;
+  cursor: not-allowed !important;
+}
+
+.react-datepicker__month-text--disabled:hover {
+  background: transparent !important;
+  color: #d1d5db !important;
+}
+
+/* Hide default triangle */
+.react-datepicker__triangle {
+  display: none !important;
+}
+.react-datepicker__month-year-grid {
+    display: grid !important;
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: 10px !important;
+    width: 100% !important;
+}
+
+.react-datepicker__month-year-grid .react-datepicker__month-text,
+.react-datepicker__month-year-grid .react-datepicker__month-year-text {
+    width: 100% !important;
+    margin: 0 !important;
+}

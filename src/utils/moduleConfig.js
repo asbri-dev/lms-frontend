@@ -73,12 +73,12 @@ export const moduleConfig = {
     title: "Finance Portal",
     subtitle: "Fee & Payment Management",
     icon: Sun,
-    background:"bg-[#ea580c] p-2 rounded-md shadow-lg",
+    background:"bg-orange-500 p-2 rounded-md shadow-lg",
 
     theme: {
       sidebar: "bg-black",
       background: "bg-white",
-      hover: "hover:bg-[#0e273c]",
+      hover: "hover:bg-[#fef3c7]",
       active : "bg-[#fef3c7]",
       text: "text-[#ea580c]",
       header: "bg-white",

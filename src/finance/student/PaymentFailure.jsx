@@ -118,7 +118,7 @@ export default function PaymentFailure() {
             No transaction data found.
           </p>
           <button
-            onClick={() => navigate("/student/fees-page")}
+            onClick={() => navigate("/student/make-payment")}
             className="mt-4 px-5 py-2.5 rounded-xl text-sm font-semibold text-white"
             style={{ background: "#3D7DFC" }}
           >
@@ -286,7 +286,7 @@ export default function PaymentFailure() {
         <div className="px-6 py-6 flex flex-col gap-3">
           {/* Retry */}
           <button
-            onClick={() => navigate("/finance/student/fees")}
+            onClick={() => navigate("/student/make-payment")}
             className="w-full py-3 rounded-2xl text-sm font-bold text-white
                        flex items-center justify-center gap-2
                        transition-all hover:opacity-90 active:scale-95"
