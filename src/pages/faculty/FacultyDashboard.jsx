@@ -242,17 +242,109 @@ useEffect(() => {
    
   }
 };
-  if (loading) return <div>Loading...</div>;
+ if (loading) {
+  return (
+    <div className="h-[80vh] flex flex-col items-center justify-center px-4 text-center">
+      {/* Soft glow background */}
+      <div className="absolute inset-0 -z-10 overflow-hidden">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-blue-500/10 rounded-full blur-3xl" />
+      </div>
+
+      {/* Spinner */}
+      <div className="relative mb-6">
+        <div className="w-16 h-16 rounded-2xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center">
+          <svg
+            className="w-8 h-8 text-blue-500 animate-spin"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <circle
+              className="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              strokeWidth="3"
+            />
+            <path
+              className="opacity-90"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+            />
+          </svg>
+        </div>
+      </div>
+
+      {/* Text */}
+      <h2 className="text-xl font-semibold text-[#2b3c6b] tracking-tight mb-2">
+        Loading dashboard
+      </h2>
+      <p className="text-zinc-500 text-sm">
+        Just a moment...
+      </p>
+    </div>
+  );
+}
 
 if (error) {
   return (
-    <div className="h-[80vh] flex flex-col justify-center items-center">
-      <p className="text-red-500 text-lg font-semibold">{error}</p>
+    <div className="h-[80vh] flex flex-col items-center justify-center px-4 text-center">
+      {/* Soft glow background */}
+      <div className="absolute inset-0 -z-10 overflow-hidden">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-red-500/10 rounded-full blur-3xl" />
+      </div>
+
+      {/* Icon */}
+      <div className="relative mb-6">
+        <div className="w-20 h-20 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center">
+          <svg
+            className="w-10 h-10 text-red-500"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={1.8}
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"
+            />
+          </svg>
+        </div>
+      </div>
+
+      {/* Title */}
+      <h2 className="text-2xl font-semibold text-[#2b3c6b] tracking-tight mb-2">
+        Something went wrong
+      </h2>
+
+      {/* Error message */}
+      <p className="text-red-400/90 text-base max-w-md mb-1 font-medium">
+        {error}
+      </p>
+      <p className="text-zinc-500 text-sm max-w-sm mb-8">
+        We couldn’t load the dashboard. Please try again.
+      </p>
+
+      {/* Retry button */}
       <button
         onClick={fetchDashboard}
-        className="mt-4 px-4 py-2 bg-blue-600 text-white rounded"
+        className="group relative inline-flex items-center gap-2 px-6 py-2.5 bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium rounded-lg transition-all duration-200 shadow-lg shadow-blue-600/20 hover:shadow-blue-500/30 active:scale-[0.98]"
       >
-        Retry
+        <svg
+          className="w-4 h-4 transition-transform group-hover:rotate-[-45deg]"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          strokeWidth={2}
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182"
+          />
+        </svg>
+        Try again
       </button>
     </div>
   );

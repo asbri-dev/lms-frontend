@@ -1,9 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import {
-  Search,
-  RefreshCw,
-  AlertCircle,
-  Inbox,
+import {Search,RefreshCw,AlertCircle,Inbox,
   Download,
   ChevronLeft,
   ChevronRight,
@@ -20,14 +16,20 @@ import {
 import toast from 'react-hot-toast';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
-import { API_BASE_URL } from "../../config/api";
+import { API_BASE_URL } from "../../../config/api";
 
 const FONT = "'Inter', sans-serif";
 
+/* ── Super Admin Color Palette ─────────────────────────────────────────── */
 const THEME = {
-  primary: '#ea580c',
-  light: '#fff7ed',
-  mid: '#fed7aa',
+  primary:   '#1E2A4A',   // Deep Navy Blue
+  secondary: '#304B7A',   // Royal Blue
+  accent:    '#4A6FA5',   // Blue
+  light:     '#F5F7FB',   // Soft Blue-Gray (page / light bg)
+  mid:       '#E2E8F0',   // Light Blue-Gray (border)
+  card:      '#FFFFFF',
+  textMain:  '#172033',   // Dark Navy
+  textSec:   '#64748B',   // Slate
 };
 
 const PAGE_SIZE = 25;
@@ -55,11 +57,6 @@ function formatCurrency(value) {
 
 /**
  * Transform the API response into a flat list of fee rows.
- * Input shape:
- * {
- *   palakkadFeeDetailsByDept: { [dept]: { [admNo]: fee[] } },
- *   chittoorFeeDetailsByDept: { [dept]: { [admNo]: fee[] } },
- * }
  */
 function flattenRows(data) {
   if (!data) return [];
@@ -133,41 +130,41 @@ export default function HeadAdminFeeDashboard() {
   const [exporting, setExporting] = useState(false);
 
   const exportAttendanceExcel = async (location) => {
-  try {
-    setExporting(true);
+    try {
+      setExporting(true);
 
-    const response = await fetch(
-      `${API_BASE_URL}/admin/download${location}Excel`,
-    );
+      const response = await fetch(
+        `${API_BASE_URL}/admin/download${location}Excel`,
+      );
 
-    if (!response.ok) {
-      throw new Error("Failed to download Excel");
+      if (!response.ok) {
+        throw new Error("Failed to download Excel");
+      }
+
+      const blob = await response.blob();
+
+      const url = window.URL.createObjectURL(blob);
+
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `${location}_Excel_.xlsx`;
+
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      window.URL.revokeObjectURL(url);
+
+      setExporting(false);
+      toast.success(`${location} Excel downloaded successfully`);
+
+    } catch (error) {
+      console.error(error);
+      toast.error(`Failed to download ${location} Excel`);
+    } finally {
+      setExporting(false);
     }
-
-    const blob = await response.blob();
-
-    const url = window.URL.createObjectURL(blob);
-
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `${location}_Excel_.xlsx`;
-
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-
-    window.URL.revokeObjectURL(url);
-
-    setExporting(false);
-    toast.success(`${location} Excel downloaded successfully`);
-
-  } catch (error) {
-    console.error(error);
-    toast.error(`Failed to download ${location} Excel`);
-  }finally {
-    setExporting(false);
-  }
-};
+  };
 
   const fetchData = async () => {
     setLoading(true);
@@ -243,10 +240,10 @@ export default function HeadAdminFeeDashboard() {
     if (!filteredRows.length) { toast.error('No records to export'); return; }
     const doc = new jsPDF({ orientation: 'landscape' });
     doc.setFontSize(16);
-    doc.setTextColor(234, 88, 12);
+    doc.setTextColor(30, 42, 74); // primary navy
     doc.text(`Fee Details — ${academicYear}`, 14, 16);
     doc.setFontSize(10);
-    doc.setTextColor(100);
+    doc.setTextColor(100, 116, 139); // secondary text
     doc.text(`Aries Polytechnic · Generated ${new Date().toLocaleDateString('en-IN')}`, 14, 22);
 
     autoTable(doc, {
@@ -258,8 +255,8 @@ export default function HeadAdminFeeDashboard() {
         formatCurrency(r.totalAmount), formatCurrency(r.amountPaid),
         formatCurrency(r.amountDue), r.feeStatus,
       ]),
-      headStyles: { fillColor: [234, 88, 12], textColor: 255, fontStyle: 'bold' },
-      alternateRowStyles: { fillColor: [255, 247, 237] },
+      headStyles: { fillColor: [30, 42, 74], textColor: 255, fontStyle: 'bold' },
+      alternateRowStyles: { fillColor: [245, 247, 251] }, // light bg
       styles: { fontSize: 7.5, cellPadding: 2.5 },
     });
 
@@ -270,7 +267,7 @@ export default function HeadAdminFeeDashboard() {
   // ── Loading ──────────────────────────────────────────────────────────────
   if (loading) {
     return (
-      <div style={{ fontFamily: FONT, background: '#F8FAFC' }}
+      <div style={{ fontFamily: FONT, background: THEME.light }}
         className="min-h-[70vh] p-4 sm:p-6 flex flex-col items-center justify-center">
         <style>{`
           @keyframes sunSpin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
@@ -287,10 +284,12 @@ export default function HeadAdminFeeDashboard() {
         `}</style>
         <div className="load-fade w-full max-w-md text-center">
           <div className="relative mx-auto mb-8 h-28 w-28">
-            <div className="load-ring absolute inset-0 rounded-full" style={{ background: 'radial-gradient(circle, #fed7aa 0%, transparent 70%)' }} />
-            <div className="absolute inset-3 rounded-full border-2 border-orange-200/60" style={{ boxShadow: '0 0 24px rgba(234,88,12,0.15)' }} />
+            <div className="load-ring absolute inset-0 rounded-full"
+              style={{ background: `radial-gradient(circle, ${THEME.mid} 0%, transparent 70%)` }} />
+            <div className="absolute inset-3 rounded-full border-2"
+              style={{ borderColor: `${THEME.accent}40`, boxShadow: `0 0 24px ${THEME.primary}26` }} />
             <div className="absolute inset-0 flex items-center justify-center">
-              <div className="load-sun text-orange-500">
+              <div className="load-sun" style={{ color: THEME.accent }}>
                 <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                   <circle cx="12" cy="12" r="4" fill="currentColor" opacity="0.9" />
                   <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" strokeLinecap="round" />
@@ -299,19 +298,26 @@ export default function HeadAdminFeeDashboard() {
             </div>
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="load-orbit">
-                <div className="h-3 w-3 rounded-full bg-amber-400 shadow-md" style={{ boxShadow: '0 0 10px rgba(251,191,36,0.8)' }} />
+                <div className="h-3 w-3 rounded-full shadow-md"
+                  style={{ background: THEME.accent, boxShadow: `0 0 10px ${THEME.accent}cc` }} />
               </div>
             </div>
           </div>
-          <h2 style={{ fontFamily: "'DM Serif Display', serif" }} className="text-xl sm:text-2xl text-slate-800 mb-1">Loading Fee Details</h2>
-          <p className="text-sm text-slate-500 mb-6">Fetching department-wise fee data…</p>
-          <div className="relative mx-auto h-1.5 w-48 overflow-hidden rounded-full bg-orange-100">
-            <div className="load-shine absolute inset-y-0 w-1/2 rounded-full" style={{ background: 'linear-gradient(90deg, transparent, #ea580c, #fb923c, transparent)' }} />
+          <h2 style={{ fontFamily: "'DM Serif Display', serif", color: THEME.textMain }}
+            className="text-xl sm:text-2xl mb-1">Loading Fee Details</h2>
+          <p className="text-sm mb-6" style={{ color: THEME.textSec }}>Fetching department-wise fee data…</p>
+          <div className="relative mx-auto h-1.5 w-48 overflow-hidden rounded-full"
+            style={{ background: THEME.mid }}>
+            <div className="load-shine absolute inset-y-0 w-1/2 rounded-full"
+              style={{ background: `linear-gradient(90deg, transparent, ${THEME.primary}, ${THEME.accent}, transparent)` }} />
           </div>
           <div className="mt-5 flex items-center justify-center gap-1.5">
             {[0,1,2].map((i) => (
-              <span key={i} className="h-1.5 w-1.5 rounded-full bg-orange-400"
-                style={{ animation: `dotBounce 1.2s ease-in-out ${i * 0.15}s infinite` }} />
+              <span key={i} className="h-1.5 w-1.5 rounded-full"
+                style={{
+                  background: THEME.accent,
+                  animation: `dotBounce 1.2s ease-in-out ${i * 0.15}s infinite`
+                }} />
             ))}
           </div>
         </div>
@@ -323,12 +329,14 @@ export default function HeadAdminFeeDashboard() {
   if (error) {
     return (
       <div style={{ fontFamily: FONT }} className="p-4 sm:p-6">
-        <div className="max-w-md mx-auto mt-16 text-center rounded-2xl border border-orange-100 bg-white p-8 shadow-sm">
-          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full" style={{ background: THEME.light }}>
+        <div className="max-w-md mx-auto mt-16 text-center rounded-2xl border p-8 shadow-sm"
+          style={{ borderColor: THEME.mid, background: THEME.card }}>
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full"
+            style={{ background: THEME.light }}>
             <AlertCircle size={28} style={{ color: THEME.primary }} />
           </div>
-          <h3 className="text-lg font-semibold text-slate-800 mb-1">Couldn't load data</h3>
-          <p className="text-sm text-slate-500 mb-5">{error}</p>
+          <h3 className="text-lg font-semibold mb-1" style={{ color: THEME.textMain }}>Couldn't load data</h3>
+          <p className="text-sm mb-5" style={{ color: THEME.textSec }}>{error}</p>
           <button onClick={fetchData}
             className="inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-medium text-white shadow-sm transition hover:opacity-90"
             style={{ background: THEME.primary }}>
@@ -343,10 +351,11 @@ export default function HeadAdminFeeDashboard() {
   if (data && allRows.length === 0) {
     return (
       <div style={{ fontFamily: FONT }} className="p-4 sm:p-6">
-        <div className="max-w-md mx-auto mt-16 text-center rounded-2xl border border-slate-200 bg-white p-8">
-          <Inbox size={40} className="mx-auto mb-3 text-slate-300" />
-          <h3 className="text-lg font-semibold text-slate-700 mb-1">No fee records found</h3>
-          <p className="text-sm text-slate-500">No data returned for <strong>{academicYear}</strong>.</p>
+        <div className="max-w-md mx-auto mt-16 text-center rounded-2xl border p-8"
+          style={{ borderColor: THEME.mid, background: THEME.card }}>
+          <Inbox size={40} className="mx-auto mb-3" style={{ color: THEME.mid }} />
+          <h3 className="text-lg font-semibold mb-1" style={{ color: THEME.textMain }}>No fee records found</h3>
+          <p className="text-sm" style={{ color: THEME.textSec }}>No data returned for <strong>{academicYear}</strong>.</p>
         </div>
       </div>
     );
@@ -354,7 +363,7 @@ export default function HeadAdminFeeDashboard() {
 
   // ── Main UI ──────────────────────────────────────────────────────────────
   return (
-    <div style={{ fontFamily: FONT, background: '#F8FAFC' }}
+    <div style={{ fontFamily: FONT, background: THEME.light }}
       className="min-h-full p-4 sm:p-6 space-y-6">
 
       <style>{`
@@ -370,38 +379,48 @@ export default function HeadAdminFeeDashboard() {
       `}</style>
 
       {/* Welcome card */}
-      <div className="rounded-2xl border border-orange-100 bg-white p-5 sm:p-6 shadow-sm animate-fade-up relative overflow-hidden"
-        style={{ background: 'linear-gradient(135deg, #fff7ed 0%, #ffffff 60%)' }}>
-        <div className="absolute -right-6 -top-6 opacity-20">
-          <Sun size={110} className="text-orange-400 animate-sun" />
+      <div className="rounded-2xl border p-5 sm:p-6 shadow-sm animate-fade-up relative overflow-hidden"
+        style={{
+          borderColor: THEME.mid,
+          background: `linear-gradient(135deg, ${THEME.light} 0%, ${THEME.card} 60%)`
+        }}>
+        <div className="absolute -right-6 -top-6 opacity-15">
+          <Sun size={110} style={{ color: THEME.accent }} className="animate-sun" />
         </div>
         <div className="relative flex flex-col sm:flex-row sm:items-center gap-4">
           <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl shadow-sm"
-            style={{ background: `linear-gradient(135deg, ${THEME.primary}, #f97316)` }}>
+            style={{ background: `linear-gradient(135deg, ${THEME.primary}, ${THEME.secondary})` }}>
             <Sun size={28} className="text-white animate-sun" style={{ animationDuration: '12s' }} />
           </div>
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wider text-orange-600 mb-0.5">Good day, Head Admin</p>
-            <h2 style={{ fontFamily: "'DM Serif Display', serif" }} className="text-xl sm:text-2xl text-slate-800">
+            <p className="text-xs font-semibold uppercase tracking-wider mb-0.5"
+              style={{ color: THEME.accent }}>Good day, Head Admin</p>
+            <h2 style={{ fontFamily: "'DM Serif Display', serif", color: THEME.textMain }}
+              className="text-xl sm:text-2xl">
               Fee Details Dashboard
             </h2>
-            <p className="text-sm text-slate-500 mt-1">Department-wise fee breakdown — Palakkad &amp; Chittoor</p>
+            <p className="text-sm mt-1" style={{ color: THEME.textSec }}>
+              Department-wise fee breakdown — Palakkad &amp; Chittoor
+            </p>
           </div>
         </div>
       </div>
 
       {/* Header / Year picker */}
       <div className="rounded-2xl p-6 sm:p-8 text-white shadow-sm relative overflow-hidden animate-fade-up stagger-1"
-        style={{ background: `linear-gradient(135deg, ${THEME.primary}, #f97316)` }}>
+        style={{ background: `linear-gradient(135deg, ${THEME.primary}, ${THEME.secondary})` }}>
         <div className="absolute -right-4 bottom-0 h-24 w-24 rounded-full bg-white/10" />
         <div className="relative flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 pr-14 sm:pr-20">
           <div>
-            <p className="text-xs uppercase tracking-[0.2em] text-orange-100/90 mb-1.5 font-medium">Head Admin · Fee Overview</p>
-            <h1 style={{ fontFamily: "'DM Serif Display', serif" }} className="text-2xl sm:text-3xl text-white drop-shadow-sm">
+            <p className="text-xs uppercase tracking-[0.2em] text-white/80 mb-1.5 font-medium">
+              Head Admin · Fee Overview
+            </p>
+            <h1 style={{ fontFamily: "'DM Serif Display', serif" }}
+              className="text-2xl sm:text-3xl text-white drop-shadow-sm">
               Fee Dashboard
             </h1>
-            <p className="text-sm text-orange-50/90 mt-1.5 flex items-center gap-2">
-              <span className="inline-block h-1.5 w-1.5 rounded-full bg-orange-200 shadow-[0_0_8px_rgba(253,186,116,0.8)]" />
+            <p className="text-sm text-white/85 mt-1.5 flex items-center gap-2">
+              <span className="inline-block h-1.5 w-1.5 rounded-full bg-white/70 shadow-[0_0_8px_rgba(255,255,255,0.6)]" />
               Aries Polytechnic — Palakkad &amp; Chittoor
             </p>
           </div>
@@ -436,15 +455,32 @@ export default function HeadAdminFeeDashboard() {
           </div>
 
           {/* Toolbar */}
-          <div className="rounded-2xl border border-orange-100 bg-white p-4 shadow-sm space-y-3 animate-fade-up">
+          <div className="rounded-2xl border p-4 shadow-sm space-y-3 animate-fade-up"
+            style={{ borderColor: THEME.mid, background: THEME.card }}>
             <div className="flex flex-col lg:flex-row gap-3 lg:items-center flex-wrap">
               {/* Search */}
               <div className="relative flex-1 min-w-[220px]">
-                <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
-                <input value={search} onChange={(e) => setSearch(e.target.value)}
+                <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2" style={{ color: THEME.textSec }} />
+                <input
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
                   placeholder="Search by admission no or fee type…"
-                  style={{ fontFamily: FONT }}
-                  className="w-full rounded-full border border-slate-200 bg-slate-50 pl-10 pr-4 py-2.5 text-sm outline-none transition focus:bg-white focus:border-orange-400" />
+                  className="w-full rounded-full border pl-10 pr-4 py-2.5 text-sm outline-none transition"
+                  style={{
+                    fontFamily: FONT,
+                    borderColor: THEME.mid,
+                    background: THEME.light,
+                    color: THEME.textMain
+                  }}
+                  onFocus={(e) => {
+                    e.target.style.borderColor = THEME.accent;
+                    e.target.style.background = THEME.card;
+                  }}
+                  onBlur={(e) => {
+                    e.target.style.borderColor = THEME.mid;
+                    e.target.style.background = THEME.light;
+                  }}
+                />
               </div>
 
               <FilterSelect value={campusFilter} onChange={(v) => { setCampusFilter(v); setDeptFilter('all'); }}
@@ -455,11 +491,14 @@ export default function HeadAdminFeeDashboard() {
                 options={feeTypeOptions} placeholder="All Fee Types" format={formatFeeType} />
               <FilterSelect value={statusFilter} onChange={setStatusFilter}
                 options={statusOptions} placeholder="All Statuses" />
+
               <button onClick={() => exportAttendanceExcel(campusFilter)}
-                className={`inline-flex items-center justify-center gap-2 rounded-full px-4 py-2.5 text-sm font-medium text-white shadow-sm transition hover:opacity-90 hover:scale-[1.02] active:scale-95 whitespace-nowrap ${exporting ? 'bg-orange-300 cursor-not-allowed' : 'bg-orange-500'}`}  
-              disabled={exporting}>
+                disabled={exporting}
+                className="inline-flex items-center justify-center gap-2 rounded-full px-4 py-2.5 text-sm font-medium text-white shadow-sm transition hover:opacity-90 hover:scale-[1.02] active:scale-95 whitespace-nowrap disabled:opacity-60 disabled:cursor-not-allowed"
+                style={{ background: exporting ? THEME.secondary : THEME.accent }}>
                 <Download size={15} /> {exporting ? 'Exporting...' : 'Export Excel'}
               </button>
+
               <button onClick={handleExportPDF}
                 className="inline-flex items-center justify-center gap-2 rounded-full px-4 py-2.5 text-sm font-medium text-white shadow-sm transition hover:opacity-90 hover:scale-[1.02] active:scale-95 whitespace-nowrap"
                 style={{ background: THEME.primary }}>
@@ -468,10 +507,12 @@ export default function HeadAdminFeeDashboard() {
             </div>
 
             {activeFilterCount > 0 && (
-              <div className="flex items-center gap-2 text-xs text-slate-500 animate-fade-in">
+              <div className="flex items-center gap-2 text-xs animate-fade-in" style={{ color: THEME.textSec }}>
                 <Filter size={13} />
                 {activeFilterCount} filter{activeFilterCount > 1 ? 's' : ''} applied
-                <button onClick={clearFilters} className="inline-flex items-center gap-1 text-orange-600 hover:underline font-medium">
+                <button onClick={clearFilters}
+                  className="inline-flex items-center gap-1 font-medium hover:underline"
+                  style={{ color: THEME.accent }}>
                   <X size={12} /> Clear
                 </button>
               </div>
@@ -479,14 +520,16 @@ export default function HeadAdminFeeDashboard() {
           </div>
 
           {/* Table */}
-          <div className="rounded-2xl border border-orange-100 bg-white shadow-sm overflow-hidden animate-fade-up">
+          <div className="rounded-2xl border shadow-sm overflow-hidden animate-fade-up"
+            style={{ borderColor: THEME.mid, background: THEME.card }}>
             {filteredRows.length === 0 ? (
               <div className="text-center py-16 px-6">
-                <Inbox size={40} className="mx-auto mb-3 text-slate-300" />
-                <h3 className="text-base font-semibold text-slate-700 mb-1">No matching records</h3>
-                <p className="text-sm text-slate-500 mb-4">Try adjusting your filters.</p>
+                <Inbox size={40} className="mx-auto mb-3" style={{ color: THEME.mid }} />
+                <h3 className="text-base font-semibold mb-1" style={{ color: THEME.textMain }}>No matching records</h3>
+                <p className="text-sm mb-4" style={{ color: THEME.textSec }}>Try adjusting your filters.</p>
                 {activeFilterCount > 0 && (
-                  <button onClick={clearFilters} className="text-sm font-medium hover:underline" style={{ color: THEME.primary }}>
+                  <button onClick={clearFilters} className="text-sm font-medium hover:underline"
+                    style={{ color: THEME.primary }}>
                     Clear filters
                   </button>
                 )}
@@ -518,27 +561,42 @@ export default function HeadAdminFeeDashboard() {
                           'Partial': { bg: '#fefce8', color: '#ca8a04' },
                           'Partially Waived': { bg: '#f0fdf4', color: '#16a34a' },
                           'Waived': { bg: '#eff6ff', color: '#2563eb' },
-                        }[r.feeStatus] || { bg: '#f1f5f9', color: '#64748b' };
+                        }[r.feeStatus] || { bg: THEME.light, color: THEME.textSec };
 
                         return (
                           <tr key={`${r.campus}-${r.admissionNo}-${r.feeType}-${i}`}
-                            className="border-t border-slate-100 hover:bg-orange-50/40 transition">
-                            <td style={{ fontFamily: FONT }} className="px-4 py-3 font-mono text-xs text-slate-600 whitespace-nowrap">{r.admissionNo}</td>
-                            <td style={{ fontFamily: FONT }} className="px-4 py-3 whitespace-nowrap">
-                              <span className="inline-flex items-center gap-1 text-xs font-medium text-slate-600">
-                                <Building2 size={12} className="text-orange-400" />
+                            className="border-t transition"
+                            style={{ borderColor: THEME.mid }}
+                            onMouseEnter={(e) => e.currentTarget.style.background = `${THEME.light}80`}
+                            onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}>
+                            <td className="px-4 py-3 font-mono text-xs whitespace-nowrap"
+                              style={{ color: THEME.textSec }}>{r.admissionNo}</td>
+                            <td className="px-4 py-3 whitespace-nowrap">
+                              <span className="inline-flex items-center gap-1 text-xs font-medium"
+                                style={{ color: THEME.textSec }}>
+                                <Building2 size={12} style={{ color: THEME.accent }} />
                                 {r.campus}
                               </span>
                             </td>
-                            <td style={{ fontFamily: FONT }} className="px-4 py-3 text-slate-700 font-medium whitespace-nowrap">{r.department}</td>
-                            <td style={{ fontFamily: FONT }} className="px-4 py-3 text-slate-500 text-center whitespace-nowrap">{r.semester}</td>
-                            <td style={{ fontFamily: FONT }} className="px-4 py-3 font-mono text-xs text-slate-500 whitespace-nowrap">{r.studentFeeCode}</td>
-                            <td style={{ fontFamily: FONT }} className="px-4 py-3 text-slate-600 whitespace-nowrap">{formatFeeType(r.feeType)}</td>
-                            <td style={{ fontFamily: FONT }} className="px-4 py-3 text-slate-400 text-xs whitespace-nowrap">{r.feeDueDate || '—'}</td>
-                            <td style={{ fontFamily: FONT }} className="px-4 py-3 text-right text-slate-700 whitespace-nowrap">{formatCurrency(r.totalAmount)}</td>
-                            <td style={{ fontFamily: FONT }} className="px-4 py-3 text-right text-emerald-600 font-medium whitespace-nowrap">{formatCurrency(r.amountPaid)}</td>
-                            <td style={{ fontFamily: FONT }} className="px-4 py-3 text-right text-rose-600 font-medium whitespace-nowrap">{formatCurrency(r.amountDue)}</td>
-                            <td style={{ fontFamily: FONT }} className="px-4 py-3 text-center whitespace-nowrap">
+                            <td className="px-4 py-3 font-medium whitespace-nowrap"
+                              style={{ color: THEME.textMain }}>{r.department}</td>
+                            <td className="px-4 py-3 text-center whitespace-nowrap"
+                              style={{ color: THEME.textSec }}>{r.semester}</td>
+                            <td className="px-4 py-3 font-mono text-xs whitespace-nowrap"
+                              style={{ color: THEME.textSec }}>{r.studentFeeCode}</td>
+                            <td className="px-4 py-3 whitespace-nowrap"
+                              style={{ color: THEME.textSec }}>{formatFeeType(r.feeType)}</td>
+                            <td className="px-4 py-3 text-xs whitespace-nowrap"
+                              style={{ color: THEME.textSec }}>{r.feeDueDate || '—'}</td>
+                            <td className="px-4 py-3 text-right whitespace-nowrap"
+                              style={{ color: THEME.textMain }}>{formatCurrency(r.totalAmount)}</td>
+                            <td className="px-4 py-3 text-right font-medium whitespace-nowrap text-emerald-600">
+                              {formatCurrency(r.amountPaid)}
+                            </td>
+                            <td className="px-4 py-3 text-right font-medium whitespace-nowrap text-rose-600">
+                              {formatCurrency(r.amountDue)}
+                            </td>
+                            <td className="px-4 py-3 text-center whitespace-nowrap">
                               <span className="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium"
                                 style={{ background: statusColor.bg, color: statusColor.color }}>
                                 {r.feeStatus}
@@ -552,18 +610,23 @@ export default function HeadAdminFeeDashboard() {
                 </div>
 
                 {/* Pagination */}
-                <div className="flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-slate-100 px-4 py-3">
-                  <p className="text-xs text-slate-500">
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-3 border-t px-4 py-3"
+                  style={{ borderColor: THEME.mid }}>
+                  <p className="text-xs" style={{ color: THEME.textSec }}>
                     Showing {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, filteredRows.length)} of {filteredRows.length}
                   </p>
                   <div className="flex items-center gap-2">
                     <button onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page === 1}
-                      className="inline-flex items-center gap-1 rounded-full border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 disabled:opacity-40 hover:bg-slate-50 transition">
+                      className="inline-flex items-center gap-1 rounded-full border px-3 py-1.5 text-xs font-medium disabled:opacity-40 transition"
+                      style={{ borderColor: THEME.mid, color: THEME.textSec }}>
                       <ChevronLeft size={14} /> Prev
                     </button>
-                    <span className="text-xs text-slate-500 px-1">Page {page} of {totalPages}</span>
+                    <span className="text-xs px-1" style={{ color: THEME.textSec }}>
+                      Page {page} of {totalPages}
+                    </span>
                     <button onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page === totalPages}
-                      className="inline-flex items-center gap-1 rounded-full border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 disabled:opacity-40 hover:bg-slate-50 transition">
+                      className="inline-flex items-center gap-1 rounded-full border px-3 py-1.5 text-xs font-medium disabled:opacity-40 transition"
+                      style={{ borderColor: THEME.mid, color: THEME.textSec }}>
                       Next <ChevronRight size={14} />
                     </button>
                   </div>
@@ -580,26 +643,31 @@ export default function HeadAdminFeeDashboard() {
 function StatCard({ icon, label, value, accent, className = '' }) {
   const colorMap = {
     emerald: { bg: '#ecfdf5', color: '#059669' },
-    rose: { bg: '#fff1f2', color: '#e11d48' },
+    rose:    { bg: '#fff1f2', color: '#e11d48' },
     default: { bg: THEME.light, color: THEME.primary },
   };
   const c = colorMap[accent] || colorMap.default;
   return (
-    <div className={`rounded-xl border border-orange-100 bg-white p-4 shadow-sm transition hover:shadow-md hover:-translate-y-0.5 ${className}`}>
+    <div className={`rounded-xl border p-4 shadow-sm transition hover:shadow-md hover:-translate-y-0.5 ${className}`}
+      style={{ borderColor: THEME.mid, background: THEME.card }}>
       <div className="flex items-center gap-2 mb-2">
-        <span className="flex h-8 w-8 items-center justify-center rounded-full" style={{ background: c.bg, color: c.color }}>
+        <span className="flex h-8 w-8 items-center justify-center rounded-full"
+          style={{ background: c.bg, color: c.color }}>
           {icon}
         </span>
-        <span className="text-xs font-medium text-slate-500">{label}</span>
+        <span className="text-xs font-medium" style={{ color: THEME.textSec }}>{label}</span>
       </div>
-      <p className="text-lg font-semibold text-slate-800">{value}</p>
+      <p className="text-lg font-semibold" style={{ color: THEME.textMain }}>{value}</p>
     </div>
   );
 }
 
 function Th({ children, align = 'left' }) {
   return (
-    <th style={{ fontFamily: FONT }} className={`px-4 py-3 text-xs font-semibold uppercase tracking-wide text-orange-700 whitespace-nowrap ${align === 'right' ? 'text-right' : align === 'center' ? 'text-center' : 'text-left'}`}>
+    <th style={{ fontFamily: FONT, color: THEME.primary }}
+      className={`px-4 py-3 text-xs font-semibold uppercase tracking-wide whitespace-nowrap ${
+        align === 'right' ? 'text-right' : align === 'center' ? 'text-center' : 'text-left'
+      }`}>
       {children}
     </th>
   );
@@ -608,8 +676,16 @@ function Th({ children, align = 'left' }) {
 function FilterSelect({ value, onChange, options, placeholder, format }) {
   return (
     <select value={value} onChange={(e) => onChange(e.target.value)}
-      style={{ fontFamily: FONT }}
-      className="rounded-full border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-600 outline-none transition focus:bg-white focus:border-orange-400 min-w-[150px]">
+      style={{
+        fontFamily: FONT,
+        borderColor: THEME.mid,
+        background: THEME.light,
+        color: THEME.textSec
+      }}
+      className="rounded-full border px-4 py-2.5 text-sm outline-none transition min-w-[150px]
+                 focus:bg-white"
+      onFocus={(e) => e.target.style.borderColor = THEME.accent}
+      onBlur={(e) => e.target.style.borderColor = THEME.mid}>
       <option value="all">{placeholder}</option>
       {options.map((opt) => (
         <option key={opt} value={opt}>{format ? format(opt) : opt}</option>

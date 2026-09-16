@@ -6,7 +6,7 @@ import {
   Leaf, RefreshCw, AlertCircle, Search, X, Users,
   GraduationCap, Bus, Home, ChevronDown, ChevronRight,
   MapPin, Check, SendHorizonal, Globe, SortAsc, ArrowLeft,
-  BadgeCheck, BookOpen,
+ 
 } from "lucide-react";
 
 // ─── helpers ─────────────────────────────────────────────────────────────────
@@ -471,11 +471,16 @@ export default function FeeChangeRequestPage() {
     };
 
     try {
-      const res = await safeFetch(`${API_BASE_URL}/feeTransferReq`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
+       const submitApi =
+         empId?.startsWith("AREP")
+           ? "feeTransferReqP"
+           : "feeTransferReq";
+       
+       const res = await safeFetch(`${API_BASE_URL}/${submitApi}`, {
+         method: "POST",
+         headers: { "Content-Type": "application/json" },
+         body: JSON.stringify(payload),
+       });
       const text = await res.text();
       if (!res.ok) throw new Error(text);
 

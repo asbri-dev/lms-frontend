@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
-import { useAuth } from "../../auth/useAuth";
-import { API_BASE_URL } from "../../config/api";
+import { useAuth } from "../../../auth/useAuth";
+import { API_BASE_URL } from "../../../config/api";
 import toast, { Toaster } from "react-hot-toast";
 import {
   Sun, RefreshCw, AlertCircle, CheckCircle2, XCircle,
@@ -486,7 +486,7 @@ function TableSkeleton() {
 
 // ─── main page ────────────────────────────────────────────────────────────────
 
-export default function HeadAdminApprovalPage() {
+export default function PalakadApprove() {
   const { user } = useAuth();
   const empId = user?.employeeId;
 
@@ -511,7 +511,7 @@ export default function HeadAdminApprovalPage() {
     setError(null);
     setIsNetErr(false);
     try {
-      const res = await safeFetch(`${API_BASE_URL}/getFeeReqC`, {
+      const res = await safeFetch(`${API_BASE_URL}/getFeeReqP`, {
         method: "GET",
         headers: { "Content-Type": "application/json" },
       });
@@ -549,6 +549,7 @@ export default function HeadAdminApprovalPage() {
       semesterApplicable: r.applicableSemester,
       transferAs:         r.transferAs,
       initiateBy:         r.initiateBy,
+       feeType:            r.feeType,
       initiateAt:         nowISO(),
       status:             "Approved",
       approvedBy:         empId,
@@ -558,28 +559,67 @@ export default function HeadAdminApprovalPage() {
       reasonForRevoking:  null,
       busStop:            r.busStop ?? null,
     };
+   try {
+  const res = await safeFetch(`${API_BASE_URL}/approveFeeReqP`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+
+  const responseText = await res.text();
+
+  if (!res.ok) {
+    let errorMessage = `Server returned ${res.status}.`;
+
     try {
-      const res = await safeFetch(`${API_BASE_URL}/approveFeeReq`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-      if (!res.ok) throw new Error(`Server returned ${res.status}.`);
-      toast.success(`Request for ${r.studAdmissionNo} approved successfully`, {
-        duration: 4000,
-        style: { background: "#f0fdf4", color: "#15803d", border: "1px solid #dcfce7", fontWeight: "600" },
-        iconTheme: { primary: "#16a34a", secondary: "#fff" },
-      });
-      setApproveRecord(null);
-      fetchData();
-    } catch (err) {
-      toast.error(err.message || "Failed to approve request.", {
-        duration: 5000,
-        style: { background: "#FEF2F2", color: "#ef4444", border: "1px solid #fecaca" },
-      });
-    } finally {
-      setActionLoading(false);
+      const errorJson = JSON.parse(responseText);
+
+      errorMessage =
+        errorJson.message ||
+        errorJson.error ||
+        errorJson.errorMessage ||
+        errorJson.detail ||
+        errorMessage;
+    } catch {
+      if (responseText?.trim()) {
+        errorMessage = responseText;
+      }
     }
+
+    throw new Error(errorMessage);
+  }
+
+  toast.success(`Request for ${r.studAdmissionNo} approved successfully`, {
+    duration: 4000,
+    style: {
+      background: "#f0fdf4",
+      color: "#15803d",
+      border: "1px solid #dcfce7",
+      fontWeight: "600",
+    },
+    iconTheme: {
+      primary: "#16a34a",
+      secondary: "#fff",
+    },
+  });
+
+  setApproveRecord(null);
+  fetchData();
+
+} catch (err) {
+  toast.error(err.message || "Failed to approve request.", {
+    duration: 5000,
+    style: {
+      background: "#FEF2F2",
+      color: "#ef4444",
+      border: "1px solid #fecaca",
+      fontWeight: "600",
+    },
+  });
+
+} finally {
+  setActionLoading(false);
+}
   };
 
   // ── reject action ──
@@ -592,6 +632,7 @@ export default function HeadAdminApprovalPage() {
       semesterApplicable: r.applicableSemester,
       transferAs:         r.transferAs,
       initiateBy:         r.initiateBy,
+      feeType:            r.feeType,
       initiateAt:         nowISO(),
       status:             "Rejected",
       approvedBy:         empId,
@@ -602,7 +643,7 @@ export default function HeadAdminApprovalPage() {
       busStop:            r.busStop ?? null,
     };
     try {
-      const res = await safeFetch(`${API_BASE_URL}/approveFeeReq`, {
+      const res = await safeFetch(`${API_BASE_URL}/"/approveFeeReqP`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -652,7 +693,7 @@ export default function HeadAdminApprovalPage() {
               className="text-2xl font-bold tracking-tight"
               style={{ fontFamily: "'DM Serif Display', serif", color: "#0F172A" }}
             >
-              Fee Change Approvals
+              Palakkad Fee Change Approvals
             </h1>
             <p className="text-sm" style={{ color: "#64748B" }}>
               Review and action pending fee transfer requests

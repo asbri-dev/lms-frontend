@@ -15,37 +15,7 @@ import {
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { API_BASE_URL } from "../../config/api";
-
-// ── fee label map (same as MakePayment.jsx) ──────────────────────────────────
-const FEE_LABELS = {
-  uniformFee: "Uniform Fee",
-  applicationFee: "Application Fee",
-  idCardFee: "ID Card Fee",
-  cautionDeposit: "Caution Deposit",
-  ratificationFee: "Ratification Fee",
-  alumniFee: "Alumni Fee",
-  industrialAndTrainingFee: "Industrial & Training Fee",
-  tuitionFee: "Tuition Fee",
-  bookFee: "Book Fee",
-  affiliationFee: "Affiliation Fee",
-  transportationFee: "Transportation Fee",
-  libraryAndLaboratoryFee: "Library & Laboratory Fee",
-  hostelAndMessFee: "Hostel & Mess Fee",
-};
-
-const getFeeLabel = (name) => {
-  if (!name) return name;
-  const suffixMatch = name.match(/^(?:first|second|third|fourth)Year(.+)$/i);
-  if (suffixMatch) {
-    const base =
-      suffixMatch[1].charAt(0).toLowerCase() + suffixMatch[1].slice(1);
-    const prefix = name.match(/^(\w+?)Year/i)[1];
-    const yearMap = { first: "1st", second: "2nd", third: "3rd", fourth: "4th" };
-    const yr = yearMap[prefix.toLowerCase()] ?? prefix;
-    return `${FEE_LABELS[base] ?? base} (${yr} Year)`;
-  }
-  return FEE_LABELS[name] ?? name;
-};
+import { FEE_LABELS, getFeeLabel } from "./feeLabels";
 
 const fmt = (val) =>
   new Intl.NumberFormat("en-IN", {

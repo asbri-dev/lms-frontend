@@ -463,10 +463,10 @@ export default function DueDateSetPage() {
           </FormCard>
         </div>
 
-        {/* ── Right: summary + status + submit ── */}
-        <div>
-          <div className="rounded-2xl border border-orange-100 bg-white p-5 shadow-sm sticky top-6">
-            <h3 className="text-sm font-semibold text-slate-700 mb-4">Review &amp; Submit</h3>
+      {/* ── Right: summary + status + submit ── */}
+     <div className="lg:sticky lg:top-6 lg:self-start">
+         <div className="rounded-2xl border border-orange-100 bg-white p-5 shadow-sm">
+              <h3 className="text-sm font-semibold text-slate-700 mb-4">Review &amp; Submit</h3>
 
             {/* Summary rows */}
             <div className="space-y-3 mb-5">
@@ -558,8 +558,8 @@ export default function DueDateSetPage() {
                 Complete all steps above to continue
               </p>
             )}
-          </div>
-        </div>
+         </div>
+     </div>
       </div>
     </div>
   );
