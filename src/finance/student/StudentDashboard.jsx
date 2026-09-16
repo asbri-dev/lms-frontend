@@ -2,36 +2,18 @@ import { useState, useEffect, useCallback } from "react";
 import {
   Snowflake, GraduationCap, IndianRupee, CheckCircle2,
   Wallet, CalendarClock, AlertTriangle, ChevronRight,
-  RefreshCw, MapPin, BookOpen, User, Clock, Loader2
+  RefreshCw, MapPin, BookOpen, User, Clock, Loader2,Download
 } from "lucide-react";
 import { useAuth } from "../../auth/useAuth"; // adjust path as needed
 import { API_BASE_URL } from "../../config/api";// your axios instance
+import toast from "react-hot-toast";
+import { FEE_LABELS } from "./feeLabels";
 
 // ── helpers ──────────────────────────────────────────────────────────────────
 const fmt = (val) =>
   Number(val).toLocaleString("en-IN", { maximumFractionDigits: 0 });
 
-const feeLabel = (key) => {
-  const map = {
-    tuitionFee: "Tuition Fee",
-    transportationFee: "Transportation Fee",
-    cautionDeposit: "Caution Deposit",
-    bookFee: "Book Fee",
-    uniformFee: "Uniform Fee",
-    libraryAndLaboratoryFee: "Library & Lab Fee",
-    industrialAndTrainingFee: "Industrial & Training",
-    ratificationFee: "Ratification Fee",
-    affiliationFee: "Affiliation Fee",
-    alumniFee: "Alumni Fee",
-    idCardFee: "ID Card Fee",
-    applicationFee: "Application Fee",
-    hostelAndMessFee: "Hostel & Mess Fee",
-    oneOneTuitionFee: "Tuition Fee (SEM I)",
-    oneTwoTuitionFee: "Tuition Fee (SEM II)",
-    uniformAndDrawingFee:"Uniform & Drawing Fee"
-  };
-  return map[key] || key;
-};
+const feeLabel = (key) => FEE_LABELS[key] || key;
 
 const statusStyle = (status) => {
   if (status === "Paid")
@@ -39,6 +21,44 @@ const statusStyle = (status) => {
   if (status === "Partial")
     return { bg: "#fffbeb", color: "#b45309", border: "#fde68a", dot: "#d97706" };
   return { bg: "#fff7ed", color: "#c2410c", border: "#fed7aa", dot: "#ea580c" };
+};
+
+
+const downloadReceipt = async (transactionId) => {
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/downloadPaymentInvoice?txnId=${encodeURIComponent(transactionId)}`
+
+    );
+
+    if (!response.ok) {
+      throw new Error("Failed to download receipt");
+    }
+
+    const blob = await response.blob();
+
+    const url = window.URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `Receipt_${transactionId}.pdf`;
+
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    window.URL.revokeObjectURL(url);
+
+    toast.success("Receipt downloaded successfully");
+
+    return true;
+  } catch (error) {
+    console.error("Receipt download error:", error);
+
+    toast.error("Failed to download receipt. Please try again.");
+
+    return false;
+  }
 };
 
 // ── Snowflake decorative bg ───────────────────────────────────────────────────
@@ -119,56 +139,231 @@ function Chip({ icon: Icon, label }) {
 }
 
 // ── Fee Row ───────────────────────────────────────────────────────────────────
-function FeeRow({ fee, index }) {
+function FeeRow({
+  fee,
+  index,
+  downloadingReceipt,
+  setDownloadingReceipt,
+}) {
   const st = statusStyle(fee.feeStatus);
   const paid = Number(fee.amountPaid);
-  const total = Number(fee.amountToBePaid);
+  const total = Number(fee.amtIncFine);
   const pct = total > 0 ? Math.round((paid / total) * 100) : 0;
 
+  const transactionId = fee.transactionId;
+
   return (
-    <div style={{
-      display:"grid",
-      gridTemplateColumns:"1fr 100px 100px 100px 110px",
-      gap:12, alignItems:"center",
-      padding:"14px 20px",
-      borderBottom:"1px solid #f1f5f9",
-      animation:"fadeUp .4s ease both",
-      animationDelay:`${index * 0.04}s`,
-      transition:"background .15s",
-    }}
-      onMouseEnter={e => e.currentTarget.style.background = "#f8faff"}
-      onMouseLeave={e => e.currentTarget.style.background = "transparent"}
+    <div
+      style={{
+        display: "grid",
+        gridTemplateColumns: "1fr 2fr 100px 100px 100px 110px 100px",
+        gap: 12,
+        alignItems: "center",
+        padding: "14px 20px",
+        borderBottom: "1px solid #f1f5f9",
+        animation: "fadeUp .4s ease both",
+        animationDelay: `${index * 0.04}s`,
+        transition: "background .15s",
+      }}
+      onMouseEnter={(e) =>
+        (e.currentTarget.style.background = "#f8faff")
+      }
+      onMouseLeave={(e) =>
+        (e.currentTarget.style.background = "transparent")
+      }
     >
+
+      {/* Fee Type */}
       <div>
-        <p style={{ margin:0, fontWeight:600, fontSize:13, color:"#0f172a" }}>
+        <p
+          style={{
+            margin: 0,
+            fontWeight: 600,
+            fontSize: 13,
+            color: "#0f172a",
+          }}
+        >
           {feeLabel(fee.typeOfFee)}
         </p>
+
         {Number(fee.fineAmount) > 0 && (
-          <p style={{ margin:"3px 0 0", fontSize:11, color:"#ef4444", display:"flex", alignItems:"center", gap:4 }}>
-            <AlertTriangle size={11} /> Fine: ₹{fmt(fee.fineAmount)}
+          <p
+            style={{
+              margin: "3px 0 0",
+              fontSize: 11,
+              color: "#ef4444",
+              display: "flex",
+              alignItems: "center",
+              gap: 4,
+            }}
+          >
+            <AlertTriangle size={11} />
+            Fine: ₹{fmt(fee.fineAmount)}
           </p>
         )}
       </div>
-      <p style={{ margin:0, fontSize:13, color:"#334155", textAlign:"right", fontWeight:500 }}>₹{fmt(fee.amountToBePaid)}</p>
-      <p style={{ margin:0, fontSize:13, color:"#16a34a", textAlign:"right", fontWeight:500 }}>₹{fmt(fee.amountPaid)}</p>
-      <div style={{ textAlign:"right" }}>
-        <p style={{ margin:0, fontSize:13, color:"#3D7DFC", fontWeight:600 }}>₹{fmt(total - paid)}</p>
-        <div style={{ marginTop:4, height:3, borderRadius:4, background:"#e2e8f0" }}>
-          <div style={{ height:"100%", width:`${pct}%`, background:"#3D7DFC", borderRadius:4, transition:"width .6s ease" }} />
+
+      {/* Transaction ID */}
+      <div style={{ textAlign: "right" }}>
+        <p
+          style={{
+            margin: 0,
+            fontSize: 12,
+            color: "#334155",
+            fontWeight: 500,
+            wordBreak: "break-all",
+          }}
+        >
+          {transactionId || "—"}
+        </p>
+      </div>
+
+      {/* Total */}
+      <p
+        style={{
+          margin: 0,
+          fontSize: 13,
+          color: "#334155",
+          textAlign: "right",
+          fontWeight: 500,
+        }}
+      >
+        ₹{fmt(fee.amtIncFine)}
+      </p>
+
+      {/* Paid */}
+      <p
+        style={{
+          margin: 0,
+          fontSize: 13,
+          color: "#16a34a",
+          textAlign: "right",
+          fontWeight: 500,
+        }}
+      >
+        ₹{fmt(fee.amountPaid)}
+      </p>
+
+      {/* Balance */}
+      <div style={{ textAlign: "right" }}>
+        <p
+          style={{
+            margin: 0,
+            fontSize: 13,
+            color: "#3D7DFC",
+            fontWeight: 600,
+          }}
+        >
+          ₹{fmt(total - paid)}
+        </p>
+
+        <div
+          style={{
+            marginTop: 4,
+            height: 3,
+            borderRadius: 4,
+            background: "#e2e8f0",
+          }}
+        >
+          <div
+            style={{
+              height: "100%",
+              width: `${pct}%`,
+              background: "#3D7DFC",
+              borderRadius: 4,
+              transition: "width .6s ease",
+            }}
+          />
         </div>
       </div>
-      <div style={{ display:"flex", justifyContent:"flex-end" }}>
-        <span style={{
-          fontSize:11, fontWeight:600,
-          padding:"4px 10px", borderRadius:20,
-          background: st.bg, color: st.color,
-          border:`1px solid ${st.border}`,
-          display:"flex", alignItems:"center", gap:5,
-        }}>
-          <span style={{ width:6, height:6, borderRadius:"50%", background: st.dot, display:"inline-block" }} />
+
+      {/* Status */}
+      <div style={{ display: "flex", justifyContent: "flex-end" }}>
+        <span
+          style={{
+            fontSize: 11,
+            fontWeight: 600,
+            padding: "4px 10px",
+            borderRadius: 20,
+            background: st.bg,
+            color: st.color,
+            border: `1px solid ${st.border}`,
+            display: "flex",
+            alignItems: "center",
+            gap: 5,
+          }}
+        >
+          <span
+            style={{
+              width: 6,
+              height: 6,
+              borderRadius: "50%",
+              background: st.dot,
+              display: "inline-block",
+            }}
+          />
           {fee.feeStatus}
         </span>
       </div>
+
+      {/* Receipt / Download */}
+      <div style={{ display: "flex", justifyContent: "right" }}>
+        {transactionId ? (
+         <button
+  onClick={async () => {
+    if (downloadingReceipt === transactionId) return;
+
+    try {
+      setDownloadingReceipt(transactionId);
+      await downloadReceipt(transactionId);
+    } finally {
+      setDownloadingReceipt(null);
+    }
+  }}
+  disabled={downloadingReceipt === transactionId}
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 5,
+              background: "#E9F3FF",
+              color: "#1e4db7",
+              border: "1px solid #bfdbfe",
+              borderRadius: 8,
+              padding: "5px 10px",
+              fontSize: 11,
+              fontWeight: 600,
+              cursor: "pointer",
+              fontFamily: "inherit",
+              whiteSpace: "nowrap",
+            }}
+          >
+            {downloadingReceipt === transactionId ? (
+  <>
+    <Loader2
+      size={12}
+      strokeWidth={2.5}
+      style={{
+        animation: "spin 1s linear infinite",
+      }}
+    />
+  
+  </>
+) : (
+  <>
+    <Download size={12} strokeWidth={2.5} />
+ 
+  </>
+)}
+            
+          </button>
+        ) : (
+          <span style={{ color: "#cbd5e1", fontSize: 11 }}>
+            —
+          </span>
+        )}
+      </div>
+
     </div>
   );
 }
@@ -181,6 +376,7 @@ export default function StudentDashboard() {
   const [lastSync, setLastSync] = useState(null);
     const { user } = useAuth(); // expects user.admissionNo or user.studentAdmissionNumber
   const admissionNo = user.admissionNumber;
+  const [downloadingReceipt, setDownloadingReceipt] = useState(null);
 
   const fetchDashboard = useCallback(async () => {
     setLoading(true);
@@ -531,39 +727,122 @@ if (loading) return (
           </div>
 
           {/* column labels */}
-          <div style={{
-            display:"grid",
-            gridTemplateColumns:"1fr 100px 100px 100px 110px",
-            gap:12, padding:"10px 20px",
-            background:"#f8faff",
-            borderBottom:"1px solid #E9F3FF",
-          }}>
-            {["Fee Type","Total","Paid","Balance","Status"].map((h, i) => (
-              <p key={h} style={{
-                margin:0, fontSize:11, fontWeight:600, color:"#94a3b8",
-                textTransform:"uppercase", letterSpacing:".06em",
-                textAlign: i === 0 ? "left" : "right",
-              }}>{h}</p>
-            ))}
-          </div>
+         {/* column labels */}
+             <div
+               style={{
+                 display: "grid",
+                 gridTemplateColumns: "1fr 2fr 100px 100px 100px 110px 100px",
+                 gap: 12,
+                 padding: "10px 20px",
+                 background: "#f8faff",
+                 borderBottom: "1px solid #E9F3FF",
+               }}
+             >
+               {[
+                 "Fee Type",
+                 "Transaction ID",
+                 "Total",
+                 "Paid",
+                 "Balance",
+                 "Status",
+                 "Receipt",
+               ].map((h, i) => (
+                 <p
+                   key={h}
+                   style={{
+                     margin: 0,
+                     fontSize: 11,
+                     fontWeight: 600,
+                     color: "#94a3b8",
+                     textTransform: "uppercase",
+                     letterSpacing: ".06em",
+                     textAlign: i === 0 ? "left" : "right",
+                   }}
+                 >
+                   {h}
+                 </p>
+               ))}
+             </div>
 
           {/* rows */}
-          {fees.map((fee, i) => <FeeRow key={fee.typeOfFee} fee={fee} index={i} />)}
+          {fees.map((fee, i) => (
+  <FeeRow
+    key={fee.typeOfFee}
+    fee={fee}
+    index={i}
+    downloadingReceipt={downloadingReceipt}
+    setDownloadingReceipt={setDownloadingReceipt}
+  />
+))}
 
           {/* totals footer */}
-          <div style={{
-            display:"grid",
-            gridTemplateColumns:"1fr 100px 100px 100px 110px",
-            gap:12, padding:"16px 20px",
-            background:"linear-gradient(90deg,#E9F3FF 0%,#f0f6ff 100%)",
-            borderTop:"2px solid #D8E4FA",
-          }}>
-            <p style={{ margin:0, fontWeight:700, fontSize:13, color:"#0f172a" }}>Total</p>
-            <p style={{ margin:0, fontWeight:700, fontSize:13, color:"#0f172a", textAlign:"right" }}>₹{fmt(totals.totalAmount)}</p>
-            <p style={{ margin:0, fontWeight:700, fontSize:13, color:"#16a34a", textAlign:"right" }}>₹{fmt(totals.amountPaid)}</p>
-            <p style={{ margin:0, fontWeight:700, fontSize:13, color:"#3D7DFC", textAlign:"right" }}>₹{fmt(totals.balanceIncludingFine)}</p>
-            <div />
-          </div>
+{/* totals footer */}
+<div
+  style={{
+    display: "grid",
+    gridTemplateColumns: "1fr 2fr 100px 100px 100px 110px 100px",
+    gap: 12,
+    padding: "16px 20px",
+    background: "linear-gradient(90deg,#E9F3FF 0%,#f0f6ff 100%)",
+    borderTop: "2px solid #D8E4FA",
+  }}
+>
+  <p
+    style={{
+      margin: 0,
+      fontWeight: 700,
+      fontSize: 13,
+      color: "#0f172a",
+    }}
+  >
+    Total
+  </p>
+
+  {/* Transaction ID column */}
+  <div />
+
+  <p
+    style={{
+      margin: 0,
+      fontWeight: 700,
+      fontSize: 13,
+      color: "#0f172a",
+      textAlign: "right",
+    }}
+  >
+    ₹{fmt(totals.totalAmount)}
+  </p>
+
+  <p
+    style={{
+      margin: 0,
+      fontWeight: 700,
+      fontSize: 13,
+      color: "#16a34a",
+      textAlign: "right",
+    }}
+  >
+    ₹{fmt(totals.amountPaid)}
+  </p>
+
+  <p
+    style={{
+      margin: 0,
+      fontWeight: 700,
+      fontSize: 13,
+      color: "#3D7DFC",
+      textAlign: "right",
+    }}
+  >
+    ₹{fmt(totals.balanceIncludingFine)}
+  </p>
+
+  {/* Status column */}
+  <div />
+
+  {/* Receipt column */}
+  <div />
+</div>
         </div>
 
         {/* footer */}

@@ -13,6 +13,7 @@ import {
   Upload,
   IndianRupee,
   BarChart3,
+  Landmark,
 } from "lucide-react";
 
 const Sidebar = ({ onClose }) => {
@@ -116,6 +117,10 @@ const Sidebar = ({ onClose }) => {
             </NavLink>
 
             <p className={sectionTitle}>FEE Management</p>
+            <NavLink to="/superadmin/fee-dashboard" className={linkClasses} onClick={() => onClose?.()}>
+              <Landmark size={18} />
+              Fee Reports
+            </NavLink>
           
 
             <p className={sectionTitle}>Settings</p>

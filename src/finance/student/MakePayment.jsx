@@ -20,27 +20,9 @@ import {
   Wallet,
   ChevronRight,
 } from "lucide-react";
+import { FEE_LABELS, getFeeLabel } from "./feeLabels";
 
 // ─── constants ───────────────────────────────────────────────────────────────
-
-const FEE_LABELS = {
-  uniformFee: "Uniform Fee",
-  applicationFee: "Application Fee",
-  idCardFee: "ID Card Fee",
-  cautionDeposit: "Caution Deposit",
-  ratificationFee: "Ratification Fee",
-  alumniFee: "Alumni Fee",
-  industrialAndTrainingFee: "Industrial & Training Fee",
-  tuitionFee: "Tuition Fee",
-  bookFee: "Book Fee",
-  affiliationFee: "Affiliation Fee",
-  transportationFee: "Transportation Fee",
-  libraryAndLaboratoryFee: "Library & Laboratory Fee",
-  hostelAndMessFee: "Hostel & Mess Fee",
-      oneOneTuitionFee: "Tuition Fee (SEM I)",
-    oneTwoTuitionFee: "Tuition Fee (SEM II)",
-    uniformAndDrawingFee:"Uniform & Drawing Fee"
-};
 
 const Pass_Fee = (feeName) => {
   switch (feeName) {
@@ -73,20 +55,7 @@ const Pass_Fee = (feeName) => {
       return feeName;
   }
 };
-console.log(Pass_Fee); // Example usage
-const getFeeLabel = (name) => {
-  if (!name) return name;
-  // handle prefixed names like "secondYearTuitionFee"
-  const suffixMatch = name.match(/^(?:first|second|third|fourth)Year(.+)$/i); //
-  if (suffixMatch) {
-    const base = suffixMatch[1].charAt(0).toLowerCase() + suffixMatch[1].slice(1);
-    const prefix = name.match(/^(\w+?)Year/i)[1];
-    const yearMap = { first: "I", second: "II", third: "III", fourth: "4th" };
-    const yr = yearMap[prefix.toLowerCase()] ?? prefix;
-    return `${FEE_LABELS[base] ?? base} (${yr} Year)`;
-  }
-  return FEE_LABELS[name] ?? name;
-};
+
 
 const fmt = (val) =>
   new Intl.NumberFormat("en-IN", {
@@ -582,7 +551,7 @@ export default function PaymentPage() {
       const payload = {
         studentName: pageData.studentName,
         admissionNumber: pageData.admissionNumber,
-        amountToBePaid: selectedFee.amountToBePaid,
+        amountToBePaid: selectedFee.amtIncFine,
         email: pageData.email,
         mobileNumber: pageData.mobileNumber,
         feeName: selectedFee.feeName,

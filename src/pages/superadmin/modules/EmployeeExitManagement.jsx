@@ -67,14 +67,14 @@ const ConfirmModal = ({ emp, exitType, lastWorkingDay, reasonForExit, onConfirm,
 
       <div className="bg-gray-50 rounded-lg px-4 py-3 text-sm text-gray-600 space-y-1.5">
         <div>
-          You are about to initiate the exit process for{" "}
-          <span className="font-semibold text-gray-800">{fullName(emp)}</span> ({emp.empId}).
-        </div>
-        <div className="text-xs text-gray-500 pt-1 space-y-0.5">
-          <div><span className="text-gray-400">Exit type:</span> {exitType}</div>
-          <div><span className="text-gray-400">Last working day:</span> {lastWorkingDay}</div>
-          {reasonForExit && <div><span className="text-gray-400">Reason:</span> {reasonForExit}</div>}
-        </div>
+          You are about to initiate the exit process for{" "}       
+          <span className="font-semibold text-gray-800">{fullName(emp)}</span> ({emp.empId}).       
+        </div>       
+        <div className="text-xs text-gray-500 pt-1 space-y-0.5">       
+          <div><span className="text-gray-400">Exit type:</span> {exitType}</div>       
+          <div><span className="text-gray-400">Last working day:</span> {lastWorkingDay}</div>       
+          {reasonForExit && <div><span className="text-gray-400">Reason:</span> {reasonForExit}</div>}       
+        </div>       
       </div>
 
       <div className="flex gap-3">

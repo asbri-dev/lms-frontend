@@ -19,6 +19,7 @@ import ReportsDashboard from "./pages/superadmin/ReportsDashboard";
 import FeeDashboard from "./pages/superadmin/FeeDashboard";
 
 
+
 import HeadDashboard from "./pages/head/HeadDashboard";
 import AllRequestsPage from "./pages/head/AllRequestsPage";
 
@@ -42,7 +43,7 @@ import FacultyProfile from "./components/profile/Facultyprofile";
 
 import HeadAdminDashboard from "./finance/headadmin/FHAdminDashboard";
 import FacultyAttendanceModule from "./pages/head/FacultyAttendance";
-import HeadAdminApprovals from "./finance/headadmin/HeadAdminApprovalPage";
+import HeadAdminApprovals from "./finance/headadmin/FeeApprove";
 import DueDateSetPage from "./finance/headadmin/DueDateSetPage"
 
 
@@ -56,6 +57,7 @@ import FeeAssignment from "./finance/headadmin/Fee Assignment";
 
 
 
+
 import StudentDashboard from "./finance/student/StudentDashboard";
 import StudentProfile from "./finance/student/StudentProfile";
 import MyFeePage from "./finance/student/MyFeePage";
@@ -63,6 +65,7 @@ import MakePayment from "./finance/student/MakePayment";
 import PaymentReturn  from "./finance/student/PaymentReturn";
 import PaymentSuccess from "./finance/student/PaymentSuccess";
 import PaymentFailure from "./finance/student/PaymentFailure";
+import ErrorPge from "./finance/student/SalaryInitiationErrorPage"
 
 
 
@@ -118,7 +121,8 @@ function App() {
         <Route path="admin-management" element={<AdminManagement />} />
         <Route path="attendance-modifier" element={<AttendanceModifier />} />
         <Route path="report-dashboard"  element={<ReportsDashboard />} />
-        <Route path="fee-dashboard"  element={<FeeDashboard />} />
+         <Route path="fee-dashboard"  element={<FeeDashboard />} />
+        
       </Route>
       
       {/* HEAD */}
@@ -227,6 +231,7 @@ function App() {
         <Route path="payment-return" element={<PaymentReturn />} />
         <Route path="payment/success" element={<PaymentSuccess />} />
         <Route path="payment/failure" element={<PaymentFailure />} />
+        <Route path="error-page" element={<ErrorPge />} />
        
       </Route>  
 
