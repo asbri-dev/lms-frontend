@@ -16,24 +16,9 @@ import {
   BadgeAlert,
   BookOpen,
 } from "lucide-react";
+import { FEE_LABELS } from "./feeLabels";
 
 // ─── helpers ────────────────────────────────────────────────────────────────
-
-const FEE_LABELS = {
-  uniformFee: "Uniform Fee",
-  applicationFee: "Application Fee",
-  idCardFee: "ID Card Fee",
-  cautionDeposit: "Caution Deposit",
-  ratificationFee: "Ratification Fee",
-  alumniFee: "Alumni Fee",
-  industrialAndTrainingFee: "Industrial & Training Fee",
-  tuitionFee: "Tuition Fee",
-  bookFee: "Book Fee",
-  affiliationFee: "Affiliation Fee",
-  transportationFee: "Transportation Fee",
-  libraryAndLaboratoryFee: "Library & Laboratory Fee",
-  hostelAndMessFee: "Hostel & Mess Fee",
-};
 
 const fmt = (val) =>
   new Intl.NumberFormat("en-IN", {
@@ -207,7 +192,7 @@ function FeeTable({ fees }) {
         </thead>
         <tbody>
           {fees.map((fee, idx) => {
-            const balance = Number(fee.amountToBePaid) - Number(fee.amountPaid) - Number(fee.fineAmount);
+            const balance = Number(fee.amtIncFine) - Number(fee.amountPaid);
             const hasFine = Number(fee.fineAmount) > 0;
             return (
               <tr
@@ -233,7 +218,7 @@ function FeeTable({ fees }) {
 
                 {/* Total Amount */}
                 <td className="px-5 py-4 font-semibold" style={{ color: "#0F172A" }}>
-                  {fmt(fee.amountToBePaid)}
+                  {fmt(fee.amtIncFine)}
                 </td>
 
                 {/* Amount Paid */}
@@ -296,7 +281,7 @@ function FeeTable({ fees }) {
               Year Total
             </td>
             <td className="px-5 py-3.5 font-bold" style={{ color: "#0F172A" }}>
-              {fmt(fees.reduce((s, f) => s + Number(f.amountToBePaid), 0))}
+              {fmt(fees.reduce((s, f) => s + Number(f.amtIncFine), 0))}
             </td>
             <td className="px-5 py-3.5 font-bold" style={{ color: "#16a34a" }}>
               {fmt(fees.reduce((s, f) => s + Number(f.amountPaid), 0))}
@@ -368,6 +353,9 @@ export default function MyFeePage() {
   const activeFees = activeKey && data ? data[activeKey] ?? [] : [];
   const activeYear = years.find((y) => y.rawKey === activeKey);
   const totals = calcTotals(activeFees);
+
+
+  
 
   // ── overall totals across ALL years ──
   const grandTotals = data

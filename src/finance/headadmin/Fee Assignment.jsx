@@ -425,7 +425,7 @@ const handleSelectStudent = (student, location) => {
       feeAmount: fee.amountToBePaid,
       location: selectedStudent.location,
       createdBy: user?.employeeId,
-      reason: "Removed by Head Admin",
+      reason: `Removed by Head Admin ${user?.employeeId}`,
     };
 
     try {
