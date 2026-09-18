@@ -66,6 +66,7 @@ import PaymentReturn  from "./finance/student/PaymentReturn";
 import PaymentSuccess from "./finance/student/PaymentSuccess";
 import PaymentFailure from "./finance/student/PaymentFailure";
 import ErrorPge from "./finance/student/SalaryInitiationErrorPage"
+import PaymentTerms from "./finance/student/PaymentTerms";
 
 
 
@@ -232,6 +233,7 @@ function App() {
         <Route path="payment/success" element={<PaymentSuccess />} />
         <Route path="payment/failure" element={<PaymentFailure />} />
         <Route path="error-page" element={<ErrorPge />} />
+        <Route path="payment-terms" element={<PaymentTerms />} />
        
       </Route>  
 
