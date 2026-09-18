@@ -3,9 +3,15 @@ import { useNavigate } from "react-router-dom";
 import { ArrowLeft, LockKeyhole, FileText, ShieldCheck } from "lucide-react";
 
 
-const PaymentTerms = ({ onProceed, onBack }) => {
+const PaymentTerms = ({ onProceed, }) => {
   const [accepted, setAccepted] = useState(false);
   const navigate = useNavigate();
+
+  const onbackClick = () => {
+    
+      navigate("/student/dashboard"); // Navigate to the StudentDashboard page
+    
+  };
 
   const handleProceed = () => {
     
@@ -63,21 +69,18 @@ const PaymentTerms = ({ onProceed, onBack }) => {
                   <span className="absolute -left-4 top-2 h-2 w-2 rounded-full bg-blue-600" />
 
                   If the payment is successful, you will get a payment
-                  confirmation email and Payment Invoice is generated, download the invoice for your reference. You can also check the payment status in the "Fee Page" section of your student dashboard.
+                  confirmation email and Payment Receipt is generated, download the Receipt for your reference. You can also check the payment status in the "Fee Page" section of your student dashboard.
                 </li>
                  <li className="relative pl-3">
                   <span className="absolute -left-4 top-2 h-2 w-2 rounded-full bg-blue-600" />
 
               Please make a note of the Reference/Transaction ID for your records in case of a successful payment.
-.
                 </li>
 
                 <li className="relative pl-3">
                   <span className="absolute -left-4 top-2 h-2 w-2 rounded-full bg-blue-600" />
 
-                  If the transaction has failed for some reasons, you are
-                  requested to wait for three working days before trying
-                  for payment again. Please contact the accounts department
+                  If the transaction has failed for some reasons. Please contact the accounts department
                   for any discrepancy of online fee faced by you with
                   reference to any of your transaction.
                 </li>
@@ -112,8 +115,8 @@ const PaymentTerms = ({ onProceed, onBack }) => {
             {/* Cancellation / Refund Policy */}
             <section>
               <div className="mb-4 flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-orange-50">
-                  <span className="text-2xl text-orange-500">↻</span>
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50">
+                  <span className="text-2xl text-slate-700">↻</span>
                 </div>
 
                 <h2 className="text-xl font-bold text-[#28417B] md:text-2xl">
@@ -145,7 +148,7 @@ const PaymentTerms = ({ onProceed, onBack }) => {
               </div>
 
               <p className="text-sm leading-7 text-slate-700 md:text-base">
-                I fully read and understand the above policy in connection
+                I fully read and understand the above Terms and Conditions in connection
                 with online payment of fees to the college. I shall abide
                 by the terms and conditions in force or modified from time
                 to time pertaining to the online payment to the Institution.
@@ -185,7 +188,7 @@ const PaymentTerms = ({ onProceed, onBack }) => {
             {/* Back */}
             <button
               type="button"
-              onClick={onBack}
+              onClick={onbackClick}
               className="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-300 px-6 py-3 font-medium text-slate-700 transition hover:bg-slate-50"
             >
               <ArrowLeft className="h-5 w-5" />
