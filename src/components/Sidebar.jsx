@@ -300,7 +300,7 @@ const Sidebar = ({ onClose }) => {
               <FileText size={18} />
               Fees Page
             </NavLink>
-            <NavLink to="/student/make-payment" className={linkClasses} onClick={() => onClose?.()}>
+            <NavLink to="/student/payment-terms" className={linkClasses} onClick={() => onClose?.()}>
               <IndianRupee size={18} color="green" />
               Make Payment
             </NavLink>

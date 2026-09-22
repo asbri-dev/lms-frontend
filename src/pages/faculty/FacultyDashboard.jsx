@@ -18,7 +18,8 @@ import casualImg from "../../assets/cl.jpeg";
 import medical from "../../assets/ml.jpeg";
 import pend from "../../assets/pending.jpeg";
 import permission from "../../assets/permisson.jpeg";
-
+import FacultyAnnouncement from "./FacultyAnnouncement";
+import {parse, isBefore } from "date-fns";
 
 
 
@@ -35,6 +36,9 @@ const [selectedMonth, setSelectedMonth] = useState(new Date());
 const [error, setError] = useState("");
 const [todayLeaves, setTodayLeaves] = useState([]);
 const [birthdays, setBirthdays] = useState([]);
+
+const [showAnnouncement, setShowAnnouncement] = useState(false);
+
 
 
   /* ================= FETCH ================= */
@@ -70,9 +74,49 @@ const [birthdays, setBirthdays] = useState([]);
   }
 };
 
-  useEffect(() => {
-    if (user?.employeeId) fetchDashboard();
-  }, [user]);
+
+
+
+   /* ================= CHECK ANNOUNCEMENT ================= */
+  const checkAnnouncement = async () => {
+  try {
+  
+
+    const response = await fetch(
+      `${API_BASE_URL}/faculty/newFeatures?empId=${user.employeeId}`
+    );
+
+    if (!response.ok) {
+      throw new Error("Announcement check failed");
+    }
+
+    const seen = await response.json();
+
+    // Backend returns:
+    // true  = already seen
+    // false = not seen
+
+    if (seen === false) {
+      setShowAnnouncement(true);
+    } else {
+      setShowAnnouncement(false);
+    }
+
+  } catch (error) {
+    console.error("Announcement check failed:", error);
+
+    // Important:
+    // Don't block dashboard if announcement API fails.
+    setShowAnnouncement(false);
+
+  } 
+};
+
+useEffect(() => {
+  if (!user?.employeeId) return;
+
+  checkAnnouncement();
+}, [user?.employeeId]);
 
 
 
@@ -99,8 +143,18 @@ const handleNextMonth = () => {
     const fromDate = format(from, "dd-MMM-yyyy");
     const toDate = format(to, "dd-MMM-yyyy");
 
+    const exportDate = parse(fromDate, "dd-MMM-yyyy", new Date());
+    const cutoffDate = new Date(2026, 8, 1);
+    
+      const apiEndpoint =
+      isBefore(exportDate, cutoffDate)
+        ? `${API_BASE_URL}/attendanceSummary`
+        : `${API_BASE_URL}/attSummary`;
+    
+   
+
     const res = await fetch(
-      `${API_BASE_URL}/attendanceSummary?empId=${user.employeeId}&fromDate=${fromDate}&toDate=${toDate}`
+      `${apiEndpoint}?empId=${user.employeeId}&fromDate=${fromDate}&toDate=${toDate}`
     );
 
     const data = await res.json();
@@ -350,6 +404,9 @@ if (error) {
   );
 }
 
+
+
+
 if (!data) {
   return <div>No data available</div>;
 }
@@ -362,7 +419,15 @@ const mlApplied = data.pendingLeaveList?.filter(l => l.typeOfLeave === "ml").len
 
 const clAvailed = data.approvedLeaveList?.filter(l => l.typeOfLeave === "cl").length ?? 0;
 const mlAvailed = data.approvedLeaveList?.filter(l => l.typeOfLeave === "ml").length ?? 0;
-  return (
+
+    return (
+  <>
+    {showAnnouncement && (
+      <FacultyAnnouncement
+        employeeId={user.employeeId}
+        onCompleted={() => setShowAnnouncement(false)}
+      />
+    )}
     
     <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
 
@@ -520,7 +585,9 @@ const mlAvailed = data.approvedLeaveList?.filter(l => l.typeOfLeave === "ml").le
 </div>
 
     </div>
+    </>
   );
+   
 };
 
 export default FacultyDashboard;
