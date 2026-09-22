@@ -758,7 +758,7 @@ useEffect(() => {
       const fmtFrom = formatDateForApi(from);
       const fmtTo   = formatDateForApi(to);
       const res = await fetch(
-        `${API_BASE_URL}/getAttedanceInfo?empId=${empId}&fromDate=${fmtFrom}&toDate=${fmtTo}`
+        `${API_BASE_URL}/aries/getAttendance?empId=${empId}&fromDate=${fmtFrom}&toDate=${fmtTo}`
       );
       const data = await res.json();
       setRecords(Array.isArray(data) ? data : []);
@@ -869,7 +869,7 @@ useEffect(() => {
   const handleSave = async (payload) => {
     setSavingRow(payload.date);
     try {
-      const res = await fetch(`${API_BASE_URL}/attendanceManualOverride`, {
+      const res = await fetch(`${API_BASE_URL}/attOverride`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
