@@ -6,6 +6,7 @@ import toast from "react-hot-toast";
 import { API_BASE_URL } from "../../config/api";
 
 import DatePicker from "react-datepicker";
+import { parse, isBefore } from "date-fns";
 
 import "react-datepicker/dist/react-datepicker.css";
 import "../../styles/MonthPicker.css";
@@ -236,6 +237,7 @@ const month = useMemo(() => format(monthDate, "yyyy-MM"), [monthDate]);
   const [loading, setLoading]     = useState(false);
   const [error, setError]         = useState(null);
 
+
   const token = sessionStorage.getItem("authToken");
 
   /* ─── Month Range ─── */
@@ -321,8 +323,16 @@ useEffect(() => {
   const exportAttendanceExcel = async (fromdate, todate, location) => {
   try {
     setExporting(true);
-    const response = await fetch(
-      `${API_BASE_URL}/downloadAttendanceMusterExcel?fromDate=${fromdate}&toDate=${todate}&collegeLocation=${location}`,
+const exportDate = parse(fromdate, "dd-MMM-yyyy", new Date());
+const cutoffDate = new Date(2026, 8, 1);
+
+  const apiEndpoint =
+  isBefore(exportDate, cutoffDate)
+    ? `${API_BASE_URL}/downloadAttendanceMusterExcel`
+    : `${API_BASE_URL}/attendanceMusterExcel`;
+
+     const response = await fetch(
+      `${apiEndpoint}?fromDate=${fromdate}&toDate=${todate}&collegeLocation=${location}`,
       {
         headers: {
           Authorization: `Bearer ${token}`,

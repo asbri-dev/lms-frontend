@@ -51,71 +51,72 @@ const AttendanceInfo = ({ employeeId }) => {
     }, 400);
   };
 
-  const fetchAttendance = useCallback(async () => {
+const fetchAttendance = useCallback(async () => {
+  if (!empId) return;
+  if (loading) return;
 
-    if (!empId) return;
-    if (loading) return;
+  try {
+    setLoading(true);
+    setError("");
+
+    const { fromDate, toDate } = getMonthRange(currentMonth);
+
+    // August 2026 and before -> old API
+    // September 2026 onwards -> new API
+    const cutoffDate = new Date(2026, 8, 1); // September 1, 2026
+
+    const apiEndpoint =
+      currentMonth < cutoffDate
+        ? `${API_BASE_URL}/getAttedanceInfo`
+        : `${API_BASE_URL}/aries/getAttendance`;
+
+    const response = await fetch(
+      `${apiEndpoint}?empId=${empId}&fromDate=${fromDate}&toDate=${toDate}`
+    );
+
+    let data = null;
 
     try {
-
-      setLoading(true);
-      setError("");
-
-      const { fromDate, toDate } = getMonthRange(currentMonth);
-
-      const response = await fetch(
-        `${API_BASE_URL}/getAttedanceInfo?empId=${empId}&fromDate=${fromDate}&toDate=${toDate}`
-      );
-
-      let data = null;
-
-      try {
-        data = await response.json();
-      } catch {
-        data = null;
-      }
-
-      if (response.status >= 500) {
-        setError("Server error. Please try again later.");
-        return;
-      }
-
-      if (!response.ok) {
-        setError(data?.message || "Failed to load attendance.");
-        return;
-      }
-
-      const transformed = transformAttendanceData(data);
-
-      setEvents(transformed);
-
-      const map = {};
-      transformed.forEach((e) => {
-        map[e.start] = e.extendedProps;
-      });
-
-      setEventMap(map);
-
-      if (transformed.length > 0) {
-        setSelectedDate(transformed[0].date);
-        setSelectedDetails(transformed[0].extendedProps);
-      } else {
-        setSelectedDate(null);
-        setSelectedDetails(null);
-      }
-
+      data = await response.json();
     } catch {
-
-      setError("Network error. Please check your connection.");
-
-    } finally {
-
-      setLoading(false);
-
+      data = null;
     }
 
-  }, [currentMonth, empId]);
+    if (response.status >= 500) {
+      setError("Server error. Please try again later.");
+      return;
+    }
 
+    if (!response.ok) {
+      setError(data?.message || "Failed to load attendance.");
+      return;
+    }
+
+    const transformed = transformAttendanceData(data);
+
+    setEvents(transformed);
+
+    const map = {};
+
+    transformed.forEach((e) => {
+      map[e.start] = e.extendedProps;
+    });
+
+    setEventMap(map);
+
+    if (transformed.length > 0) {
+      setSelectedDate(transformed[0].start);
+      setSelectedDetails(transformed[0].extendedProps);
+    } else {
+      setSelectedDate(null);
+      setSelectedDetails(null);
+    }
+  } catch {
+    setError("Network error. Please check your connection.");
+  } finally {
+    setLoading(false);
+  }
+}, [currentMonth, empId]);
   useEffect(() => {
     fetchAttendance(); 
   }, [fetchAttendance]);
@@ -130,9 +131,7 @@ const AttendanceInfo = ({ employeeId }) => {
 
       default:
         return status.charAt(0).toUpperCase() + status.slice(1);
-  
-
-    } 
+      } 
   }
 
 return (
@@ -211,11 +210,52 @@ return (
           </div>
         )}
 
-        {error && (
-          <div className="text-red-500 text-center py-4 text-sm">
-            {error}
-          </div>
-        )}
+{error && (
+  <div className="flex flex-col items-center justify-center py-8 px-4 text-center">
+    <div className="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center mb-3">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        className="h-6 w-6 text-red-500"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+        strokeWidth={2}
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+        />
+      </svg>
+    </div>
+
+    <p className="text-sm font-medium text-gray-800 mb-1">
+      Something went wrong
+    </p>
+    <p className="text-xs sm:text-sm text-gray-500 mb-4 max-w-xs">
+      {error}
+    </p>
+
+    <button
+      onClick={fetchAttendance}
+      disabled={loading}
+      className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#2b3c6b] text-white text-xs sm:text-sm font-medium
+                 hover:bg-[#3f548f] active:scale-95 transition-all disabled:opacity-50"
+    >
+      {loading ? (
+        <>
+          <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+          </svg>
+          Retrying...
+        </>
+      ) : (
+        "Try Again"
+      )}
+    </button>
+  </div>
+)}
 
         <div className="attendance-calendar overflow-x-auto">
           {mounted ? (
@@ -244,9 +284,9 @@ return (
 
                 return (
                   <div className="relative w-full h-full flex items-center justify-center py-0.5">
-                    <span className="text-[10px] sm:text-xs font-semibold text-gray-700">
-                      {label}
-                    </span>
+                    <span className="text-[10px] sm:text-xs font-bold text-gray-700">
+                     {label}
+                   </span>
 
                     {isPresentOverride && (
                       <SquarePen
@@ -409,6 +449,43 @@ return (
                 </div>
               </div>
             </div>
+
+
+            {/* SWIPE DETAILS */}
+<div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
+  <div className="flex items-center justify-between mb-3">
+    <h4 className="font-semibold text-gray-700 text-sm sm:text-base">
+      Swipe Details
+    </h4>
+
+    <span className="text-[10px] sm:text-xs font-medium px-2 py-1 rounded-full bg-gray-100 text-gray-500">
+      {selectedDetails.details.swipes?.length || 0} Swipes
+    </span>
+  </div>
+
+  {selectedDetails.details.swipes?.length > 0 ? (
+    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+      {selectedDetails.details.swipes.map((swipe, index) => (
+        <div
+          key={`${swipe}-${index}`}
+          className="bg-gray-50 rounded-xl px-3 py-2"
+        >
+          <p className="text-[10px] sm:text-xs text-gray-400 font-medium">
+            Swipe {index + 1}
+          </p>
+
+          <p className="text-sm text-gray-700 font-semibold">
+            {swipe}
+          </p>
+        </div>
+      ))}
+    </div>
+  ) : (
+    <div className="text-xs sm:text-sm text-gray-400 text-center py-3">
+      No swipe details available
+    </div>
+  )}
+</div>
 
             {/* ADJUSTMENTS */}
             <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100">

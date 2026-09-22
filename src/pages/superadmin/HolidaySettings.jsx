@@ -49,6 +49,7 @@ const HolidayPage = () => {
   const [formData, setFormData] = useState({
     fromDate: "",
     toDate: "",
+    session: "3",
     holidayType: "",
     holidayDescription: "",
   });
@@ -172,6 +173,7 @@ const HolidayPage = () => {
           holidayForm: formattedFrom,
           holidayTo: formattedTo,
           noOfDays: String(noOfDays),
+          session: Number(formData.session),
           holidayType: formData.holidayType,
           holidayLocation: location,
           holidayDescription: formData.holidayDescription,
@@ -187,6 +189,7 @@ const HolidayPage = () => {
       setFormData({
         fromDate: "",
         toDate: "",
+        session: "3",
         holidayType: "",
         holidayDescription: "",
       });
@@ -252,6 +255,7 @@ const HolidayPage = () => {
     setFormData({
       fromDate: "",
       toDate: "",
+      session: "3",
       holidayType: "",
       holidayDescription: "",
     });
@@ -550,6 +554,28 @@ const HolidayPage = () => {
                   )}
                 </div>
               </div>
+              <div>
+               <label className="block text-xs font-medium text-gray-500 mb-1.5">
+                 Session
+               </label>
+             
+               <select
+                 value={formData.session}
+                 onChange={(e) =>
+                   setFormData({
+                     ...formData,
+                     session: e.target.value,
+                   })
+                 }
+                 className="w-full px-3 py-2 rounded-lg bg-gray-50 border border-gray-200 text-sm
+                            focus:outline-none focus:ring-2 focus:ring-[#2b3c6b]/30 cursor-pointer"
+               > 
+                 <option value="3">Full Day</option>
+                 <option value="1">First Half</option>
+                 <option value="2">Second Half</option>
+                 
+               </select>
+             </div>
 
               <div>
                 <label className="block text-xs font-medium text-gray-500 mb-1.5">
