@@ -374,6 +374,26 @@ return (
                  </span>
                </div>
               )} 
+              {selectedDetails.details.workedReason && (
+               <div className="flex items-center gap-2 text-gray-500 text-xs sm:text-sm mt-2">
+                 <NotepadText  size={14} className="text-gray-400" />
+                 <span>Worked For:</span>
+                 <span className="font-medium text-gray-700">
+                   {selectedDetails.details.workedReason}
+
+                 </span>
+               </div>
+              )} 
+               {selectedDetails.details.availedReason && (
+               <div className="flex items-center gap-2 text-gray-500 text-xs sm:text-sm mt-2">
+                 <NotepadText  size={14} className="text-gray-400" />
+                 <span>Availed For:</span>
+                 <span className="font-medium text-gray-700">
+                   {selectedDetails.details.availedReason}
+
+                 </span>
+               </div>
+              )} 
                {selectedDetails.details.holidayReason && (
                <div className="flex items-center gap-2 text-gray-500 text-xs sm:text-sm mt-2">
                  <Briefcase size={14} className="text-blue-400" />

@@ -55,6 +55,7 @@ export const STATUS_MAP = {
   "Holiday:Present":       { label: "H/P",             color: "#0ea5e9", type: "Holiday/Present" },
   "Absent:Holiday":        { label: "A/H",             color: "#F3B7A5", type: "Absent/Holiday"  },
   "Holiday:Absent":        { label: "H/A",             color: "#F3B7A5", type: "Holiday/Absent"  },
+  "CO":                    { label: "CO",              color: "#CAD5CA", type: "Leave"  },
 
 };
 
@@ -123,10 +124,13 @@ export const transformAttendanceData = (data = []) => {
   earlyOut:     details.earlyOut || "-",
 
   // Reasons
-  reason:       details.ReasonForOverride,
+  reason:       details.reasonForOverride,
   leaveReason:  details.reason || details.reasonForLeave || details.reasonForOd,
   permissionReason: details.reasonForPermission,
   holidayReason: details.reasonForHoliday,
+  workedReason: details.workedReason,
+  availedReason:  details.availedReason
+
 },
     },
   };
