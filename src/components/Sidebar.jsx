@@ -235,6 +235,10 @@ const Sidebar = ({ onClose }) => {
               <ClipboardCheck size={18} />
               Apply OD
             </NavLink>
+            <NavLink to="/faculty/apply-comp-off" className={linkClasses} onClick={() => onClose?.()}>
+              <ClipboardCheck size={18} />
+              Apply Comp Off
+            </NavLink>
           </>
         )}
 
@@ -257,6 +261,10 @@ const Sidebar = ({ onClose }) => {
             <NavLink to="/headadmin/fee-assignment" className={linkClasses} onClick={() => onClose?.()}>
               <IndianRupee size={18} />
               Fee Assignment
+            </NavLink>
+            <NavLink to="/headadmin/od-form" className={linkClasses} onClick={() => onClose?.()}>
+              <ClipboardCheck size={18} />
+              OD Form Upload
             </NavLink>
           </>
         )}

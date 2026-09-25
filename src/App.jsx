@@ -39,12 +39,14 @@ import AttendanceInfo from "./pages/faculty/AttendanceInfo";
 import ApplyPermission from "./pages/faculty/ApplyPermission";
 import ApplyOd from "./pages/faculty/ApplyOd";
 import FacultyProfile from "./components/profile/Facultyprofile";
+import ApplyCompOff from "./pages/faculty/ApplyCompOff";
 
 
 import HeadAdminDashboard from "./finance/headadmin/FHAdminDashboard";
 import FacultyAttendanceModule from "./pages/head/FacultyAttendance";
 import HeadAdminApprovals from "./finance/headadmin/FeeApprove";
 import DueDateSetPage from "./finance/headadmin/DueDateSetPage"
+import OdForm from "./finance/headadmin/OdForm";
 
 
 
@@ -181,6 +183,7 @@ function App() {
   <Route path="apply-permission" element={<ApplyPermission />} />
   <Route path="apply-od" element={<ApplyOd />} />
   <Route path="profile" element={<FacultyProfile />} />
+  <Route path="apply-comp-off" element={<ApplyCompOff />} />
 </Route>
 
       {/* FINANCE */} 
@@ -199,6 +202,7 @@ function App() {
         <Route path="fee-approvals" element={<HeadAdminApprovals />} />
         <Route path="due-date" element={<DueDateSetPage/>}/>
         <Route path="fee-assignment" element={<FeeAssignment/>}/>
+        <Route path="od-form" element={<OdForm />} />
       </Route>
       
       {/* FINANCE ADMIN */}

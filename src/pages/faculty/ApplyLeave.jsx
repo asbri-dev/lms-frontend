@@ -77,10 +77,10 @@ const checkLeaveBalance = useCallback(() => {
   const clBalance = leaveBalance.cl-leaveBalance.casualLeaves || 0;
   const mlBalance = leaveBalance.ml-leaveBalance.medicalLeaves || 0;
   if(noOfDays > clBalance&& typeOfLeave === "cl") {
-    return "All available Casual Leaves already applied.";
+    return "You have applied  for more than available leaves.";
   }
  if(noOfDays >mlBalance && typeOfLeave === "ml") {
-    return "All available Medical Leaves already applied.";
+    return "You have applied  for more than available leaves.";
   }
   if (typeOfLeave === "cl" && leaveBalance.cl <= 0) {
     return "No Casual Leave balance available";
