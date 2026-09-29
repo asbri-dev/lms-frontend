@@ -8,6 +8,8 @@ import {
   User,
   Plus,
   Trash2,
+  Download,
+  
   RefreshCw,
   AlertCircle,
   Inbox,
@@ -129,6 +131,72 @@ const YEAR_LABELS = {
   firstYear: "First Year",
   secondYear: "Second Year",
   thirdYear: "Third Year",
+};
+
+
+
+const downloadReceipt = async (transactionId) => {
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/downloadPaymentInvoice?txnId=${encodeURIComponent(transactionId)}`
+    );
+
+    if (!response.ok) {
+      throw new Error("Failed to download receipt");
+    }
+
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `Receipt_${transactionId}.pdf`;
+
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    window.URL.revokeObjectURL(url);
+
+    toast.success("Receipt downloaded successfully");
+  } catch (error) {
+    console.error("Transaction receipt download error:", error);
+    toast.error("Failed to download receipt");
+  }
+};
+
+
+const downloadReceiptByPath = async (recieptPath) => {
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/api/fee-reciepts/file?path=${(recieptPath)}`
+    );
+
+    if (!response.ok) {
+      throw new Error("Failed to download receipt");
+    }
+
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+    link.href = url;
+
+   // const fileName = recieptPath.split("/").pop() || "Fee_Receipt";
+
+    link.download = `Receipt.jpeg`;
+
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    window.URL.revokeObjectURL(url);
+
+    toast.success("Receipt downloaded successfully");
+  } catch (error) {
+    console.error("Receipt path download error:", error);
+    toast.error("Failed to download receipt");
+  }
 };
 
 /* ============================================================
@@ -571,9 +639,9 @@ const handleSelectStudent = (student, location) => {
                     className="w-full flex items-center justify-between px-4 py-3 text-white hover:bg-white/10 transition"
                   >
                    <span className="flex items-center gap-2 text-sm font-semibold text-orange-600">
-  <MapPin size={13} className="text-orange-500" />
-  {location}
-</span>
+                     <MapPin size={13} className="text-orange-500" />
+                     {location}
+                   </span>
                     {expandedLocations[location]
                       ? <ChevronDown size={15} className="text-white/70" />
                       : <ChevronRight size={15} className="text-white/70" />}
@@ -792,10 +860,18 @@ const handleSelectStudent = (student, location) => {
    ============================================================ */
 function AcademicYearSection({ group, removingKey, onRemove }) {
   const [open, setOpen] = useState(true);
-  const groupTotal = group.fees.reduce((s, f) => s + (Number(f.amountToBePaid) || 0), 0);
+  const [downloadingReceipt, setDownloadingReceipt] = useState(null);
+
+  const groupTotal = group.fees.reduce(
+    (s, f) => s + (Number(f.amountToBePaid) || 0),
+    0
+  );
 
   return (
-    <div className="rounded-2xl bg-white shadow-sm overflow-hidden" style={{ border: `1px solid ${THEME.mid}` }}>
+    <div
+      className="rounded-2xl bg-white shadow-sm overflow-hidden"
+      style={{ border: `1px solid ${THEME.mid}` }}
+    >
       {/* section header */}
       <button
         onClick={() => setOpen((v) => !v)}
@@ -805,22 +881,34 @@ function AcademicYearSection({ group, removingKey, onRemove }) {
         <div className="flex items-center gap-3">
           <div
             className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0"
-            style={{ background: `linear-gradient(135deg, ${THEME.primary}, #f97316)` }}
+            style={{
+              background: `linear-gradient(135deg, ${THEME.primary}, #f97316)`,
+            }}
           >
             {group.num}
           </div>
+
           <div>
-            <p className="text-sm font-semibold text-slate-800">{group.label}</p>
-            <p className="text-xs text-slate-400">{group.fees.length} fee{group.fees.length !== 1 ? "s" : ""} · {fmt(groupTotal)}</p>
+            <p className="text-sm font-semibold text-slate-800">
+              {group.label}
+            </p>
+
+            <p className="text-xs text-slate-400">
+              {group.fees.length} fee
+              {group.fees.length !== 1 ? "s" : ""} · {fmt(groupTotal)}
+            </p>
           </div>
         </div>
-        {open
-          ? <ChevronDown size={16} className="text-slate-400" />
-          : <ChevronRight size={16} className="text-slate-400" />}
+
+        {open ? (
+          <ChevronDown size={16} className="text-slate-400" />
+        ) : (
+          <ChevronRight size={16} className="text-slate-400" />
+        )}
       </button>
 
-      {open && (
-        group.fees.length === 0 ? (
+      {open &&
+        (group.fees.length === 0 ? (
           <div className="px-5 py-6 text-center text-slate-400 text-sm">
             <Inbox size={20} className="mx-auto mb-1" />
             No fees in this year
@@ -830,52 +918,132 @@ function AcademicYearSection({ group, removingKey, onRemove }) {
             {group.fees.map((fee) => {
               const rKey = `${group.key}::${fee.typeOfFee}`;
               const isRemoving = removingKey === rKey;
+
               const { bg, fg, Icon } = statusStyle(fee.feeStatus);
+
+              const transactionId = fee.transactionId;
+              const recieptPath = fee.recieptPath;
+
+              const downloadKey = transactionId || recieptPath;
+
+              const isDownloading =
+                downloadingReceipt === downloadKey;
+
               return (
                 <li
                   key={fee.typeOfFee}
                   className="flex items-center justify-between gap-4 px-5 py-4 hover:bg-orange-50/30 transition"
-                  style={{ opacity: fee.__optimistic ? 0.55 : 1 }}
+                  style={{
+                    opacity: fee.__optimistic ? 0.55 : 1,
+                  }}
                 >
+                  {/* Fee information */}
                   <div className="min-w-0">
                     <p className="text-sm font-medium text-slate-800">
                       {humanizeFeeName(fee.typeOfFee)}
                     </p>
+
                     <div className="flex flex-wrap gap-x-3 gap-y-0.5 mt-1 text-xs text-slate-500">
-                      <span>To pay: <span className="font-semibold text-slate-700">{fmt(fee.amountToBePaid)}</span></span>
-                      <span>Paid: {fmt(fee.amountPaid)}</span>
+                      <span>
+                        To pay:{" "}
+                        <span className="font-semibold text-slate-700">
+                          {fmt(fee.amountToBePaid)}
+                        </span>
+                      </span>
+
+                      <span>
+                        Paid: {fmt(fee.amountPaid)}
+                      </span>
+
                       {Number(fee.fineAmount) > 0 && (
-                        <span className="text-red-500">Fine: {fmt(fee.fineAmount)}</span>
+                        <span className="text-red-500">
+                          Fine: {fmt(fee.fineAmount)}
+                        </span>
                       )}
-                      <span>Due: {fmtDate(fee.dueDate)}</span>
+
+                      <span>
+                        Due: {fmtDate(fee.dueDate)}
+                      </span>
                     </div>
                   </div>
 
+                  {/* Actions */}
                   <div className="flex items-center gap-2 shrink-0">
+
+                    {/* Status */}
                     <span
                       className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium"
-                      style={{ background: bg, color: fg }}
+                      style={{
+                        background: bg,
+                        color: fg,
+                      }}
                     >
                       <Icon size={11} />
                       {fee.feeStatus || "Unpaid"}
                     </span>
+
+                    {/* DOWNLOAD */}
+                    {downloadKey && downloadKey !== "NA" && (
+                      <button
+                        onClick={async () => {
+                          if (isDownloading) return;
+
+                          try {
+                            setDownloadingReceipt(downloadKey);
+
+                            if (transactionId) {
+                              // Transaction ID → old receipt API
+                              await downloadReceipt(transactionId);
+                            } else if (
+                              recieptPath &&
+                              recieptPath !== "NA"
+                            ) {
+                              // Receipt path → new receipt API
+                              await downloadReceiptByPath(
+                                recieptPath
+                              );
+                            }
+                          } finally {
+                            setDownloadingReceipt(null);
+                          }
+                        }}
+                        disabled={isDownloading}
+                        title="Download receipt"
+                        className="p-2 rounded-full text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition disabled:opacity-50"
+                      >
+                        {isDownloading ? (
+                          <Loader2
+                            size={14}
+                            className="animate-spin"
+                          />
+                        ) : (
+                          <Download size={14} />
+                        )}
+                      </button>
+                    )}
+
+                    {/* REMOVE */}
                     <button
                       onClick={() => onRemove(group.key, fee)}
                       disabled={isRemoving}
                       title="Remove fee"
                       className="p-2 rounded-full text-slate-400 hover:text-red-500 hover:bg-red-50 transition disabled:opacity-50"
                     >
-                      {isRemoving
-                        ? <Loader2 size={14} className="animate-spin" />
-                        : <Trash2 size={14} />}
+                      {isRemoving ? (
+                        <Loader2
+                          size={14}
+                          className="animate-spin"
+                        />
+                      ) : (
+                        <Trash2 size={14} />
+                      )}
                     </button>
                   </div>
                 </li>
               );
             })}
           </ul>
-        )
-      )}
+        ))}
     </div>
   );
 }
