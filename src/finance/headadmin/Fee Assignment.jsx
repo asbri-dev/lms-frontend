@@ -6,6 +6,7 @@ import {
   MapPin,
   GraduationCap,
   User,
+  Upload,
   Plus,
   Trash2,
   Download,
@@ -239,6 +240,13 @@ const [waiveFeeLabel, setWaiveFeeLabel] = useState("Merit"); // or whatever defa
 const [waiveAmount, setWaiveAmount] = useState("");
 const [waiveSubmitting, setWaiveSubmitting] = useState(false);
 
+
+/* ====================== upload receipt ====================== */
+const [showUploadForm, setShowUploadForm] = useState(false);
+const [uploadFeeType, setUploadFeeType] = useState("");
+const [uploadFile, setUploadFile] = useState(null);
+const [uploadSubmitting, setUploadSubmitting] = useState(false);
+
   /* ---- fetch directory ---- */
   const loadDirectory = useCallback(async () => {
     setDirLoading(true);
@@ -302,6 +310,9 @@ const handleSelectStudent = (student, location) => {
   setFeeStructure(null);   // ← already there ✓ — just confirming this stays
   setFeeError(null);       // ← ADD THIS: clear any previous error banner
   loadFeeStructure(student.admissionNo);
+   setShowUploadForm(false);
+  setUploadFile(null);
+   setUploadFeeType("");
 };
 
  //  const handleWaiveFeeTypeChange = (e) => {
@@ -341,6 +352,37 @@ const handleSelectStudent = (student, location) => {
   }
 };
 
+
+const handleUploadReceipt = async (e) => {
+  e.preventDefault();
+  if (!selectedStudent) return;
+  if (!uploadFeeType) return toast.error("Select a fee type");
+  if (!uploadFile) return toast.error("Choose a receipt file");
+
+  const formData = new FormData();
+  formData.append("receipt", uploadFile);
+  formData.append("studentId", selectedStudent.admissionNo);
+  formData.append("feeType", uploadFeeType);
+
+  setUploadSubmitting(true);
+  try {
+    // Do NOT set Content-Type — the browser adds the multipart boundary itself
+    const res = await fetch(`${API_BASE_URL}/api/fee-reciepts/upload`, {
+      method: "POST",
+      body: formData,
+    });
+    if (!res.ok) throw new Error(`Failed (${res.status})`);
+    toast.success("Receipt uploaded successfully");
+    setShowUploadForm(false);
+    setUploadFeeType("");
+    setUploadFile(null);
+    loadFeeStructure(selectedStudent.admissionNo); // refresh so download icon appears
+  } catch (err) {
+    toast.error(err.message || "Failed to upload receipt");
+  } finally {
+    setUploadSubmitting(false);
+  }
+};
   /* ---- derived: academic year groups sorted by year number ---- */
   const academicYearGroups = useMemo(() => {
     if (!feeStructure) return [];
@@ -348,6 +390,18 @@ const handleSelectStudent = (student, location) => {
       .map(([key, fees]) => ({ key, fees: fees || [], ...parseAcademicYearKey(key) }))
       .sort((a, b) => a.num - b.num);
   }, [feeStructure]);
+
+  /* ---- receipt fee types for selected student's existing fees ---- */
+const studentFeeTypes = useMemo(
+  () => [
+    ...new Set(
+      academicYearGroups.flatMap((group) =>
+        group.fees.map((fee) => fee.typeOfFee)
+      )
+    ),
+  ],
+  [academicYearGroups]
+);
 
   /* ---- derived: totals across all groups ---- */
   const totals = useMemo(() => {
@@ -749,6 +803,18 @@ const handleSelectStudent = (student, location) => {
                     </span>
                   </div>
                 </div>
+                <div className="flex flex-wrap items-center gap-2">
+  {/* Upload Receipt */}
+  <button
+    onClick={() => setShowUploadForm((v) => !v)}
+    className="inline-flex items-center gap-1.5 text-sm font-semibold px-5 py-2.5 rounded-full text-white shadow transition hover:brightness-95"
+    style={{ background: "linear-gradient(90deg, #16a34a, #22c55e)" }}
+  >
+    {showUploadForm ? <X size={15} /> : <Upload size={15} />}
+    {showUploadForm ? "Cancel" : "Upload Receipt"}
+  </button>
+
+
                   <button
                   onClick={() => setShowWaiveForm((v) => !v)}
                   className="inline-flex items-center gap-1.5 text-sm font-semibold px-5 py-2.5 rounded-full text-white shadow ..."
@@ -766,6 +832,9 @@ const handleSelectStudent = (student, location) => {
                   {showAddForm ? <X size={15} /> : <Plus size={15} />}
                   {showAddForm ? "Cancel" : "Add Fee"}
                 </button>
+                  {/* existing Waive Off button */}
+  {/* existing Add Fee button */}
+</div>
 
               </div>
 
@@ -791,6 +860,20 @@ const handleSelectStudent = (student, location) => {
     onSubmit={handleWaiveOff}
     onCancel={() => { setShowWaiveForm(false); /* reset */ }}
     submitting={waiveSubmitting}
+  />
+)}
+
+
+{showUploadForm && (
+  <UploadReceiptForm
+    feeTypes={studentFeeTypes}
+    uploadFeeType={uploadFeeType}
+    setUploadFeeType={setUploadFeeType}
+    uploadFile={uploadFile}
+    setUploadFile={setUploadFile}
+    onSubmit={handleUploadReceipt}
+    onCancel={() => { setShowUploadForm(false); setUploadFile(null); setUploadFeeType(""); }}
+    submitting={uploadSubmitting}
   />
 )}
 
@@ -1268,6 +1351,71 @@ function WaiveOffForm({
         >
           {submitting ? <Loader2 size={14} className="animate-spin" /> : <CheckCircle2 size={14} />}
           {submitting ? "Waiving…" : "Waive Off"}
+        </button>
+      </div>
+    </form>
+  );
+}
+
+
+function UploadReceiptForm({
+  feeTypes, uploadFeeType, setUploadFeeType,
+  setUploadFile, onSubmit, onCancel, submitting,
+}) {
+  return (
+    <form
+      onSubmit={onSubmit}
+      className="fee-fade rounded-2xl bg-white shadow-sm p-5"
+      style={{ border: `1.5px solid ${THEME.mid}` }}
+    >
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-sm font-semibold text-slate-800 flex items-center gap-2">
+          <Upload size={15} style={{ color: THEME.primary }} />
+          Upload Receipt
+        </h3>
+        <button type="button" onClick={onCancel} className="text-slate-400 hover:text-slate-600">
+          <X size={15} />
+        </button>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label className="text-xs font-semibold text-slate-500 mb-1 block">Fee Type</label>
+          <select
+            value={uploadFeeType}
+            onChange={(e) => setUploadFeeType(e.target.value)}
+            className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none focus:border-orange-400 transition"
+            required
+          >
+            <option value="">Select fee type…</option>
+            {feeTypes.map((ft) => (
+              <option key={ft} value={ft}>{humanizeFeeName(ft)}</option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label className="text-xs font-semibold text-slate-500 mb-1 block">Receipt File</label>
+          <input
+            type="file"
+            accept="image/*,application/pdf"
+            onChange={(e) => setUploadFile(e.target.files?.[0] || null)}
+            className="w-full text-sm text-slate-600 file:mr-3 file:px-3 file:py-2 file:rounded-lg file:border-0 file:bg-orange-50 file:text-orange-600 file:font-semibold"
+            required
+          />
+        </div>
+      </div>
+
+      <div className="flex justify-end gap-2 mt-5">
+        <button type="button" onClick={onCancel}
+          className="px-4 py-2 rounded-full text-sm font-medium text-slate-500 hover:bg-slate-100 transition">
+          Cancel
+        </button>
+        <button type="submit" disabled={submitting}
+          className="inline-flex items-center gap-1.5 px-5 py-2 rounded-full text-sm font-semibold text-white shadow transition hover:brightness-95 disabled:opacity-60"
+          style={{ background: `linear-gradient(90deg, ${THEME.primary}, #f97316)` }}>
+          {submitting ? <Loader2 size={14} className="animate-spin" /> : <Upload size={14} />}
+          {submitting ? "Uploading…" : "Upload"}
         </button>
       </div>
     </form>

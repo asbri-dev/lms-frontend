@@ -152,7 +152,7 @@ const formatDate = (val) => {
     );
 
     setForm({
-      collegeLocation: "",
+      collegeLocation: empId,
       workedDate: "",
       workedReason: "",
       availedDate: "",
@@ -382,7 +382,7 @@ const formatDate = (val) => {
           <button
             onClick={() => {
               setForm({
-                collegeLocation: "",
+                collegeLocation: empId,
                 workedDate: "",
                 workedReason: "",
                 availedDate: "",

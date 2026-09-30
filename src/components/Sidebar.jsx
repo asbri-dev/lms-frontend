@@ -198,6 +198,10 @@ const Sidebar = ({ onClose }) => {
               <ClipboardCheck size={18} />
               Permission Approvals
             </NavLink>
+            {/* <NavLink to="/admin/comp-off-approvals" className={linkClasses} onClick={() => onClose?.()}>
+              <ClipboardCheck size={18} />
+              Comp Off Approvals
+            </NavLink> */}
           </>
         )}
 
@@ -235,10 +239,10 @@ const Sidebar = ({ onClose }) => {
               <ClipboardCheck size={18} />
               Apply OD
             </NavLink>
-            <NavLink to="/faculty/apply-comp-off" className={linkClasses} onClick={() => onClose?.()}>
+            {/* <NavLink to="/faculty/apply-comp-off" className={linkClasses} onClick={() => onClose?.()}>
               <ClipboardCheck size={18} />
               Apply Comp Off
-            </NavLink>
+            </NavLink> */}
           </>
         )}
 

@@ -55,6 +55,8 @@ export const STATUS_MAP = {
   "Holiday:Present":       { label: "H/P",             color: "#0ea5e9", type: "Holiday/Present" },
   "Absent:Holiday":        { label: "A/H",             color: "#F3B7A5", type: "Absent/Holiday"  },
   "Holiday:Absent":        { label: "H/A",             color: "#F3B7A5", type: "Holiday/Absent"  },
+  "Absent(O):Present":     { label: "A/P",             color: "#FBA39D", type: "Absent/Present" },
+  "Present:Absent(O)":     { label: "P/A",             color: "#D7FDF0", type: "Present/Absent" },
   "CO":                    { label: "CO",              color: "#CAD5CA", type: "Leave"  },
 
 };

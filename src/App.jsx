@@ -30,6 +30,7 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import LeaveApprovals from "./pages/admin/LeaveApprovals";
 import  UserManagement  from "./pages/admin/UserManagement";
 import FacultyAttendance from "./pages/admin/FacultyAttendance";
+import CompOffApprovals from "./pages/admin/CompOffApprovals";
 
 
 import FacultyDashboard from "./pages/faculty/FacultyDashboard";
@@ -165,6 +166,7 @@ function App() {
          <Route path="permission-approvals" element={<PermissionApprovals />} />
          <Route path="users" element={<UserManagement />} />
          <Route path="faculty-attendance" element={<FacultyAttendance />} />
+         <Route path="comp-off-approvals" element={<CompOffApprovals />} />
       </Route>
 
       {/* FACULTY */}

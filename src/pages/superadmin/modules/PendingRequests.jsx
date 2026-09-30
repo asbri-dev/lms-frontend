@@ -155,7 +155,9 @@ const LeaveCard = ({ item, onAction, actionLoadingId }) => {
         {item.typeOfLeave && (
           <div className="col-span-2"><span className="text-gray-400">Type: </span>{item.typeOfLeave}</div>
         )}
+
       </div>
+      
 
       {item.reasonForLeave && (
         <div className="text-xs text-gray-500 bg-gray-50 rounded-lg px-3 py-2">
@@ -439,6 +441,18 @@ const AllRequestRow = ({ item, type, onRevokeClick, onApproveClick }) => {
         {fromDate}{toDate && toDate !== "—" ? ` → ${toDate}` : ""}
       </td>
       <td className="px-4 py-3"><Badge label={format(detail) || "—"} style={DETAILS_STYLE[format(detail) || "—"]} /></td>
+      <td className="px-4 py-3">
+  {item.noOfDays ? (
+    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-indigo-50 text-indigo-700 text-xs font-semibold border border-indigo-100">
+      {item.noOfDays}
+      <span className="font-medium">
+        {Number(item.noOfDays) === 1 ? "Day" : "Days"}
+      </span>
+    </span>
+  ) : (
+    <span className="text-gray-400 text-xs">—</span>
+  )}
+</td>
       <td className="px-2 py-3">
    {resolveStatus(item.status) === "Pending" && (
   <button
@@ -900,7 +914,7 @@ const PendingRequests = () => {
         noOfLeaves: item.noOfDays,
         typeOfLeave: item.typeOfLeave,
         reasonForLeave: item.reasonForLeave,
-        leaveStatus: "Revoke",
+        leaveStatus: "Revoked",
         revokeReason,
       };
     } else if (type === "Permission") {
@@ -909,7 +923,7 @@ const PendingRequests = () => {
         permissionDate: item.permissionDate || item.Date,
         permissionType: item.permissionType,
         reasonForPermission: item.reasonForPermission,
-        permissionStatus: "Revoke",
+        permissionStatus: "Revoked",
         revokeReason,
       };
     } else {
@@ -923,7 +937,7 @@ const PendingRequests = () => {
         noOfDays: item.noOfDays,
         reason: item.reason,
         appliedOn: item.appliedOn,
-        status: "Revoke",
+        status: "Revoked",
         revokeReason,
       };
     }
@@ -1107,7 +1121,7 @@ let matchMonthYear = true;
 if (filterMonthYear !== "All") {
   const d = parseDate(date);
 
-  if (!isNaN(d)) {
+  if (d instanceof Date && !isNaN(d.getTime())) {
     const value = `${d.getFullYear()}-${String(
       d.getMonth() + 1
     ).padStart(2, "0")}`;
@@ -1136,13 +1150,15 @@ if (filterMonthYear !== "All") {
   flatAll.forEach((r) => {
     let date = "";
 
-    if (r._type === "Leave") {
-      date = r.leaveFrom;
-    } else if (r._type === "Permission") {
-      date = r.Date;
-    } else {
-      date = r.onDutyFrom;
-    }
+if (r._type === "Leave") {
+  date = r.leaveFrom;
+} else if (r._type === "Permission") {
+  date = r.Date;
+} else if (r._type === "OD") {
+  date = r.onDutyFrom;
+} else if (r._type === "CO") {
+  date = r.workedDate;
+}
 
     if (date) {
       const d = parseDate(date);
@@ -1430,6 +1446,7 @@ if (filterMonthYear !== "All") {
                     <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500">Type</th>
                     <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 whitespace-nowrap">Date / Period</th>
                     <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500">Details</th>
+                    <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500">No. of Days</th>
                     <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500">Action</th>
                     <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500">Status</th>
                   </tr>
