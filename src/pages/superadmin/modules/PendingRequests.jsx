@@ -70,6 +70,7 @@ const TYPE_STYLE = {
   Leave:      "bg-purple-100 text-purple-700",
   Permission: "bg-blue-100 text-blue-700",
   OD:         "bg-yellow-100 text-yellow-700",
+  CO:        "bg-green-100 text-green-700",
 };
 
 const DETAILS_STYLE = {
@@ -83,6 +84,7 @@ const APPROVE_API = {
   Leave:      "/approveLeaves",
   Permission: "/approvePr",
   OD:         "/odApprove",
+  CO:        "/approveCompOff",
 };
 
 
@@ -153,7 +155,9 @@ const LeaveCard = ({ item, onAction, actionLoadingId }) => {
         {item.typeOfLeave && (
           <div className="col-span-2"><span className="text-gray-400">Type: </span>{item.typeOfLeave}</div>
         )}
+
       </div>
+      
 
       {item.reasonForLeave && (
         <div className="text-xs text-gray-500 bg-gray-50 rounded-lg px-3 py-2">
@@ -290,6 +294,113 @@ const ODCard = ({ item, onAction, actionLoadingId }) => {
 };
 
 /* ════════════════════════════════════════
+   Comp Off CARD
+════════════════════════════════════════ */
+const CompOffCard = ({ item, onAction, actionLoadingId }) => {
+  const id = `co-${item.empId}-${item.workedDate}`;
+  const loc = getLocation(item.empId);
+  const loading = actionLoadingId === id;
+
+  return (
+    <div className="bg-white border border-gray-200 rounded-xl p-4 space-y-3 hover:border-indigo-200 transition-colors">
+
+      {/* Header */}
+      <div className="flex items-start justify-between gap-2">
+        <div>
+          <div className="flex flex-wrap items-center gap-2">
+
+            <span className="text-sm font-medium text-gray-800">
+              {item.empName || item.empId}
+            </span>
+
+            <Badge
+              label={loc}
+              style={LOC_STYLE[loc]}
+            />
+
+            <Badge
+              label="CO"
+              style={TYPE_STYLE.CO}
+            />
+
+          </div>
+
+          <div className="text-xs text-gray-400 mt-0.5">
+            {item.empId}
+          </div>
+        </div>
+
+        <Badge
+          label={resolveStatus(item.status)}
+          style={
+            STATUS_STYLE[item.status] ||
+            "bg-gray-100 text-gray-500"
+          }
+        />
+      </div>
+
+
+      {/* Dates */}
+      <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-gray-500">
+
+        <div>
+          <span className="text-gray-400">
+            Worked Date:
+          </span>{" "}
+          {formatDate(item.workedDate)}
+        </div>
+
+        <div>
+          <span className="text-gray-400">
+            Availed Date:
+          </span>{" "}
+          {formatDate(item.availedDate)}
+        </div>
+
+      </div>
+
+
+      {/* Reason */}
+      {item.workedReason && (
+        <div className="text-xs text-gray-500 bg-gray-50 rounded-lg px-3 py-2">
+          <span className="text-gray-400">
+            Reason:
+          </span>{" "}
+          {item.workedReason}
+        </div>
+      )}
+
+
+      {/* Action */}
+      <div className="flex gap-2 pt-1 border-t border-gray-100">
+
+        <button
+          onClick={() =>
+            onAction(item, "CO", "Approved", id)
+          }
+          disabled={loading}
+          className="flex-1 text-xs font-medium py-1.5 rounded-lg bg-green-600 text-white hover:bg-green-700 disabled:opacity-50 transition-colors"
+        >
+          {loading ? "..." : "✓ Approve"}
+        </button>
+
+        <button
+          onClick={() =>
+            onAction(item, "CO", "Rejected", id)
+          }
+          disabled={loading}
+          className="flex-1 text-xs font-medium py-1.5 rounded-lg border border-red-200 text-red-600 hover:bg-red-50 disabled:opacity-50 transition-colors"
+        >
+          {loading ? "..." : "✕ Reject"}
+        </button>
+
+      </div>
+
+    </div>
+  );
+};
+
+/* ════════════════════════════════════════
    ALL REQUESTS — Table row
 ════════════════════════════════════════ */
 const AllRequestRow = ({ item, type, onRevokeClick, onApproveClick }) => {
@@ -310,6 +421,10 @@ const AllRequestRow = ({ item, type, onRevokeClick, onApproveClick }) => {
     fromDate = formatDate(item.onDutyFrom);
     toDate   = formatDate(item.onDutyTo);
     detail   = item.reason;
+  } else if (type === "CO") {
+    fromDate = formatDate(item.workedDate);
+    toDate   = formatDate(item.availedDate);
+    detail   = item.workedReason;
   }
 
  
@@ -326,6 +441,18 @@ const AllRequestRow = ({ item, type, onRevokeClick, onApproveClick }) => {
         {fromDate}{toDate && toDate !== "—" ? ` → ${toDate}` : ""}
       </td>
       <td className="px-4 py-3"><Badge label={format(detail) || "—"} style={DETAILS_STYLE[format(detail) || "—"]} /></td>
+      <td className="px-4 py-3">
+  {item.noOfDays ? (
+    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-indigo-50 text-indigo-700 text-xs font-semibold border border-indigo-100">
+      {item.noOfDays}
+      <span className="font-medium">
+        {Number(item.noOfDays) === 1 ? "Day" : "Days"}
+      </span>
+    </span>
+  ) : (
+    <span className="text-gray-400 text-xs">—</span>
+  )}
+</td>
       <td className="px-2 py-3">
    {resolveStatus(item.status) === "Pending" && (
   <button
@@ -590,6 +717,7 @@ const PendingRequests = () => {
   const [pendingLeaves,      setPendingLeaves]      = useState([]);
   const [pendingPermissions, setPendingPermissions] = useState([]);
   const [pendingOds,         setPendingOds]         = useState([]);
+  const [pendingCompOffs, setPendingCompOffs]       = useState([]);
   const [loadingMy,          setLoadingMy]          = useState(false);
   const [errorMy,            setErrorMy]            = useState(null);
 
@@ -636,6 +764,7 @@ const PendingRequests = () => {
       setPendingLeaves(json.pendingLeaves           || []);
       setPendingPermissions(json.pendingPermissions || []);
       setPendingOds(json.pendingOds                 || []);
+      setPendingCompOffs(json.pendingCompOffs || []);
     } catch (e) {
       setErrorMy(e.message || "Failed to load requests");
     } finally {
@@ -785,7 +914,7 @@ const PendingRequests = () => {
         noOfLeaves: item.noOfDays,
         typeOfLeave: item.typeOfLeave,
         reasonForLeave: item.reasonForLeave,
-        leaveStatus: "Revoke",
+        leaveStatus: "Revoked",
         revokeReason,
       };
     } else if (type === "Permission") {
@@ -794,7 +923,7 @@ const PendingRequests = () => {
         permissionDate: item.permissionDate || item.Date,
         permissionType: item.permissionType,
         reasonForPermission: item.reasonForPermission,
-        permissionStatus: "Revoke",
+        permissionStatus: "Revoked",
         revokeReason,
       };
     } else {
@@ -808,7 +937,7 @@ const PendingRequests = () => {
         noOfDays: item.noOfDays,
         reason: item.reason,
         appliedOn: item.appliedOn,
-        status: "Revoke",
+        status: "Revoked",
         revokeReason,
       };
     }
@@ -952,9 +1081,17 @@ const ods = [
   ...(allData.rejectedOds || []),
   ...(allData.withdrawnOds || []),
 ];
+
+const co=[
+  ...(allData.pendingCompOffs || []),
+  ...(allData.approvedCompOffs || []),
+  ...(allData.rejectedCompOffs || []),
+  ...(allData.withdrawnCompOffs || []),
+]
     leaves.forEach((i)      => rows.push({ ...i, _type: "Leave"      }));
     permissions.forEach((i) => rows.push({ ...i, _type: "Permission" }));
     ods.forEach((i)         => rows.push({ ...i, _type: "OD"         }));
+    co.forEach((i)           => rows.push({ ...i, _type: "CO"           }));
     return rows;
   }, [allData]);
 
@@ -984,7 +1121,7 @@ let matchMonthYear = true;
 if (filterMonthYear !== "All") {
   const d = parseDate(date);
 
-  if (!isNaN(d)) {
+  if (d instanceof Date && !isNaN(d.getTime())) {
     const value = `${d.getFullYear()}-${String(
       d.getMonth() + 1
     ).padStart(2, "0")}`;
@@ -1013,13 +1150,15 @@ if (filterMonthYear !== "All") {
   flatAll.forEach((r) => {
     let date = "";
 
-    if (r._type === "Leave") {
-      date = r.leaveFrom;
-    } else if (r._type === "Permission") {
-      date = r.Date;
-    } else {
-      date = r.onDutyFrom;
-    }
+if (r._type === "Leave") {
+  date = r.leaveFrom;
+} else if (r._type === "Permission") {
+  date = r.Date;
+} else if (r._type === "OD") {
+  date = r.onDutyFrom;
+} else if (r._type === "CO") {
+  date = r.workedDate;
+}
 
     if (date) {
       const d = parseDate(date);
@@ -1035,7 +1174,7 @@ if (filterMonthYear !== "All") {
   return [...months].sort().reverse();
 }, [flatAll]);
 
-  const totalPending = pendingLeaves.length + pendingPermissions.length + pendingOds.length;
+  const totalPending = pendingLeaves.length + pendingPermissions.length + pendingOds.length + pendingCompOffs.length;
 
   return (
     <div className="space-y-5">
@@ -1139,7 +1278,32 @@ if (filterMonthYear !== "All") {
               </div>
             </div>
           )}
+
+          {/* Pending Comp-Offs */}
+         {!loadingMy && pendingCompOffs.length > 0 && (
+           <div>
+             <SectionHeader
+               label="Comp-Off requests"
+               count={pendingCompOffs.length}
+             />
+         
+             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+         
+               {pendingCompOffs.map((item, i) => (
+                 <CompOffCard
+                   key={`co-${i}`}
+                   item={item}
+                   onAction={handleAction}
+                   actionLoadingId={actionLoadingId}
+                 />
+               ))}
+         
+             </div>
+           </div>
+         )}
         </div>
+
+        
       )}
 
       {/* ════════ ALL REQUESTS TAB ════════ */}
@@ -1174,7 +1338,7 @@ if (filterMonthYear !== "All") {
         onChange={(e) => setFilterType(e.target.value)}
         className="w-full border border-gray-200 shadow-sm px-3 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
       >
-        {["All", "Leave", "Permission", "OD"].map((t) => (
+        {["All", "Leave", "Permission", "OD", "CO"].map((t) => (
           <option key={t}>{t}</option>
         ))}
       </select>
@@ -1282,6 +1446,7 @@ if (filterMonthYear !== "All") {
                     <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500">Type</th>
                     <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 whitespace-nowrap">Date / Period</th>
                     <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500">Details</th>
+                    <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500">No. of Days</th>
                     <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500">Action</th>
                     <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500">Status</th>
                   </tr>

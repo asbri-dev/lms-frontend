@@ -6,8 +6,11 @@ import {
   MapPin,
   GraduationCap,
   User,
+  Upload,
   Plus,
   Trash2,
+  Download,
+  
   RefreshCw,
   AlertCircle,
   Inbox,
@@ -131,6 +134,72 @@ const YEAR_LABELS = {
   thirdYear: "Third Year",
 };
 
+
+
+const downloadReceipt = async (transactionId) => {
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/downloadPaymentInvoice?txnId=${encodeURIComponent(transactionId)}`
+    );
+
+    if (!response.ok) {
+      throw new Error("Failed to download receipt");
+    }
+
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `Receipt_${transactionId}.pdf`;
+
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    window.URL.revokeObjectURL(url);
+
+    toast.success("Receipt downloaded successfully");
+  } catch (error) {
+    console.error("Transaction receipt download error:", error);
+    toast.error("Failed to download receipt");
+  }
+};
+
+
+const downloadReceiptByPath = async (recieptPath) => {
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/api/fee-reciepts/file?path=${(recieptPath)}`
+    );
+
+    if (!response.ok) {
+      throw new Error("Failed to download receipt");
+    }
+
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+    link.href = url;
+
+   // const fileName = recieptPath.split("/").pop() || "Fee_Receipt";
+
+    link.download = `Receipt.jpeg`;
+
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    window.URL.revokeObjectURL(url);
+
+    toast.success("Receipt downloaded successfully");
+  } catch (error) {
+    console.error("Receipt path download error:", error);
+    toast.error("Failed to download receipt");
+  }
+};
+
 /* ============================================================
    MAIN COMPONENT
    ============================================================ */
@@ -170,6 +239,13 @@ const [waiveFeeType, setWaiveFeeType] = useState("");
 const [waiveFeeLabel, setWaiveFeeLabel] = useState("Merit"); // or whatever default
 const [waiveAmount, setWaiveAmount] = useState("");
 const [waiveSubmitting, setWaiveSubmitting] = useState(false);
+
+
+/* ====================== upload receipt ====================== */
+const [showUploadForm, setShowUploadForm] = useState(false);
+const [uploadFeeType, setUploadFeeType] = useState("");
+const [uploadFile, setUploadFile] = useState(null);
+const [uploadSubmitting, setUploadSubmitting] = useState(false);
 
   /* ---- fetch directory ---- */
   const loadDirectory = useCallback(async () => {
@@ -234,6 +310,9 @@ const handleSelectStudent = (student, location) => {
   setFeeStructure(null);   // ← already there ✓ — just confirming this stays
   setFeeError(null);       // ← ADD THIS: clear any previous error banner
   loadFeeStructure(student.admissionNo);
+   setShowUploadForm(false);
+  setUploadFile(null);
+   setUploadFeeType("");
 };
 
  //  const handleWaiveFeeTypeChange = (e) => {
@@ -273,6 +352,37 @@ const handleSelectStudent = (student, location) => {
   }
 };
 
+
+const handleUploadReceipt = async (e) => {
+  e.preventDefault();
+  if (!selectedStudent) return;
+  if (!uploadFeeType) return toast.error("Select a fee type");
+  if (!uploadFile) return toast.error("Choose a receipt file");
+
+  const formData = new FormData();
+  formData.append("receipt", uploadFile);
+  formData.append("studentId", selectedStudent.admissionNo);
+  formData.append("feeType", uploadFeeType);
+
+  setUploadSubmitting(true);
+  try {
+    // Do NOT set Content-Type — the browser adds the multipart boundary itself
+    const res = await fetch(`${API_BASE_URL}/api/fee-reciepts/upload`, {
+      method: "POST",
+      body: formData,
+    });
+    if (!res.ok) throw new Error(`Failed (${res.status})`);
+    toast.success("Receipt uploaded successfully");
+    setShowUploadForm(false);
+    setUploadFeeType("");
+    setUploadFile(null);
+    loadFeeStructure(selectedStudent.admissionNo); // refresh so download icon appears
+  } catch (err) {
+    toast.error(err.message || "Failed to upload receipt");
+  } finally {
+    setUploadSubmitting(false);
+  }
+};
   /* ---- derived: academic year groups sorted by year number ---- */
   const academicYearGroups = useMemo(() => {
     if (!feeStructure) return [];
@@ -280,6 +390,18 @@ const handleSelectStudent = (student, location) => {
       .map(([key, fees]) => ({ key, fees: fees || [], ...parseAcademicYearKey(key) }))
       .sort((a, b) => a.num - b.num);
   }, [feeStructure]);
+
+  /* ---- receipt fee types for selected student's existing fees ---- */
+const studentFeeTypes = useMemo(
+  () => [
+    ...new Set(
+      academicYearGroups.flatMap((group) =>
+        group.fees.map((fee) => fee.typeOfFee)
+      )
+    ),
+  ],
+  [academicYearGroups]
+);
 
   /* ---- derived: totals across all groups ---- */
   const totals = useMemo(() => {
@@ -571,9 +693,9 @@ const handleSelectStudent = (student, location) => {
                     className="w-full flex items-center justify-between px-4 py-3 text-white hover:bg-white/10 transition"
                   >
                    <span className="flex items-center gap-2 text-sm font-semibold text-orange-600">
-  <MapPin size={13} className="text-orange-500" />
-  {location}
-</span>
+                     <MapPin size={13} className="text-orange-500" />
+                     {location}
+                   </span>
                     {expandedLocations[location]
                       ? <ChevronDown size={15} className="text-white/70" />
                       : <ChevronRight size={15} className="text-white/70" />}
@@ -681,6 +803,18 @@ const handleSelectStudent = (student, location) => {
                     </span>
                   </div>
                 </div>
+                <div className="flex flex-wrap items-center gap-2">
+  {/* Upload Receipt */}
+  <button
+    onClick={() => setShowUploadForm((v) => !v)}
+    className="inline-flex items-center gap-1.5 text-sm font-semibold px-5 py-2.5 rounded-full text-white shadow transition hover:brightness-95"
+    style={{ background: "linear-gradient(90deg, #16a34a, #22c55e)" }}
+  >
+    {showUploadForm ? <X size={15} /> : <Upload size={15} />}
+    {showUploadForm ? "Cancel" : "Upload Receipt"}
+  </button>
+
+
                   <button
                   onClick={() => setShowWaiveForm((v) => !v)}
                   className="inline-flex items-center gap-1.5 text-sm font-semibold px-5 py-2.5 rounded-full text-white shadow ..."
@@ -698,6 +832,9 @@ const handleSelectStudent = (student, location) => {
                   {showAddForm ? <X size={15} /> : <Plus size={15} />}
                   {showAddForm ? "Cancel" : "Add Fee"}
                 </button>
+                  {/* existing Waive Off button */}
+  {/* existing Add Fee button */}
+</div>
 
               </div>
 
@@ -723,6 +860,20 @@ const handleSelectStudent = (student, location) => {
     onSubmit={handleWaiveOff}
     onCancel={() => { setShowWaiveForm(false); /* reset */ }}
     submitting={waiveSubmitting}
+  />
+)}
+
+
+{showUploadForm && (
+  <UploadReceiptForm
+    feeTypes={studentFeeTypes}
+    uploadFeeType={uploadFeeType}
+    setUploadFeeType={setUploadFeeType}
+    uploadFile={uploadFile}
+    setUploadFile={setUploadFile}
+    onSubmit={handleUploadReceipt}
+    onCancel={() => { setShowUploadForm(false); setUploadFile(null); setUploadFeeType(""); }}
+    submitting={uploadSubmitting}
   />
 )}
 
@@ -792,10 +943,18 @@ const handleSelectStudent = (student, location) => {
    ============================================================ */
 function AcademicYearSection({ group, removingKey, onRemove }) {
   const [open, setOpen] = useState(true);
-  const groupTotal = group.fees.reduce((s, f) => s + (Number(f.amountToBePaid) || 0), 0);
+  const [downloadingReceipt, setDownloadingReceipt] = useState(null);
+
+  const groupTotal = group.fees.reduce(
+    (s, f) => s + (Number(f.amountToBePaid) || 0),
+    0
+  );
 
   return (
-    <div className="rounded-2xl bg-white shadow-sm overflow-hidden" style={{ border: `1px solid ${THEME.mid}` }}>
+    <div
+      className="rounded-2xl bg-white shadow-sm overflow-hidden"
+      style={{ border: `1px solid ${THEME.mid}` }}
+    >
       {/* section header */}
       <button
         onClick={() => setOpen((v) => !v)}
@@ -805,22 +964,34 @@ function AcademicYearSection({ group, removingKey, onRemove }) {
         <div className="flex items-center gap-3">
           <div
             className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0"
-            style={{ background: `linear-gradient(135deg, ${THEME.primary}, #f97316)` }}
+            style={{
+              background: `linear-gradient(135deg, ${THEME.primary}, #f97316)`,
+            }}
           >
             {group.num}
           </div>
+
           <div>
-            <p className="text-sm font-semibold text-slate-800">{group.label}</p>
-            <p className="text-xs text-slate-400">{group.fees.length} fee{group.fees.length !== 1 ? "s" : ""} · {fmt(groupTotal)}</p>
+            <p className="text-sm font-semibold text-slate-800">
+              {group.label}
+            </p>
+
+            <p className="text-xs text-slate-400">
+              {group.fees.length} fee
+              {group.fees.length !== 1 ? "s" : ""} · {fmt(groupTotal)}
+            </p>
           </div>
         </div>
-        {open
-          ? <ChevronDown size={16} className="text-slate-400" />
-          : <ChevronRight size={16} className="text-slate-400" />}
+
+        {open ? (
+          <ChevronDown size={16} className="text-slate-400" />
+        ) : (
+          <ChevronRight size={16} className="text-slate-400" />
+        )}
       </button>
 
-      {open && (
-        group.fees.length === 0 ? (
+      {open &&
+        (group.fees.length === 0 ? (
           <div className="px-5 py-6 text-center text-slate-400 text-sm">
             <Inbox size={20} className="mx-auto mb-1" />
             No fees in this year
@@ -830,52 +1001,132 @@ function AcademicYearSection({ group, removingKey, onRemove }) {
             {group.fees.map((fee) => {
               const rKey = `${group.key}::${fee.typeOfFee}`;
               const isRemoving = removingKey === rKey;
+
               const { bg, fg, Icon } = statusStyle(fee.feeStatus);
+
+              const transactionId = fee.transactionId;
+              const recieptPath = fee.recieptPath;
+
+              const downloadKey = transactionId || recieptPath;
+
+              const isDownloading =
+                downloadingReceipt === downloadKey;
+
               return (
                 <li
                   key={fee.typeOfFee}
                   className="flex items-center justify-between gap-4 px-5 py-4 hover:bg-orange-50/30 transition"
-                  style={{ opacity: fee.__optimistic ? 0.55 : 1 }}
+                  style={{
+                    opacity: fee.__optimistic ? 0.55 : 1,
+                  }}
                 >
+                  {/* Fee information */}
                   <div className="min-w-0">
                     <p className="text-sm font-medium text-slate-800">
                       {humanizeFeeName(fee.typeOfFee)}
                     </p>
+
                     <div className="flex flex-wrap gap-x-3 gap-y-0.5 mt-1 text-xs text-slate-500">
-                      <span>To pay: <span className="font-semibold text-slate-700">{fmt(fee.amountToBePaid)}</span></span>
-                      <span>Paid: {fmt(fee.amountPaid)}</span>
+                      <span>
+                        To pay:{" "}
+                        <span className="font-semibold text-slate-700">
+                          {fmt(fee.amountToBePaid)}
+                        </span>
+                      </span>
+
+                      <span>
+                        Paid: {fmt(fee.amountPaid)}
+                      </span>
+
                       {Number(fee.fineAmount) > 0 && (
-                        <span className="text-red-500">Fine: {fmt(fee.fineAmount)}</span>
+                        <span className="text-red-500">
+                          Fine: {fmt(fee.fineAmount)}
+                        </span>
                       )}
-                      <span>Due: {fmtDate(fee.dueDate)}</span>
+
+                      <span>
+                        Due: {fmtDate(fee.dueDate)}
+                      </span>
                     </div>
                   </div>
 
+                  {/* Actions */}
                   <div className="flex items-center gap-2 shrink-0">
+
+                    {/* Status */}
                     <span
                       className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium"
-                      style={{ background: bg, color: fg }}
+                      style={{
+                        background: bg,
+                        color: fg,
+                      }}
                     >
                       <Icon size={11} />
                       {fee.feeStatus || "Unpaid"}
                     </span>
+
+                    {/* DOWNLOAD */}
+                    {downloadKey && downloadKey !== "NA" && (
+                      <button
+                        onClick={async () => {
+                          if (isDownloading) return;
+
+                          try {
+                            setDownloadingReceipt(downloadKey);
+
+                            if (transactionId) {
+                              // Transaction ID → old receipt API
+                              await downloadReceipt(transactionId);
+                            } else if (
+                              recieptPath &&
+                              recieptPath !== "NA"
+                            ) {
+                              // Receipt path → new receipt API
+                              await downloadReceiptByPath(
+                                recieptPath
+                              );
+                            }
+                          } finally {
+                            setDownloadingReceipt(null);
+                          }
+                        }}
+                        disabled={isDownloading}
+                        title="Download receipt"
+                        className="p-2 rounded-full text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition disabled:opacity-50"
+                      >
+                        {isDownloading ? (
+                          <Loader2
+                            size={14}
+                            className="animate-spin"
+                          />
+                        ) : (
+                          <Download size={14} />
+                        )}
+                      </button>
+                    )}
+
+                    {/* REMOVE */}
                     <button
                       onClick={() => onRemove(group.key, fee)}
                       disabled={isRemoving}
                       title="Remove fee"
                       className="p-2 rounded-full text-slate-400 hover:text-red-500 hover:bg-red-50 transition disabled:opacity-50"
                     >
-                      {isRemoving
-                        ? <Loader2 size={14} className="animate-spin" />
-                        : <Trash2 size={14} />}
+                      {isRemoving ? (
+                        <Loader2
+                          size={14}
+                          className="animate-spin"
+                        />
+                      ) : (
+                        <Trash2 size={14} />
+                      )}
                     </button>
                   </div>
                 </li>
               );
             })}
           </ul>
-        )
-      )}
+        ))}
     </div>
   );
 }
@@ -1100,6 +1351,71 @@ function WaiveOffForm({
         >
           {submitting ? <Loader2 size={14} className="animate-spin" /> : <CheckCircle2 size={14} />}
           {submitting ? "Waiving…" : "Waive Off"}
+        </button>
+      </div>
+    </form>
+  );
+}
+
+
+function UploadReceiptForm({
+  feeTypes, uploadFeeType, setUploadFeeType,
+  setUploadFile, onSubmit, onCancel, submitting,
+}) {
+  return (
+    <form
+      onSubmit={onSubmit}
+      className="fee-fade rounded-2xl bg-white shadow-sm p-5"
+      style={{ border: `1.5px solid ${THEME.mid}` }}
+    >
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-sm font-semibold text-slate-800 flex items-center gap-2">
+          <Upload size={15} style={{ color: THEME.primary }} />
+          Upload Receipt
+        </h3>
+        <button type="button" onClick={onCancel} className="text-slate-400 hover:text-slate-600">
+          <X size={15} />
+        </button>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label className="text-xs font-semibold text-slate-500 mb-1 block">Fee Type</label>
+          <select
+            value={uploadFeeType}
+            onChange={(e) => setUploadFeeType(e.target.value)}
+            className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none focus:border-orange-400 transition"
+            required
+          >
+            <option value="">Select fee type…</option>
+            {feeTypes.map((ft) => (
+              <option key={ft} value={ft}>{humanizeFeeName(ft)}</option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label className="text-xs font-semibold text-slate-500 mb-1 block">Receipt File</label>
+          <input
+            type="file"
+            accept="image/*,application/pdf"
+            onChange={(e) => setUploadFile(e.target.files?.[0] || null)}
+            className="w-full text-sm text-slate-600 file:mr-3 file:px-3 file:py-2 file:rounded-lg file:border-0 file:bg-orange-50 file:text-orange-600 file:font-semibold"
+            required
+          />
+        </div>
+      </div>
+
+      <div className="flex justify-end gap-2 mt-5">
+        <button type="button" onClick={onCancel}
+          className="px-4 py-2 rounded-full text-sm font-medium text-slate-500 hover:bg-slate-100 transition">
+          Cancel
+        </button>
+        <button type="submit" disabled={submitting}
+          className="inline-flex items-center gap-1.5 px-5 py-2 rounded-full text-sm font-semibold text-white shadow transition hover:brightness-95 disabled:opacity-60"
+          style={{ background: `linear-gradient(90deg, ${THEME.primary}, #f97316)` }}>
+          {submitting ? <Loader2 size={14} className="animate-spin" /> : <Upload size={14} />}
+          {submitting ? "Uploading…" : "Upload"}
         </button>
       </div>
     </form>

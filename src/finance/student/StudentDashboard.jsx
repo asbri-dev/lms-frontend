@@ -61,6 +61,40 @@ const downloadReceipt = async (transactionId) => {
   }
 };
 
+
+const downloadReceiptByPath = async (recieptPath) => {
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/api/fee-reciepts/file?path=${(recieptPath)}`
+    );
+
+    if (!response.ok) {
+      throw new Error("Failed to download receipt");
+    }
+
+    const blob = await response.blob();
+
+    const url = window.URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+    link.href = url;
+
+   // const fileName = recieptPath.split("/").pop() || "Fee_Receipt";
+    link.download = `Receipt.jpeg`;
+
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    window.URL.revokeObjectURL(url);
+
+    toast.success("Receipt downloaded successfully");
+  } catch (error) {
+    console.error(error);
+    toast.error("Failed to download receipt");
+  }
+};
+
 // ── Snowflake decorative bg ───────────────────────────────────────────────────
 function SnowflakeBg() {
   const flakes = [
@@ -151,6 +185,7 @@ function FeeRow({
   const pct = total > 0 ? Math.round((paid / total) * 100) : 0;
 
   const transactionId = fee.transactionId;
+  const recieptPath = fee.recieptPath;
 
   return (
     <div
@@ -307,62 +342,70 @@ function FeeRow({
       </div>
 
       {/* Receipt / Download */}
-      <div style={{ display: "flex", justifyContent: "right" }}>
-        {transactionId ? (
-         <button
-  onClick={async () => {
-    if (downloadingReceipt === transactionId) return;
+{/* Receipt / Download */}
+<div style={{ display: "flex", justifyContent: "right" }}>
+  {transactionId || (recieptPath && recieptPath !== "NA") ? (
+    <button
+      onClick={async () => {
+        const downloadKey = transactionId || recieptPath;
 
-    try {
-      setDownloadingReceipt(transactionId);
-      await downloadReceipt(transactionId);
-    } finally {
-      setDownloadingReceipt(null);
-    }
-  }}
-  disabled={downloadingReceipt === transactionId}
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: 5,
-              background: "#E9F3FF",
-              color: "#1e4db7",
-              border: "1px solid #bfdbfe",
-              borderRadius: 8,
-              padding: "5px 10px",
-              fontSize: 11,
-              fontWeight: 600,
-              cursor: "pointer",
-              fontFamily: "inherit",
-              whiteSpace: "nowrap",
-            }}
-          >
-            {downloadingReceipt === transactionId ? (
-  <>
-    <Loader2
-      size={12}
-      strokeWidth={2.5}
-      style={{
-        animation: "spin 1s linear infinite",
+        if (downloadingReceipt === downloadKey) return;
+
+        try {
+          setDownloadingReceipt(downloadKey);
+
+          if (transactionId) {
+            // Old payment receipt API
+            await downloadReceipt(transactionId);
+          } else if (recieptPath && recieptPath !== "NA") {
+            // New uploaded receipt API
+            await downloadReceiptByPath(recieptPath);
+          }
+        } finally {
+          setDownloadingReceipt(null);
+        }
       }}
-    />
-  
-  </>
-) : (
-  <>
-    <Download size={12} strokeWidth={2.5} />
- 
-  </>
-)}
-            
-          </button>
-        ) : (
-          <span style={{ color: "#cbd5e1", fontSize: 11 }}>
-            —
-          </span>
-        )}
-      </div>
+      disabled={
+        downloadingReceipt === (transactionId || recieptPath)
+      }
+      style={{
+        display: "inline-flex",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 5,
+        background: "#E9F3FF",
+        color: "#1e4db7",
+        border: "1px solid #bfdbfe",
+        borderRadius: 8,
+        padding: "5px 10px",
+        fontSize: 11,
+        fontWeight: 600,
+        cursor: "pointer",
+        fontFamily: "inherit",
+        whiteSpace: "nowrap",
+      }}
+    >
+      {downloadingReceipt === (transactionId || recieptPath) ? (
+        <Loader2
+          size={12}
+          strokeWidth={2.5}
+          style={{
+            animation: "spin 1s linear infinite",
+          }}
+        />
+      ) : (
+        <>
+          <Download size={12} strokeWidth={2.5} />
+          Download
+        </>
+      )}
+    </button>
+  ) : (
+    <span style={{ color: "#cbd5e1", fontSize: 11 }}>
+      —
+    </span>
+  )}
+</div>
 
     </div>
   );
