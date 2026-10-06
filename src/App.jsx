@@ -118,14 +118,14 @@ function App() {
           </ProtectedRoute>
         }
       > <Route index element={<Navigate to="dashboard" replace />} />    //  again added this line to redirect to dashboard when /superadmin is accessed
-        <Route path="dashboard" element={<SuperAdminDashboard />} />
-        <Route path="attendance-muster" element={<AttendanceMuster />} />
-        <Route path="holiday-settings" element={<HolidaySettings />} /> 
-        <Route path="excel-uploads" element={<ExcelUploads />} />
-        <Route path="admin-management" element={<AdminManagement />} />
-        <Route path="attendance-modifier" element={<AttendanceModifier />} />
-        <Route path="report-dashboard"  element={<ReportsDashboard />} />
-         <Route path="fee-dashboard"  element={<FeeDashboard />} />
+        <Route path="dashboard"           element={<SuperAdminDashboard />} />
+        <Route path="attendance-muster"   element={<AttendanceMuster    />} />
+        <Route path="holiday-settings"    element={<HolidaySettings     />} /> 
+        <Route path="excel-uploads"       element={<ExcelUploads        />} />
+        <Route path="admin-management"    element={<AdminManagement     />} />
+        <Route path="attendance-modifier" element={<AttendanceModifier  />} />
+        <Route path="report-dashboard"    element={<ReportsDashboard    />} />
+        <Route path="fee-dashboard"       element={<FeeDashboard        />} />
         
       </Route>
       
