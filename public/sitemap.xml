@@ -4,5 +4,10 @@
     <url>
         <loc>https://educonnect.ariespolytechnic.org/</loc>
     </url>
-
+ <url>
+        <loc>https://educonnect.ariespolytechnic.org/login</loc>
+    </url>
+     <url>
+        <loc>https://educonnect.ariespolytechnic.org/login-page</loc>
+    </url>
 </urlset>
