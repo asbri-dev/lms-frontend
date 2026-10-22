@@ -41,6 +41,7 @@ import ApplyPermission from "./pages/faculty/ApplyPermission";
 import ApplyOd from "./pages/faculty/ApplyOd";
 import FacultyProfile from "./components/profile/Facultyprofile";
 import ApplyCompOff from "./pages/faculty/ApplyCompOff";
+import PolicyDocuments from "./pages/faculty/PolicyDocuments";
 
 
 import HeadAdminDashboard from "./finance/headadmin/FHAdminDashboard";
@@ -160,13 +161,13 @@ function App() {
           </ProtectedRoute>
         }
       >
-        <Route path="dashboard" element={<AdminDashboard />} />
-         <Route path="leave-approvals" element={<LeaveApprovals />} />
-         <Route path="od-approvals" element={<OdApprovals />} />
+        <Route path="dashboard"             element={<AdminDashboard      />} />
+         <Route path="leave-approvals"      element={<LeaveApprovals      />} />
+         <Route path="od-approvals"         element={<OdApprovals         />} />
          <Route path="permission-approvals" element={<PermissionApprovals />} />
-         <Route path="users" element={<UserManagement />} />
-         <Route path="faculty-attendance" element={<FacultyAttendance />} />
-         <Route path="comp-off-approvals" element={<CompOffApprovals />} />
+         <Route path="users"                element={<UserManagement />} />
+         <Route path="faculty-attendance"   element={<FacultyAttendance />} />
+         <Route path="comp-off-approvals"   element={<CompOffApprovals />} />
       </Route>
 
       {/* FACULTY */}
@@ -186,6 +187,7 @@ function App() {
   <Route path="apply-od" element={<ApplyOd />} />
   <Route path="profile" element={<FacultyProfile />} />
   <Route path="apply-comp-off" element={<ApplyCompOff />} />
+  <Route path="policy-documents" element={<PolicyDocuments />} />
 </Route>
 
       {/* FINANCE */} 

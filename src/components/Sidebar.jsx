@@ -243,6 +243,11 @@ const Sidebar = ({ onClose }) => {
               <ClipboardCheck size={18} />
               Apply Comp Off
             </NavLink> */}
+            <p className={sectionTitle}>Document</p>
+            <NavLink to="/faculty/policy-documents" className={linkClasses} onClick={() => onClose?.()}>
+              <Users size={18} />
+              Policy Documents
+            </NavLink>
           </>
         )}
 
