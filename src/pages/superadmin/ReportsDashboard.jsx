@@ -11,12 +11,14 @@ import {
   LogOut,
   ShieldCheck,
   PieChart,
+  CircleCheck,
   Trophy,
 } from "lucide-react";
 
 // import AttendanceReport from "./reportModules";
 // import LeaveReport from "./modules/LeaveReport";
  import LeaveBalanceReport from "./reportModules/LeaveBalanceReport";
+ import AcknowledgeReport from "./reportModules/AckDetailsReport";
 // import DepartmentReport from "./modules/DepartmentReport";
 // import MonthlyReport from "./modules/MonthlyReport";
 // import EmployeeReport from "./modules/EmployeeReport";
@@ -28,10 +30,10 @@ import {
 
 const MODULES = [
   {
-    key: "attendance",
-    label: "Attendance",
-    icon: <CalendarCheck size={16} />,
-    //component: <AttendanceReport />,
+    key: "Acknowledge",
+    label: "Acknowledge Report",
+    icon: <CircleCheck size={16} />,
+    component: <AcknowledgeReport />,
   },
   {
     key: "leave",
@@ -56,24 +58,6 @@ const MODULES = [
     label: "Monthly",
     icon: <CalendarDays size={16} />,
     //component: <MonthlyReport />,
-  },
-  {
-    key: "employee",
-    label: "Employee",
-    icon: <UserRound size={16} />,
-   // component: <EmployeeReport />,
-  },
-  {
-    key: "latein",
-    label: "Late In",
-    icon: <Clock3 size={16} />,
-   // component: <LateInReport />,
-  },
-  {
-    key: "earlyout",
-    label: "Early Out",
-    icon: <LogOut size={16} />,
-  //  component: <EarlyOutReport />,
   },
   {
     key: "override",

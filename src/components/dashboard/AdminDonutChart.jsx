@@ -44,8 +44,6 @@ const AdminDonutChart = ({
               dataKey="value"
               innerRadius={70}
               outerRadius={95}
-           
-            
               animationDuration={9000}
             >
               {data.map((entry, i) => (

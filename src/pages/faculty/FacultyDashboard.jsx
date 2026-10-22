@@ -19,6 +19,7 @@ import medical from "../../assets/ml.jpeg";
 import pend from "../../assets/pending.jpeg";
 import permission from "../../assets/permisson.jpeg";
 import FacultyAnnouncement from "./FacultyAnnouncement";
+import FacultyAcknowledgement from "./FacultyAcknowledgement";
 import {parse, isBefore } from "date-fns";
 
 
@@ -38,6 +39,8 @@ const [todayLeaves, setTodayLeaves] = useState([]);
 const [birthdays, setBirthdays] = useState([]);
 
 const [showAnnouncement, setShowAnnouncement] = useState(false);
+const [showAcknowledgement, setShowAcknowledgement] = useState(false);
+const [featureData, setFeatureData] = useState(null);
 
 
 
@@ -78,44 +81,34 @@ const [showAnnouncement, setShowAnnouncement] = useState(false);
 
 
    /* ================= CHECK ANNOUNCEMENT ================= */
-  const checkAnnouncement = async () => {
+const checkNewFeatures = async () => {
   try {
-  
-
     const response = await fetch(
       `${API_BASE_URL}/faculty/newFeatures?empId=${user.employeeId}`
     );
 
     if (!response.ok) {
-      throw new Error("Announcement check failed");
+      throw new Error("Failed to check new features");
     }
 
-    const seen = await response.json();
+    const data = await response.json();
 
-    // Backend returns:
-    // true  = already seen
-    // false = not seen
-
-    if (seen === false) {
-      setShowAnnouncement(true);
-    } else {
-      setShowAnnouncement(false);
+    setFeatureData(data);
+    if(data.codeOfConduct === "false" || data.leaveAndResignationPolicy === "false") {
+      setShowAcknowledgement(true);
     }
 
+    // if (data.newFeatures === "false") {
+    //   setShowAnnouncement(true);
+    // } 
   } catch (error) {
-    console.error("Announcement check failed:", error);
-
-    // Important:
-    // Don't block dashboard if announcement API fails.
-    setShowAnnouncement(false);
-
-  } 
+    console.error("New feature check failed:", error);
+  }  
 };
 
 useEffect(() => {
   if (!user?.employeeId) return;
 
-  checkAnnouncement();
 }, [user?.employeeId]);
 
 
@@ -212,6 +205,8 @@ useEffect(() => {
   fetchDashboard();
   fetchAttendanceSummary();
   fetchExtraData();
+  
+  checkNewFeatures();
 }, [user?.employeeId, selectedMonth]);// 🔥 ADD selectedMonth
 
   /* ================= WITHDRAW ================= */
@@ -428,6 +423,14 @@ const mlAvailed = data.approvedLeaveList?.filter(l => l.typeOfLeave === "ml").le
         onCompleted={() => setShowAnnouncement(false)}
       />
     )}
+    {showAcknowledgement && featureData && (
+      console.log("Rendering FacultyAcknowledgement with featureData:"),
+  <FacultyAcknowledgement
+    employeeId={user.employeeId}
+    featureData={featureData}
+    onCompleted={() => setShowAcknowledgement(false)}
+  />
+)}
     
     <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
 

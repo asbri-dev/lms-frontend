@@ -260,10 +260,18 @@ const month = useMemo(() => format(monthDate, "yyyy-MM"), [monthDate]);
     try {
       setLoading(true);
       setError(null);
+      const exportDate = parse(fromDate, "dd-MMM-yyyy", new Date());
+const cutoffDate = new Date(2026, 8, 1);
 
-      const res = await fetch(
-        `${API_BASE_URL}/getAttendanceMuster?fromDate=${fromDate}&endDate=${endDate}`,
-        { headers: { Authorization: `Bearer ${token}` } }
+
+  const apiEndpoint =
+  isBefore(exportDate, cutoffDate)
+    ? `${API_BASE_URL}/getAttendanceMuster`
+    : `${API_BASE_URL}/aries/getAttendanceMuster`;
+
+     const res = await fetch(
+      `${apiEndpoint}?fromDate=${fromDate}&endDate=${endDate}`,
+      { headers: { Authorization: `Bearer ${token}` } }
       );
 
       if (!res.ok) throw new Error(`Server error: ${res.status}`);
@@ -325,6 +333,7 @@ useEffect(() => {
     setExporting(true);
 const exportDate = parse(fromdate, "dd-MMM-yyyy", new Date());
 const cutoffDate = new Date(2026, 8, 1);
+const month = format(exportDate, "MMMM");
 
   const apiEndpoint =
   isBefore(exportDate, cutoffDate)
@@ -350,7 +359,7 @@ const cutoffDate = new Date(2026, 8, 1);
 
     const link = document.createElement("a");
     link.href = url;
-    link.download = "Attendance_Muster.xlsx";
+    link.download = `Attendance_Muster_${month}.xlsx`;
 
     document.body.appendChild(link);
     link.click();

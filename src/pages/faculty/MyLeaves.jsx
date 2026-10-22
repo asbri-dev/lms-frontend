@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "../../auth/useAuth";
-import { Filter } from "lucide-react";
+import { Filter, Download, Image as ImageIcon, FileSpreadsheet } from "lucide-react";
 import { API_BASE_URL } from "../../config/api";
+import toast from "react-hot-toast";
 
 
 
@@ -274,6 +275,44 @@ const [messageType, setMessageType] = useState(""); // success | error
     }
   };
 
+
+
+  const downloadReceiptByPath = async (recieptPath, fileName) => {
+  try {
+    if (!recieptPath) {
+      toast.error("File not available");
+      return;
+    }
+
+    const response = await fetch(
+      `${API_BASE_URL}/api/fee-reciepts/file?path=${encodeURIComponent(recieptPath)}`
+    );
+
+    if (!response.ok) {
+      throw new Error("Failed to download file");
+    }
+
+    const blob = await response.blob();
+
+    const url = window.URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = fileName;
+
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    window.URL.revokeObjectURL(url);
+
+    toast.success("File downloaded successfully");
+  } catch (error) {
+    console.error(error);
+    toast.error("Failed to download file");
+  }
+};
+
   /* ================= UI ================= */
 
   if (loading) {
@@ -480,7 +519,198 @@ const [messageType, setMessageType] = useState(""); // success | error
         )}
       </div>
     </>
-  ) : (
+  )  : item.type === "OD" ? (
+  <>
+    {/* ================= OD CARD ================= */}
+    <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
+      <div>
+        <h4 className="font-semibold text-gray-800">
+          On Duty
+        </h4>
+
+        <p className="text-xs text-gray-500 mt-1">
+          On Duty Request
+        </p>
+      </div>
+
+      <span
+        className={`text-xs font-semibold px-3 py-1.5 rounded-full ${
+          item.status === "PENDING"
+            ? "bg-amber-50 text-amber-700 border border-amber-200"
+            : item.status === "APPROVED"
+            ? "bg-green-50 text-green-700 border border-green-200"
+            : item.status === "REJECTED"
+            ? "bg-red-50 text-red-700 border border-red-200"
+            : "bg-gray-100 text-gray-600 border border-gray-200"
+        }`}
+      >
+        {item.status}
+      </span>
+    </div>
+
+    <div className="p-5 space-y-5">
+
+      {/* ================= OD DETAILS ================= */}
+      <div>
+        <div className="flex items-center gap-2 mb-3">
+          <div className="w-1 h-4 rounded-full bg-blue-600" />
+
+          <h5 className="text-sm font-semibold text-gray-700">
+            On Duty Details
+          </h5>
+        </div>
+
+        <div className="bg-gray-50 rounded-lg p-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+            {/* From Date */}
+            <div>
+              <p className="text-xs text-gray-500 mb-1">
+                From Date
+              </p>
+
+              <p className="text-sm font-semibold text-gray-800">
+                {item.fromDate || "-"}
+              </p>
+            </div>
+
+            {/* To Date */}
+            <div>
+              <p className="text-xs text-gray-500 mb-1">
+                To Date
+              </p>
+
+              <p className="text-sm font-semibold text-gray-800">
+                {item.toDate || "-"}
+              </p>
+            </div>
+
+            {/* Number of Days */}
+            <div>
+              <p className="text-xs text-gray-500 mb-1">
+                No. of Days
+              </p>
+
+              <p className="text-sm font-semibold text-gray-800">
+                {item.meta?.noOfDays || "-"}
+              </p>
+            </div>
+
+            {/* Reason */}
+            <div>
+              <p className="text-xs text-gray-500 mb-1">
+                Reason
+              </p>
+
+              <p className="text-sm text-gray-700">
+                {item.reason || "-"}
+              </p>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      {/* ================= DOWNLOAD FILES ================= */}
+      <div>
+        <div className="flex items-center gap-2 mb-3">
+          <div className="w-1 h-4 rounded-full bg-green-600" />
+
+          <h5 className="text-sm font-semibold text-gray-700">
+            Documents
+          </h5>
+        </div>
+
+        <div className="flex flex-wrap gap-3">
+
+          {/* Download Excel */}
+          {item.meta?.odForm && (
+            <button
+              type="button"
+              onClick={() =>
+                downloadReceiptByPath(
+                  item.meta.odForm,
+                  "OD_Form.xlsx"
+                )
+              }
+              className="
+                inline-flex items-center gap-2
+                px-4 py-2
+                bg-green-50 text-green-700
+                border border-green-200
+                rounded-lg
+                text-sm font-medium
+                hover:bg-green-600
+                hover:text-white
+                hover:border-green-600
+                transition-all duration-200
+              "
+            >
+              <FileSpreadsheet size={16} />
+              Download Excel
+            </button>
+          )}
+
+          {/* Download Image */}
+          {item.meta?.geoTagImages && (
+            <button
+              type="button"
+              onClick={() =>
+                downloadReceiptByPath(
+                  item.meta.geoTagImages,
+                  "OD_GeoTag_Image.jpeg"
+                )
+              }
+              className="
+                inline-flex items-center gap-2
+                px-4 py-2
+                bg-blue-50 text-blue-700
+                border border-blue-200
+                rounded-lg
+                text-sm font-medium
+                hover:bg-blue-600
+                hover:text-white
+                hover:border-blue-600
+                transition-all duration-200
+              "
+            >
+              <ImageIcon size={16} />
+              Download Image
+            </button>
+          )}
+
+        </div>
+      </div>
+
+      {/* ================= WITHDRAW ================= */}
+      {item.status === "PENDING" && (
+        <div className="flex justify-end pt-2 border-t border-gray-100">
+          <button
+            onClick={() => handleWithdraw(item)}
+            disabled={actionLoading === item}
+            className="
+              inline-flex items-center gap-2
+              px-4 py-2
+              bg-red-50 text-red-600
+              border border-red-200
+              rounded-lg
+              text-sm font-medium
+              hover:bg-red-600
+              hover:text-white
+              hover:border-red-600
+              transition-all duration-200
+              disabled:opacity-50
+              disabled:cursor-not-allowed
+            "
+          >
+            Withdraw
+          </button>
+        </div>
+      )}
+
+    </div>
+  </>
+) : (
     /* Normal Leave Card */
     <>
       <div className="p-5 flex justify-between">
