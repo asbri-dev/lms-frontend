@@ -34,7 +34,9 @@ jobs:
       - name: Show service account email (temporary)
         env:
           SA_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_LMS_ASBRITECH }}
-        run: echo "$SA_JSON" | jq -r .client_email
+        run: |
+          echo "Service account:"
+          echo "$SA_JSON" | jq -r '.client_email'
 
       - name: Deploy to Firebase Live Channel
         uses: FirebaseExtended/action-hosting-deploy@v0
