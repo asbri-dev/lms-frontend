@@ -29,6 +29,13 @@ jobs:
         env:
           VITE_API_BASE_URL: ${{ secrets.VITE_API_URL }}
 
+      # TEMPORARY: prints only the service account email (not the key).
+      # Remove once you've confirmed which account the secret belongs to.
+      - name: Show service account email (temporary)
+        env:
+          SA_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_LMS_ASBRITECH }}
+        run: echo "$SA_JSON" | jq -r .client_email
+
       - name: Deploy to Firebase Live Channel
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
