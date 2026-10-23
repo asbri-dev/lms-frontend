@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState, useCallback, forwardRef } from "react";
 import { format, startOfMonth, endOfMonth, eachDayOfInterval } from "date-fns";
 //import { exportAttendanceExcel } from "../../utils/excel";
-import { Search, MapPin, Building2, Calendar, Download } from "lucide-react";
+import { Search, MapPin, Building2, Calendar, Download,University } from "lucide-react";
 import toast from "react-hot-toast";
 import { API_BASE_URL } from "../../config/api";
 
@@ -232,6 +232,7 @@ const month = useMemo(() => format(monthDate, "yyyy-MM"), [monthDate]);
   const [search, setSearch]       = useState("");
   const [department, setDept]     = useState("All");
   const [location, setLocation]   = useState("All");
+  const [collegeLocation, setCollegeLocation] = useState("Chittoor");
   const [sortField, setSortField] = useState(null); // "name" | "id"
   const [sortDir, setSortDir]     = useState("asc");
   const [loading, setLoading]     = useState(false);
@@ -256,35 +257,54 @@ const month = useMemo(() => format(monthDate, "yyyy-MM"), [monthDate]);
   }, [month]);
 
   /* ─── Fetch ─── */
-  const fetchAttendance = useCallback(async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const exportDate = parse(fromDate, "dd-MMM-yyyy", new Date());
-const cutoffDate = new Date(2026, 8, 1);
+const fetchAttendance = useCallback(async () => {
+  try {
+    setLoading(true);
+    setError(null);
 
+    const exportDate = parse(fromDate, "dd-MMM-yyyy", new Date());
+    const cutoffDate = new Date(2026, 8, 1); // 01-Sep-2026
 
-  const apiEndpoint =
-  isBefore(exportDate, cutoffDate)
-    ? `${API_BASE_URL}/getAttendanceMuster`
-    : `${API_BASE_URL}/aries/getAttendanceMuster`;
+    const isNewApi = !isBefore(exportDate, cutoffDate);
 
-     const res = await fetch(
-      `${apiEndpoint}?fromDate=${fromDate}&endDate=${endDate}`,
-      { headers: { Authorization: `Bearer ${token}` } }
-      );
+    const apiEndpoint = isNewApi
+      ? `${API_BASE_URL}/aries/getAttendanceMuster`
+      : `${API_BASE_URL}/getAttendanceMuster`;
 
-      if (!res.ok) throw new Error(`Server error: ${res.status}`);
+    const queryParams = new URLSearchParams({
+      fromDate,
+      endDate,
+    });
 
-      const json = await res.json();
-      setData(json.AttendanceMuster || []);
-    } catch (e) {
-      setError(e.message || "Failed to load attendance");
-      setData([]);
-    } finally {
-      setLoading(false);
+    // Only send collegeLocation for the new API
+    if (isNewApi) {
+      queryParams.append("collegeLocation", collegeLocation);
     }
-  }, [fromDate, endDate, token]);
+
+    const res = await fetch(
+      `${apiEndpoint}?${queryParams.toString()}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    if (!res.ok) {
+      throw new Error(`Server error: ${res.status}`);
+    }
+
+    const json = await res.json();
+
+    setData(json.AttendanceMuster || []);
+
+  } catch (e) {
+    setError(e.message || "Failed to load attendance");
+    setData([]);
+  } finally {
+    setLoading(false);
+  }
+}, [fromDate, endDate, token, collegeLocation]);
 
 useEffect(() => {
   fetchAttendance();
@@ -537,6 +557,24 @@ const month = format(exportDate, "MMMM");
             ))}
           </select>
         </div>
+        {/* 🏫 College Location */}
+<div className="relative">
+  <University
+    className="absolute left-3 top-2.5 text-gray-400"
+    size={16}
+  />
+
+  <select
+    value={collegeLocation}
+    onChange={(e) => setCollegeLocation(e.target.value)}
+    className="pl-9 pr-8 py-2 rounded-lg bg-gray-50 border border-gray-200 text-sm
+               focus:outline-none focus:ring-2 focus:ring-[#2b3c6b]/30
+               appearance-none cursor-pointer"
+  >
+    <option value="Chittoor">Chittoor</option>
+    <option value="Palakkad">Palakkad</option>
+  </select>
+</div>
 
         {/* 📍 Location */}
         <div className="relative">
