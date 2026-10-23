@@ -610,7 +610,7 @@ const month = format(exportDate, "MMMM");
 
         {/* ⬇ Export */}
         <button
-          onClick={() => exportAttendanceExcel(fromDate, endDate, location)}
+          onClick={() => exportAttendanceExcel(fromDate, endDate, collegeLocation)}
           disabled={filtered.length === 0 || loading}
           className="flex items-center gap-2 px-4 py-2 rounded-lg 
                bg-gradient-to-r from-[#2b3c6b] to-[#3f548f] 
