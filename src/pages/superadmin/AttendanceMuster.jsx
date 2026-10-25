@@ -223,20 +223,20 @@ const MonthInput = forwardRef(({ value, onClick }, ref) => (
     <span className="pl-5 text-gray-700">{value}</span>
   </button>
 ));
-MonthInput.displayName = "MonthInput";
+MonthInput.displayName = "MonthInput"; 
 
-const AttendanceMuster = () => {
- const [monthDate, setMonthDate] = useState(new Date());
-const month = useMemo(() => format(monthDate, "yyyy-MM"), [monthDate]);
-  const [data, setData]           = useState([]);
-  const [search, setSearch]       = useState("");
-  const [department, setDept]     = useState("All");
-  const [location, setLocation]   = useState("All");
+  const AttendanceMuster = () => {
+  const [monthDate, setMonthDate] = useState(new Date());
+  const month = useMemo(() => format(monthDate, "yyyy-MM"), [monthDate]);
+  const [data, setData]                       = useState([] );
+  const [search, setSearch]                   = useState("" );
+  const [department, setDept]                 = useState("All");
+  const [location, setLocation]               = useState("All");
   const [collegeLocation, setCollegeLocation] = useState("Chittoor");
-  const [sortField, setSortField] = useState(null); // "name" | "id"
-  const [sortDir, setSortDir]     = useState("asc");
-  const [loading, setLoading]     = useState(false);
-  const [error, setError]         = useState(null);
+  const [sortField, setSortField]             = useState(null); // "name" | "id"
+  const [sortDir, setSortDir]                 = useState("asc");
+  const [loading, setLoading]                 = useState(false);
+  const [error, setError]                     = useState(null);
 
 
   const token = sessionStorage.getItem("authToken");

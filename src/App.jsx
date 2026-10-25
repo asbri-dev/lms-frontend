@@ -3,81 +3,81 @@ import { Toaster } from "react-hot-toast";
 
 
 
-import Login from "./pages/auth/Login";
-import LoginPage from "./finance/authi/LoginPage";
-import OtpVerify from "./pages/auth/OtpVerify";
-import SetPassword from "./pages/auth/SetPassword";
-import ForgotPassword from "./pages/auth/ForgotPassword";
+import Login                   from "./pages/auth/Login";
+import LoginPage               from "./finance/authi/LoginPage";
+import OtpVerify               from "./pages/auth/OtpVerify";
+import SetPassword             from "./pages/auth/SetPassword";
+import ForgotPassword          from "./pages/auth/ForgotPassword";
 
-import SuperAdminDashboard from "./pages/superadmin/SuperAdminDashboard";
-import AttendanceMuster from "./pages/superadmin/AttendanceMuster";
-import HolidaySettings from "./pages/superadmin/HolidaySettings";
-import ExcelUploads from "./pages/superadmin/ExcelUploads";
-import AdminManagement from "./pages/superadmin/AdminManagement";
-import AttendanceModifier from "./pages/superadmin/AttendanceModifier";
-import ReportsDashboard from "./pages/superadmin/ReportsDashboard";
-import FeeDashboard from "./pages/superadmin/FeeDashboard";
-
-
-
-import HeadDashboard from "./pages/head/HeadDashboard";
-import AllRequestsPage from "./pages/head/AllRequestsPage";
+import SuperAdminDashboard     from "./pages/superadmin/SuperAdminDashboard";
+import AttendanceMuster        from "./pages/superadmin/AttendanceMuster";
+import HolidaySettings         from "./pages/superadmin/HolidaySettings";
+import ExcelUploads            from "./pages/superadmin/ExcelUploads";
+import AdminManagement         from "./pages/superadmin/AdminManagement";
+import AttendanceModifier      from "./pages/superadmin/AttendanceModifier";
+import ReportsDashboard        from "./pages/superadmin/ReportsDashboard";
+import FeeDashboard            from "./pages/superadmin/FeeDashboard";
 
 
-import OdApprovals from "./pages/admin/OdApprovals";
-import PermissionApprovals from "./pages/admin/PermissionApproval"; 
-import AdminDashboard from "./pages/admin/AdminDashboard";
-import LeaveApprovals from "./pages/admin/LeaveApprovals";
-import  UserManagement  from "./pages/admin/UserManagement";
-import FacultyAttendance from "./pages/admin/FacultyAttendance";
-import CompOffApprovals from "./pages/admin/CompOffApprovals";
+
+import HeadDashboard           from "./pages/head/HeadDashboard";
+import AllRequestsPage         from "./pages/head/AllRequestsPage";
 
 
-import FacultyDashboard from "./pages/faculty/FacultyDashboard";
-import ApplyLeave from "./pages/faculty/ApplyLeave";
-import MyLeaves from "./pages/faculty/MyLeaves";
-import AttendanceInfo from "./pages/faculty/AttendanceInfo";
-import ApplyPermission from "./pages/faculty/ApplyPermission";
-import ApplyOd from "./pages/faculty/ApplyOd";
-import FacultyProfile from "./components/profile/Facultyprofile";
-import ApplyCompOff from "./pages/faculty/ApplyCompOff";
-import PolicyDocuments from "./pages/faculty/PolicyDocuments";
+import OdApprovals             from "./pages/admin/OdApprovals";
+import PermissionApprovals     from "./pages/admin/PermissionApproval"; 
+import AdminDashboard          from "./pages/admin/AdminDashboard";
+import LeaveApprovals          from "./pages/admin/LeaveApprovals";
+import  UserManagement         from "./pages/admin/UserManagement";
+import FacultyAttendance       from "./pages/admin/FacultyAttendance";
+import CompOffApprovals        from "./pages/admin/CompOffApprovals";
 
 
-import HeadAdminDashboard from "./finance/headadmin/FHAdminDashboard";
+import FacultyDashboard        from "./pages/faculty/FacultyDashboard";
+import ApplyLeave              from "./pages/faculty/ApplyLeave";
+import MyLeaves                from "./pages/faculty/MyLeaves";
+import AttendanceInfo          from "./pages/faculty/AttendanceInfo";
+import ApplyPermission         from "./pages/faculty/ApplyPermission";
+import ApplyOd                 from "./pages/faculty/ApplyOd";
+import FacultyProfile          from "./components/profile/Facultyprofile";
+import ApplyCompOff            from "./pages/faculty/ApplyCompOff";
+import PolicyDocuments         from "./pages/faculty/PolicyDocuments";
+
+  
+import HeadAdminDashboard      from "./finance/headadmin/FHAdminDashboard";
 import FacultyAttendanceModule from "./pages/head/FacultyAttendance";
-import HeadAdminApprovals from "./finance/headadmin/FeeApprove";
-import DueDateSetPage from "./finance/headadmin/DueDateSetPage"
-import OdForm from "./finance/headadmin/OdForm";
+import HeadAdminApprovals      from "./finance/headadmin/FeeApprove";
+import DueDateSetPage          from "./finance/headadmin/DueDateSetPage"
+import OdForm                  from "./finance/headadmin/OdForm";
 
 
 
-import FAdminDashboard from "./finance/fadmin/FAdminDashboard";
-import AdminFeeStructurePage from "./finance/fadmin/AdminFeeStructurePage";
-import AdminStudentPage from "./finance/fadmin/AdminStudentPage";
-import FeechangeRequestPage from "./finance/fadmin/Feechangerequestpage";
-import FeeAssignment from "./finance/headadmin/Fee Assignment";
+import FAdminDashboard         from "./finance/fadmin/FAdminDashboard";
+import AdminFeeStructurePage   from "./finance/fadmin/AdminFeeStructurePage";
+import AdminStudentPage        from "./finance/fadmin/AdminStudentPage";
+import FeechangeRequestPage    from "./finance/fadmin/Feechangerequestpage";
+import FeeAssignment           from "./finance/headadmin/Fee Assignment";
 
 
 
 
 
-import StudentDashboard from "./finance/student/StudentDashboard";
-import StudentProfile from "./finance/student/StudentProfile";
-import MyFeePage from "./finance/student/MyFeePage";
-import MakePayment from "./finance/student/MakePayment";
-import PaymentReturn  from "./finance/student/PaymentReturn";
-import PaymentSuccess from "./finance/student/PaymentSuccess";
-import PaymentFailure from "./finance/student/PaymentFailure";
-import ErrorPge from "./finance/student/SalaryInitiationErrorPage"
-import PaymentTerms from "./finance/student/PaymentTerms";
+import StudentDashboard        from "./finance/student/StudentDashboard";
+import StudentProfile          from "./finance/student/StudentProfile";
+import MyFeePage               from "./finance/student/MyFeePage";
+import MakePayment             from "./finance/student/MakePayment";
+import PaymentReturn           from "./finance/student/PaymentReturn";
+import PaymentSuccess          from "./finance/student/PaymentSuccess";
+import PaymentFailure          from "./finance/student/PaymentFailure";
+import ErrorPge                from "./finance/student/SalaryInitiationErrorPage";
+import PaymentTerms            from "./finance/student/PaymentTerms";
 
 
 
-import DashboardLayout from "./layouts/DashboardLayout";
-import ProtectedRoute from "./routes/ProtectedRoute";
-import Unauthorized from "./pages/Unauthorized";
-import OpeningPage from "./pages/OpeningPage";
+import DashboardLayout         from "./layouts/DashboardLayout";
+import ProtectedRoute          from "./routes/ProtectedRoute";
+import Unauthorized            from "./pages/Unauthorized";
+import OpeningPage             from "./pages/OpeningPage";
 
 function App() {
   return (
@@ -101,11 +101,11 @@ function App() {
 />
     <Routes>
       {/* PUBLIC */}
-      <Route path="/" element={<OpeningPage />} />
-      <Route path="/login" element={<Login />} />
-      <Route path="/login-page" element={<LoginPage />} />
-      <Route path="/otp" element={<OtpVerify />} />
-      <Route path="/set-password" element={<SetPassword />} />
+      <Route path="/"                element={<OpeningPage    />} />
+      <Route path="/login"           element={<Login          />} />
+      <Route path="/login-page"      element={<LoginPage      />} />
+      <Route path="/otp"             element={<OtpVerify      />} />
+      <Route path="/set-password"    element={<SetPassword    />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
 
       {/* SUPERADMIN */}
@@ -118,15 +118,16 @@ function App() {
             <DashboardLayout />
           </ProtectedRoute>
         }
-      > <Route index element={<Navigate to="dashboard" replace />} />    //  again added this line to redirect to dashboard when /superadmin is accessed
+      > <Route index element={<Navigate to="dashboard" replace />} />   
         <Route path="dashboard"           element={<SuperAdminDashboard />} />
         <Route path="attendance-muster"   element={<AttendanceMuster    />} />
-        <Route path="holiday-settings"    element={<HolidaySettings     />} /> 
-        <Route path="excel-uploads"       element={<ExcelUploads        />} />
+        <Route path="holiday-settings"    element={<HolidaySettings     />} />
+        <Route path="excel-uploads"       element={<ExcelUploads        />} /> 
         <Route path="admin-management"    element={<AdminManagement     />} />
         <Route path="attendance-modifier" element={<AttendanceModifier  />} />
         <Route path="report-dashboard"    element={<ReportsDashboard    />} />
         <Route path="fee-dashboard"       element={<FeeDashboard        />} />
+        
         
       </Route>
       
@@ -140,15 +141,15 @@ function App() {
   }
 >
   {/* ✅ Custom HEAD dashboard */}
-  <Route path="dashboard" element={<HeadDashboard />} />
-  <Route path="all-requests" element={<AllRequestsPage />} />
+  <Route path="dashboard"          element={<HeadDashboard           />} />
+  <Route path="all-requests"       element={<AllRequestsPage         />} />
   <Route path="faculty-attendance" element={<FacultyAttendanceModule />} />
 
   {/* ✅ Reusing ADMIN pages */}
-  <Route path="leave-approvals" element={<LeaveApprovals />} />
-  <Route path="od-approvals" element={<OdApprovals />} />
-  <Route path="permission-approvals" element={<PermissionApprovals />} />
-  
+  <Route path="leave-approvals"      element={<LeaveApprovals        />} />
+  <Route path="od-approvals"         element={<OdApprovals           />} />
+  <Route path="permission-approvals" element={<PermissionApprovals   />} />
+  <Route path="comp-off-approvals"   element={<CompOffApprovals      />} />
 </Route>
      
 
@@ -161,34 +162,34 @@ function App() {
           </ProtectedRoute>
         }
       >
-        <Route path="dashboard"             element={<AdminDashboard      />} />
+         <Route path="dashboard"            element={<AdminDashboard      />} />
          <Route path="leave-approvals"      element={<LeaveApprovals      />} />
          <Route path="od-approvals"         element={<OdApprovals         />} />
          <Route path="permission-approvals" element={<PermissionApprovals />} />
-         <Route path="users"                element={<UserManagement />} />
-         <Route path="faculty-attendance"   element={<FacultyAttendance />} />
-         <Route path="comp-off-approvals"   element={<CompOffApprovals />} />
+         <Route path="users"                element={<UserManagement      />} />
+         <Route path="faculty-attendance"   element={<FacultyAttendance   />} />
+         <Route path="comp-off-approvals"   element={<CompOffApprovals    />} />
       </Route>
 
       {/* FACULTY */}
-     <Route
-  path="/faculty"
-  element={
-    <ProtectedRoute allowedRoles={["FACULTY"]}>
-      <DashboardLayout />
-    </ProtectedRoute>
-  }
->
-  <Route path="dashboard" element={<FacultyDashboard />} />
-  <Route path="apply-leave" element={<ApplyLeave />} />
-  <Route path="my-leaves" element={<MyLeaves />} />
-  <Route path="attendance" element={<AttendanceInfo />} />
-  <Route path="apply-permission" element={<ApplyPermission />} />
-  <Route path="apply-od" element={<ApplyOd />} />
-  <Route path="profile" element={<FacultyProfile />} />
-  <Route path="apply-comp-off" element={<ApplyCompOff />} />
-  <Route path="policy-documents" element={<PolicyDocuments />} />
-</Route>
+      <Route
+        path="/faculty"
+        element={
+     <ProtectedRoute allowedRoles={["FACULTY"]}>
+       <DashboardLayout />
+     </ProtectedRoute>
+     }
+          >
+       <Route path="dashboard"         element={<FacultyDashboard />} />
+       <Route path="apply-leave"       element={<ApplyLeave       />} />
+       <Route path="my-leaves"         element={<MyLeaves         />} />
+       <Route path="attendance"        element={<AttendanceInfo   />} />
+       <Route path="apply-permission"  element={<ApplyPermission  />} />   
+       <Route path="apply-od"          element={<ApplyOd          />} />
+       <Route path="profile"           element={<FacultyProfile   />} />
+       <Route path="apply-comp-off"    element={<ApplyCompOff     />} />
+       <Route path="policy-documents"  element={<PolicyDocuments  />} />
+     </Route>
 
       {/* FINANCE */} 
       {/* FINANCE HEAD ADMIN */}
@@ -202,11 +203,11 @@ function App() {
           </ProtectedRoute>
         }
       >  
-        <Route path="dashboard" element={<HeadAdminDashboard />} />
-        <Route path="fee-approvals" element={<HeadAdminApprovals />} />
-        <Route path="due-date" element={<DueDateSetPage/>}/>
-        <Route path="fee-assignment" element={<FeeAssignment/>}/>
-        <Route path="od-form" element={<OdForm />} />
+        <Route path="dashboard"      element={<HeadAdminDashboard />} />
+        <Route path="fee-approvals"  element={<HeadAdminApprovals />} />
+        <Route path="due-date"       element={<DueDateSetPage     />} />
+        <Route path="fee-assignment" element={<FeeAssignment      />} />
+        <Route path="od-form"        element={<OdForm             />} />
       </Route>
       
       {/* FINANCE ADMIN */}
@@ -218,10 +219,10 @@ function App() {
           </ProtectedRoute>
         }
       >  
-        <Route path="dashboard" element={<FAdminDashboard />} />
-        <Route path="fee-structure" element={<AdminFeeStructurePage />} />
-        <Route path="student-management" element={<AdminStudentPage />} />
-        <Route path="fee-change-requests" element={<FeechangeRequestPage />} />
+        <Route path="dashboard"           element={<FAdminDashboard       />} />
+        <Route path="fee-structure"       element={<AdminFeeStructurePage />} />
+        <Route path="student-management"  element={<AdminStudentPage      />} />
+        <Route path="fee-change-requests" element={<FeechangeRequestPage  />} />
       </Route>
 
       {/* STUDENT */}
@@ -233,15 +234,15 @@ function App() {
           </ProtectedRoute>
         }
       >  
-        <Route path="dashboard" element={<StudentDashboard />} />
-        <Route path="profile" element={<StudentProfile />} />
-        <Route path="fees-page" element={<MyFeePage />} />
-        <Route path="make-payment" element={<MakePayment />} />
-        <Route path="payment-return" element={<PaymentReturn />} />
-        <Route path="payment/success" element={<PaymentSuccess />} />
-        <Route path="payment/failure" element={<PaymentFailure />} />
-        <Route path="error-page" element={<ErrorPge />} />
-        <Route path="payment-terms" element={<PaymentTerms />} />
+        <Route path="dashboard"        element={<StudentDashboard />} />
+        <Route path="profile"          element={<StudentProfile   />} />
+        <Route path="fees-page"        element={<MyFeePage        />} />
+        <Route path="make-payment"     element={<MakePayment      />} />
+        <Route path="payment-return"   element={<PaymentReturn    />} />
+        <Route path="payment/success"  element={<PaymentSuccess   />} />
+        <Route path="payment/failure"  element={<PaymentFailure   />} />
+        <Route path="error-page"       element={<ErrorPge         />} />
+        <Route path="payment-terms"    element={<PaymentTerms     />} />
        
       </Route>  
 

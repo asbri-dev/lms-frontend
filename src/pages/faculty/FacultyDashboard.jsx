@@ -67,7 +67,7 @@ const [featureData, setFeatureData] = useState(null);
 
     // 🔥 Handle backend OFF separately
     if (err.message === "Failed to fetch") {
-      setError("Server is not running. Please try again later.");
+      setError("Please check your internet connection.");
     } else {
       setError(err.message);
     }

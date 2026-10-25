@@ -67,20 +67,19 @@ const Header = ({ onMenuClick }) => {
           {/* Avatar */}
           
           <img
-  onClick={handleProfileClick}
-  src={`${API_BASE_URL}/image/${empId}`}
-  alt="Profile"
- className={`
-  w-10 h-10 rounded-full object-cover
-  ${role === "FACULTY"
-    ? "cursor-pointer hover:scale-105"
-    : "cursor-default"}
-`}
-  onError={(e) => {
-    e.target.src = downloadImage;
-  }}
-/>
-
+            onClick={handleProfileClick}
+            src={`${API_BASE_URL}/image/${empId}`}
+            alt="Profile"
+           className={`
+            w-10 h-10 rounded-full object-cover
+            ${role === "FACULTY"
+              ? "cursor-pointer hover:scale-105"
+              : "cursor-default"}
+          `}
+            onError={(e) => {
+              e.target.src = downloadImage;
+            }}
+          />
         </div>
       </header>
 
