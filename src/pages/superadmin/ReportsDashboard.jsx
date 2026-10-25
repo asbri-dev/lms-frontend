@@ -75,7 +75,7 @@ const MODULES = [
 ];
 
 export default function ReportsDashboard() {
-  const [active, setActive] = useState("attendance");
+  const [active, setActive] = useState("Acknowledge");
 
   const current = MODULES.find((m) => m.key === active);
 

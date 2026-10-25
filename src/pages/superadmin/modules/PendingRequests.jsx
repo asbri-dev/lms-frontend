@@ -855,6 +855,20 @@ const PendingRequests = () => {
         status: status,
       };
     }
+      else if (type === "CO") {
+        body = {
+          empId: empId,
+          collegeLocation: item.collegeLocation,
+          appliedOn: item.appliedOn,
+          adminEmpId: item.adminEmpId,
+          workedDate: item.workedDate,
+          empName: item.empName,
+          workedReason: item.workedReason,
+          availedDate: item.availedDate,
+          status: status,
+        };
+      }
+    
 
       // ❗ Trim location if present
       if (body.location) body.location = body.location.trim();
@@ -1019,13 +1033,19 @@ const PendingRequests = () => {
       body = {
         adminEmpId: item.adminEmpId,
         empId,
+        collegeLocation: item.collegeLocation,
+        empName: item.empName,
+        workedReason: item.workedReason,
+        availedDate: item.availedDate,
+        appliedOn: item.appliedOn,
+        workedDate: item.workedDate,
         onDutyFrom: item.onDutyFrom,
+        availedReason: item.availedReason,
         onDutyTo: item.onDutyTo,
         sessionFrom: item.sessionFrom,
         sessionTo: item.sessionTo,
         noOfDays: item.noOfDays,
         reason: item.reason,
-        appliedOn: item.appliedOn,
         status: "Approved",
         approveReason,
       };
