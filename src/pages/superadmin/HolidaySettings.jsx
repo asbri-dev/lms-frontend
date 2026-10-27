@@ -45,6 +45,8 @@ const HolidayPage = () => {
 
   const [loading, setLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteReason, setDeleteReason] = useState("");
 
   const [formData, setFormData] = useState({
     fromDate: "",
@@ -202,45 +204,69 @@ const HolidayPage = () => {
     }
   };
 
-  const handleDelete = async (date) => {
-    const confirmDelete = window.confirm("Delete this holiday?");
-    if (!confirmDelete) return;
+const handleDelete = async (date, reason = "") => {
 
-    try {
-      setLoading(true);
+
+  try {
+    setLoading(true);
+
+    const formattedDate = format(new Date(date), "dd-MMM-yyyy");
+
+    if (selectedDate.type === "Off") {
+
+      // OFF DELETE API
       const response = await fetch(
-        `${API_BASE_URL}/deleteHoliday?date=${format(
-          new Date(date),
-          "dd-MMM-yyyy"
-        )}&location=${location}`,
-        { method: "DELETE" }
+        `${API_BASE_URL}/deleteWeekOff`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            date: formattedDate,
+            location: location,
+            reason: reason,
+            deletedBy: user.employeeId,
+          }),
+        }
       );
 
       if (!response.ok) {
-        let errorMessage = "Something went wrong";
-        try {
-          const contentType = response.headers.get("content-type");
-          if (contentType && contentType.includes("application/json")) {
-            const data = await response.json();
-            errorMessage = data.message || JSON.stringify(data);
-          } else {
-            errorMessage = await response.text();
-          }
-        } catch {
-          errorMessage = "Failed to process error response";
-        }
-        throw new Error(errorMessage);
+        throw new Error("Failed to delete Off");
       }
 
-      toast.success("Holiday deleted successfully");
-      setSelectedDate(null);
-      fetchHolidays();
-    } catch (err) {
-      toast.error(err.message || "Delete failed");
-    } finally {
-      setLoading(false);
+    } else {
+        const confirmDelete = window.confirm("Delete this holiday?");
+  if (!confirmDelete) return;
+
+      // EXISTING HOLIDAY DELETE API — DON'T CHANGE
+      const response = await fetch(
+        `${API_BASE_URL}/deleteHoliday?date=${formattedDate}&location=${location}`,
+        {
+          method: "DELETE",
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to delete holiday");
+      }
     }
-  };
+
+    toast.success(
+      selectedDate.type === "Off"
+        ? "Off deleted successfully"
+        : "Holiday deleted successfully"
+    );
+
+    setSelectedDate(null);
+    fetchHolidays();
+
+  } catch (err) {
+    toast.error(err.message || "Delete failed");
+  } finally {
+    setLoading(false);
+  }
+};
 
   const shiftMonth = (delta) => {
     setMonthDate((prev) => {
@@ -476,7 +502,14 @@ const HolidayPage = () => {
               )}
 
               <button
-                onClick={() => handleDelete(selectedDate.date)}
+               onClick={() => {
+                if (selectedDate.type === "Off") {
+               setDeleteReason("");
+               setShowDeleteModal(true);
+               } else {
+               handleDelete(selectedDate.date);
+               }
+              }}
                 disabled={loading}
                 className="flex items-center gap-2 w-full justify-center px-4 py-2.5 rounded-lg
                            bg-red-50 text-red-600 border border-red-200 text-sm font-medium
@@ -494,6 +527,120 @@ const HolidayPage = () => {
           )}
         </div>
       </div>
+
+      {/* Delete Off Reason Modal */}
+{showDeleteModal && selectedDate?.type === "Off" && (
+  <div
+    className="fixed inset-0 bg-black/40 backdrop-blur-sm flex justify-center items-center z-50 p-4"
+    onClick={() => setShowDeleteModal(false)}
+  >
+    <div
+      className="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden"
+      onClick={(e) => e.stopPropagation()}
+    >
+      {/* Header */}
+      <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+        <div>
+          <h3 className="text-lg font-semibold text-gray-800">
+            Delete Week Off
+          </h3>
+          <p className="text-xs text-gray-500 mt-1">
+            Please provide a reason for deleting this Off.
+          </p>
+        </div>
+
+        <button
+          type="button"
+          onClick={() => setShowDeleteModal(false)}
+          className="p-1.5 rounded-lg text-gray-400 hover:bg-gray-100
+                     hover:text-gray-600 transition"
+        >
+          <X size={18} />
+        </button>
+      </div>
+
+      {/* Body */}
+      <div className="p-6 space-y-4">
+
+        {/* Date */}
+        <div>
+          <p className="text-xs font-medium text-gray-400 uppercase tracking-wide mb-1">
+            Date
+          </p>
+
+          <p className="text-sm font-medium text-gray-800">
+            {selectedDate?.date &&
+              format(
+                parseISO(selectedDate.date),
+                "EEEE, dd MMMM yyyy"
+              )}
+          </p>
+        </div>
+
+        {/* Reason */}
+        <div>
+          <label className="block text-xs font-medium text-gray-500 mb-1.5">
+            Reason <span className="text-red-500">*</span>
+          </label>
+
+          <textarea
+            rows={4}
+            value={deleteReason}
+            onChange={(e) => setDeleteReason(e.target.value)}
+            placeholder="Enter the reason for deleting this week off..."
+            className="w-full px-3 py-2.5 rounded-lg bg-gray-50
+                       border border-gray-200 text-sm
+                       focus:outline-none focus:ring-2
+                       focus:ring-[#2b3c6b]/30
+                       resize-none"
+          />
+        </div>
+
+        {/* Deleted By */}
+        <div className="bg-gray-50 rounded-lg p-3">
+          <p className="text-xs text-gray-400">
+            Deleted by
+          </p>
+
+          <p className="text-sm font-medium text-gray-700 mt-0.5">
+            {user?.employeeId}
+          </p>
+        </div>
+      </div>
+
+      {/* Footer */}
+      <div className="flex justify-end gap-3 px-6 py-4 border-t border-gray-100 bg-gray-50">
+
+        <button
+          type="button"
+          onClick={() => {
+            setShowDeleteModal(false);
+            setDeleteReason("");
+          }}
+          className="px-4 py-2 rounded-lg bg-white border border-gray-200
+                     text-sm text-gray-600 hover:bg-gray-100 transition"
+        >
+          Cancel
+        </button>
+
+        <button
+          type="button"
+          disabled={loading || !deleteReason.trim()}
+          onClick={() => {
+            setShowDeleteModal(false);
+            handleDelete(selectedDate.date, deleteReason.trim());
+          }}
+          className="px-4 py-2 rounded-lg text-white text-sm font-medium
+                     bg-red-600 hover:bg-red-700
+                     transition disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {loading ? "Deleting..." : "Delete Off"}
+        </button>
+
+      </div>
+    </div>
+  </div>
+)}
 
       {/* Create modal */}
       {showModal && (
