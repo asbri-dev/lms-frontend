@@ -184,6 +184,11 @@ const LEGEND_ENTRIES = [
   { key: "PR-Present:Present", ...STATUS_MAP["PR-Present:Present"] },
 ];
 
+
+
+
+
+
 const TOTAL_KEYS = ["Total","Present", "Absent", "CL", "ML", "OD", "Off", "Holiday", "Unknown", "Permission"];
 
 /* ─── Derive location from employeeId prefix ─── */
@@ -283,7 +288,7 @@ const fetchAttendance = useCallback(async () => {
 
     const res = await fetch(
       `${apiEndpoint}?${queryParams.toString()}`,
-      {
+      {  
         headers: {
           Authorization: `Bearer ${token}`,
         },

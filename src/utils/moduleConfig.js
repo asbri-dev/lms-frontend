@@ -1,5 +1,9 @@
 // src/shared/config/moduleConfig.js
 import { GraduationCap,Leaf,Snowflake,Sun } from 'lucide-react';
+const collegeNames = {
+  PALAKKAD: "Aries Polytechnic College, Palakkad",
+  CHITTOOR: "Aries Polytechnic College, Chittoor",
+};
 
 export const moduleConfig = {
   SUPERADMIN: {
@@ -105,22 +109,28 @@ export const moduleConfig = {
     label: "Finance Admin",
   },
 
-  STUDENT: {
-    title: "Finance Portal",
-    subtitle: "Fees",
-    icon: Snowflake,
-    background:"bg-blue-500 p-2 rounded-md shadow-lg",
+  
 
-    theme: {
-      sidebar: "bg-black",
-      background: "bg-white",
-      Ntext: "text-black",
-      hover: "hover:bg-[#d8e4fa]",
-      active : "bg-[#d8e4fa]",
-      text: "text-[#3d7dfc]",
-      header: "bg-white",  
-    },
 
-    label: "Student",
+STUDENT: (collegeLocation) => ({
+  
+  title:
+    collegeNames[collegeLocation?.toUpperCase()] ||
+    "Aries Polytechnic College",
+
+  icon: Snowflake,
+  background: "bg-blue-500 p-2 rounded-md shadow-lg",
+
+  theme: {
+    sidebar: "bg-black",
+    background: "bg-white",
+    Ntext: "text-black",
+    hover: "hover:bg-[#d8e4fa]",
+    active: "bg-[#d8e4fa]",
+    text: "text-[#3d7dfc]",
+    header: "bg-white",
   },
+
+  label: "Student",
+}),
 };

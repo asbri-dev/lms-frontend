@@ -21,7 +21,11 @@ const Header = ({ onMenuClick }) => {
   const role = user?.role || "";
   const navigate = useNavigate();
  // const avatarLetter = user?.name?.charAt(0)?.toUpperCase() || "U";
-  const currentModule = moduleConfig[user?.role];
+  const currentModule =
+  user?.role === "STUDENT"
+    ? moduleConfig.STUDENT(user?.collegeLocation)
+    : moduleConfig[user?.role];
+    
   const handleProfileClick = () => {
   if (role === "FACULTY") {
     navigate("profile");
@@ -46,9 +50,9 @@ const Header = ({ onMenuClick }) => {
             <Menu size={22} />
           </button>
 
-          <h2 className="text-base md:text-xl font-semibold text-gray-800">
-            {currentModule?.title}
-          </h2>
+<h2 className="text-base md:text-xl font-semibold tracking-[-0.02em] text-[#0f172a]">
+  {currentModule?.title}
+</h2>
         </div>
 
         {/* Right: avatar + user info */}

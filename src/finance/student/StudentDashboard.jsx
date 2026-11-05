@@ -95,6 +95,118 @@ const downloadReceiptByPath = async (recieptPath) => {
   }
 };
 
+// ── Responsive styles (desktop layout unchanged, mobile overrides below) ─────
+const RESPONSIVE_CSS = `
+  *, *::before, *::after { box-sizing: border-box; }
+
+  .m-label { display: none; }
+
+  /* fee table grid (desktop) */
+  .fee-grid {
+    display: grid;
+    grid-template-columns: 1fr 2fr 100px 100px 100px 110px 100px;
+    gap: 12px;
+  }
+  .fr-total, .fr-paid, .fr-bal { text-align: right; }
+  .fr-txn { text-align: right; }
+  .fr-status { display: flex; justify-content: flex-end; }
+  .fr-receipt { display: flex; justify-content: flex-end; }
+
+  .stat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  /* ── Tablet ── */
+  @media (max-width: 900px) {
+    .dash-wrap { padding: 20px 16px 40px !important; }
+    .stat-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  }
+
+  /* ── Mobile ── */
+  @media (max-width: 720px) {
+    .dash-wrap { padding: 16px 12px 32px !important; }
+
+    /* header */
+    .dash-header { margin-bottom: 18px !important; gap: 10px !important; }
+    .dash-header-title { font-size: 18px !important; }
+    .dash-sync { display: none !important; }
+    .dash-refresh { padding: 8px 12px !important; }
+
+    /* welcome card */
+    .welcome-card { padding: 20px 18px !important; border-radius: 18px !important; margin-bottom: 16px !important; }
+    .welcome-name { font-size: 21px !important; margin-bottom: 12px !important; word-break: break-word; }
+    .welcome-pill { font-size: 11px !important; padding: 4px 10px !important; }
+
+    /* stat cards */
+    .stat-grid { gap: 10px; margin-bottom: 16px; }
+    .stat-card { padding: 14px 14px !important; border-radius: 14px !important; gap: 8px !important; }
+    .stat-icon { width: 36px !important; height: 36px !important; border-radius: 10px !important; }
+    .stat-value { font-size: 18px !important; }
+    .stat-sub { font-size: 10.5px !important; }
+
+    /* info strip */
+    .info-strip { padding: 12px 14px !important; gap: 8px !important; margin-bottom: 16px !important; }
+
+    /* table card */
+    .fee-card { border-radius: 16px !important; }
+    .fee-card-head { padding: 14px 16px !important; }
+    .fee-head { display: none !important; }
+
+    /* each fee row becomes a card */
+    .fee-row {
+      grid-template-columns: repeat(3, 1fr) !important;
+      grid-template-areas:
+        "type   type   status"
+        "txn    txn    txn"
+        "total  paid   bal"
+        "receipt receipt receipt";
+      gap: 10px 8px !important;
+      padding: 16px !important;
+    }
+    .fr-type    { grid-area: type; min-width: 0; }
+    .fr-status  { grid-area: status; align-items: flex-start; }
+    .fr-txn     { grid-area: txn; text-align: left !important;
+                  background: #f8faff; border-radius: 10px; padding: 8px 10px; }
+    .fr-total   { grid-area: total; text-align: left !important; }
+    .fr-paid    { grid-area: paid;  text-align: left !important; }
+    .fr-bal     { grid-area: bal;   text-align: left !important; }
+    .fr-receipt { grid-area: receipt; justify-content: stretch !important; }
+    .fr-btn     { width: 100% !important; padding: 9px 12px !important; font-size: 12px !important; }
+
+    .m-label {
+      display: block;
+      font-size: 10px;
+      font-weight: 600;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+      margin-bottom: 2px;
+    }
+
+    /* totals footer */
+    .fee-foot {
+      grid-template-columns: repeat(3, 1fr) !important;
+      grid-template-areas:
+        "lbl   lbl  lbl"
+        "total paid bal";
+      gap: 8px !important;
+      padding: 14px 16px !important;
+    }
+    .ff-lbl   { grid-area: lbl; }
+    .ff-total { grid-area: total; text-align: left !important; }
+    .ff-paid  { grid-area: paid;  text-align: left !important; }
+    .ff-bal   { grid-area: bal;   text-align: left !important; }
+    .ff-empty { display: none !important; }
+  }
+
+  @media (max-width: 380px) {
+    .stat-grid { grid-template-columns: 1fr; }
+  }
+`;
+
 // ── Snowflake decorative bg ───────────────────────────────────────────────────
 function SnowflakeBg() {
   const flakes = [
@@ -123,7 +235,7 @@ function SnowflakeBg() {
 // ── Stat Card ─────────────────────────────────────────────────────────────────
 function StatCard({ icon: Icon, label, value, sub, accent, delay }) {
   return (
-    <div style={{
+    <div className="stat-card" style={{
       background:"#fff",
       borderRadius:16,
       border:`1.5px solid ${accent}30`,
@@ -133,13 +245,14 @@ function StatCard({ icon: Icon, label, value, sub, accent, delay }) {
       boxShadow:`0 2px 16px ${accent}12`,
       animation:"fadeUp .5s ease both",
       animationDelay: delay,
+      minWidth:0,
     }}>
       <div style={{
         position:"absolute", top:-18, right:-18,
         width:80, height:80, borderRadius:"50%",
         background:`${accent}10`,
       }} />
-      <div style={{
+      <div className="stat-icon" style={{
         width:42, height:42, borderRadius:12,
         background:`${accent}15`,
         display:"flex", alignItems:"center", justifyContent:"center",
@@ -148,10 +261,10 @@ function StatCard({ icon: Icon, label, value, sub, accent, delay }) {
       </div>
       <div>
         <p style={{ fontSize:12, color:"#64748b", margin:"0 0 4px", fontFamily:"'DM Sans',sans-serif" }}>{label}</p>
-        <p style={{ fontSize:22, fontWeight:700, color:"#0f172a", margin:0, fontFamily:"'DM Sans',sans-serif", letterSpacing:"-0.5px" }}>
+        <p className="stat-value" style={{ fontSize:22, fontWeight:700, color:"#0f172a", margin:0, fontFamily:"'DM Sans',sans-serif", letterSpacing:"-0.5px" }}>
           ₹{fmt(value)}
         </p>
-        {sub && <p style={{ fontSize:11, color: accent, margin:"4px 0 0", fontWeight:500 }}>{sub}</p>}
+        {sub && <p className="stat-sub" style={{ fontSize:11, color: accent, margin:"4px 0 0", fontWeight:500 }}>{sub}</p>}
       </div>
       <style>{`@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}`}</style>
     </div>
@@ -165,8 +278,9 @@ function Chip({ icon: Icon, label }) {
       display:"inline-flex", alignItems:"center", gap:6,
       background:"#E9F3FF", borderRadius:8,
       padding:"5px 11px", fontSize:12, color:"#1e4db7", fontWeight:500,
+      maxWidth:"100%",
     }}>
-      {Icon && <Icon size={13} strokeWidth={2.2} />}
+      {Icon && <Icon size={13} strokeWidth={2.2} style={{ flexShrink:0 }} />}
       {label}
     </div>
   );
@@ -189,10 +303,8 @@ function FeeRow({
 
   return (
     <div
+      className="fee-grid fee-row"
       style={{
-        display: "grid",
-        gridTemplateColumns: "1fr 2fr 100px 100px 100px 110px 100px",
-        gap: 12,
         alignItems: "center",
         padding: "14px 20px",
         borderBottom: "1px solid #f1f5f9",
@@ -209,7 +321,7 @@ function FeeRow({
     >
 
       {/* Fee Type */}
-      <div>
+      <div className="fr-type">
         <p
           style={{
             margin: 0,
@@ -239,7 +351,8 @@ function FeeRow({
       </div>
 
       {/* Transaction ID */}
-      <div style={{ textAlign: "right" }}>
+      <div className="fr-txn">
+        <span className="m-label">Transaction ID</span>
         <p
           style={{
             margin: 0,
@@ -254,33 +367,38 @@ function FeeRow({
       </div>
 
       {/* Total */}
-      <p
-        style={{
-          margin: 0,
-          fontSize: 13,
-          color: "#334155",
-          textAlign: "right",
-          fontWeight: 500,
-        }}
-      >
-        ₹{fmt(fee.amtIncFine)}
-      </p>
+      <div className="fr-total">
+        <span className="m-label">Total</span>
+        <p
+          style={{
+            margin: 0,
+            fontSize: 13,
+            color: "#334155",
+            fontWeight: 500,
+          }}
+        >
+          ₹{fmt(fee.amtIncFine)}
+        </p>
+      </div>
 
       {/* Paid */}
-      <p
-        style={{
-          margin: 0,
-          fontSize: 13,
-          color: "#16a34a",
-          textAlign: "right",
-          fontWeight: 500,
-        }}
-      >
-        ₹{fmt(fee.amountPaid)}
-      </p>
+      <div className="fr-paid">
+        <span className="m-label">Paid</span>
+        <p
+          style={{
+            margin: 0,
+            fontSize: 13,
+            color: "#16a34a",
+            fontWeight: 500,
+          }}
+        >
+          ₹{fmt(fee.amountPaid)}
+        </p>
+      </div>
 
       {/* Balance */}
-      <div style={{ textAlign: "right" }}>
+      <div className="fr-bal">
+        <span className="m-label">Balance</span>
         <p
           style={{
             margin: 0,
@@ -313,7 +431,7 @@ function FeeRow({
       </div>
 
       {/* Status */}
-      <div style={{ display: "flex", justifyContent: "flex-end" }}>
+      <div className="fr-status">
         <span
           style={{
             fontSize: 11,
@@ -342,70 +460,70 @@ function FeeRow({
       </div>
 
       {/* Receipt / Download */}
-{/* Receipt / Download */}
-<div style={{ display: "flex", justifyContent: "right" }}>
-  {transactionId || (recieptPath && recieptPath !== "NA") ? (
-    <button
-      onClick={async () => {
-        const downloadKey = transactionId || recieptPath;
+      <div className="fr-receipt">
+        {transactionId || (recieptPath && recieptPath !== "NA") ? (
+          <button
+            className="fr-btn"
+            onClick={async () => {
+              const downloadKey = transactionId || recieptPath;
 
-        if (downloadingReceipt === downloadKey) return;
+              if (downloadingReceipt === downloadKey) return;
 
-        try {
-          setDownloadingReceipt(downloadKey);
+              try {
+                setDownloadingReceipt(downloadKey);
 
-          if (transactionId) {
-            // Old payment receipt API
-            await downloadReceipt(transactionId);
-          } else if (recieptPath && recieptPath !== "NA") {
-            // New uploaded receipt API
-            await downloadReceiptByPath(recieptPath);
-          }
-        } finally {
-          setDownloadingReceipt(null);
-        }
-      }}
-      disabled={
-        downloadingReceipt === (transactionId || recieptPath)
-      }
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        justifyContent: "center",
-        gap: 5,
-        background: "#E9F3FF",
-        color: "#1e4db7",
-        border: "1px solid #bfdbfe",
-        borderRadius: 8,
-        padding: "5px 10px",
-        fontSize: 11,
-        fontWeight: 600,
-        cursor: "pointer",
-        fontFamily: "inherit",
-        whiteSpace: "nowrap",
-      }}
-    >
-      {downloadingReceipt === (transactionId || recieptPath) ? (
-        <Loader2
-          size={12}
-          strokeWidth={2.5}
-          style={{
-            animation: "spin 1s linear infinite",
-          }}
-        />
-      ) : (
-        <>
-          <Download size={12} strokeWidth={2.5} />
-          Download
-        </>
-      )}
-    </button>
-  ) : (
-    <span style={{ color: "#cbd5e1", fontSize: 11 }}>
-      —
-    </span>
-  )}
-</div>
+                if (transactionId) {
+                  // Old payment receipt API
+                  await downloadReceipt(transactionId);
+                } else if (recieptPath && recieptPath !== "NA") {
+                  // New uploaded receipt API
+                  await downloadReceiptByPath(recieptPath);
+                }
+              } finally {
+                setDownloadingReceipt(null);
+              }
+            }}
+            disabled={
+              downloadingReceipt === (transactionId || recieptPath)
+            }
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 5,
+              background: "#E9F3FF",
+              color: "#1e4db7",
+              border: "1px solid #bfdbfe",
+              borderRadius: 8,
+              padding: "5px 10px",
+              fontSize: 11,
+              fontWeight: 600,
+              cursor: "pointer",
+              fontFamily: "inherit",
+              whiteSpace: "nowrap",
+            }}
+          >
+            {downloadingReceipt === (transactionId || recieptPath) ? (
+              <Loader2
+                size={12}
+                strokeWidth={2.5}
+                style={{
+                  animation: "spin 1s linear infinite",
+                }}
+              />
+            ) : (
+              <>
+                <Download size={12} strokeWidth={2.5} />
+                Download
+              </>
+            )}
+          </button>
+        ) : (
+          <span style={{ color: "#cbd5e1", fontSize: 11 }}>
+            —
+          </span>
+        )}
+      </div>
 
     </div>
   );
@@ -450,6 +568,7 @@ if (loading) return (
     fontFamily: "'DM Sans',sans-serif",
     position: "relative",
     overflow: "hidden",
+    padding: 16,
   }}>
     <style>{`
       @keyframes sunSpin {
@@ -549,10 +668,11 @@ if (loading) return (
       minHeight:"100vh", display:"flex", alignItems:"center", justifyContent:"center",
       background:"linear-gradient(135deg,#E9F3FF 0%,#f8faff 100%)",
       fontFamily:"'DM Sans',sans-serif",
+      padding:16,
     }}>
       <div style={{
-        background:"#fff", borderRadius:16, padding:40, textAlign:"center",
-        border:"1.5px solid #fecaca", maxWidth:360,
+        background:"#fff", borderRadius:16, padding:"32px 24px", textAlign:"center",
+        border:"1.5px solid #fecaca", maxWidth:360, width:"100%",
       }}>
         <AlertTriangle size={40} color="#ef4444" style={{ marginBottom:12 }} />
         <p style={{ fontWeight:700, fontSize:16, color:"#0f172a", margin:"0 0 6px" }}>Failed to load</p>
@@ -575,20 +695,28 @@ if (loading) return (
     .filter(f => f.dueDate !== "To be Announced" && f.feeStatus !== "Paid")
     .sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate))[0]?.dueDate || "—";
 
+  const pillStyle = {
+    background:"rgba(255,255,255,.18)", backdropFilter:"blur(4px)",
+    borderRadius:8, padding:"5px 12px", fontSize:12, color:"#fff", fontWeight:500,
+    border:"1px solid rgba(255,255,255,.25)",
+  };
+
   return (
     <div style={{
       minHeight:"100vh",
       background:"linear-gradient(135deg,#E9F3FF 0%,#f8faff 55%,#D8E4FA 100%)",
       fontFamily:"'DM Sans',sans-serif",
       position:"relative",
+      overflowX:"hidden",
     }}>
       <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet" />
+      <style>{RESPONSIVE_CSS}</style>
       <SnowflakeBg />
 
-      <div style={{ position:"relative", zIndex:1, maxWidth:1180, margin:"0 auto", padding:"28px 20px 48px" }}>
+      <div className="dash-wrap" style={{ position:"relative", zIndex:1, maxWidth:1180, margin:"0 auto", padding:"28px 20px 48px" }}>
 
         {/* ── Header ── */}
-        <div style={{
+        <div className="dash-header" style={{
           display:"flex", alignItems:"center", justifyContent:"space-between",
           marginBottom:28, flexWrap:"wrap", gap:12,
         }}>
@@ -598,6 +726,7 @@ if (loading) return (
               background:"linear-gradient(135deg,#3D7DFC,#6fa3ff)",
               display:"flex", alignItems:"center", justifyContent:"center",
               boxShadow:"0 4px 14px #3D7DFC40",
+              flexShrink:0,
             }}>
               <Snowflake size={24} color="#fff" strokeWidth={2} />
             </div>
@@ -605,18 +734,18 @@ if (loading) return (
               <p style={{ margin:0, fontSize:12, color:"#3D7DFC", fontWeight:600, letterSpacing:".06em", textTransform:"uppercase" }}>
                 Student Portal
               </p>
-              <p style={{ margin:0, fontSize:20, fontWeight:700, color:"#0f172a", fontFamily:"'DM Serif Display',serif", letterSpacing:"-0.3px" }}>
+              <p className="dash-header-title" style={{ margin:0, fontSize:20, fontWeight:700, color:"#0f172a", fontFamily:"'DM Serif Display',serif", letterSpacing:"-0.3px" }}>
                 Fee Dashboard
               </p>
             </div>
           </div>
           <div style={{ display:"flex", alignItems:"center", gap:10 }}>
             {lastSync && (
-              <p style={{ fontSize:11, color:"#94a3b8", margin:0 }}>
+              <p className="dash-sync" style={{ fontSize:11, color:"#94a3b8", margin:0 }}>
                 Synced {lastSync.toLocaleTimeString("en-IN", { hour:"2-digit", minute:"2-digit" })}
               </p>
             )}
-            <button onClick={fetchDashboard} style={{
+            <button className="dash-refresh" onClick={fetchDashboard} style={{
               display:"flex", alignItems:"center", gap:6,
               background:"#fff", border:"1.5px solid #D8E4FA",
               borderRadius:10, padding:"8px 14px", cursor:"pointer",
@@ -629,7 +758,7 @@ if (loading) return (
         </div>
 
         {/* ── Welcome Card ── */}
-        <div style={{
+        <div className="welcome-card" style={{
           background:"linear-gradient(120deg,#3D7DFC 0%,#5b93ff 60%,#80aeff 100%)",
           borderRadius:20, padding:"28px 32px",
           marginBottom:24, position:"relative", overflow:"hidden",
@@ -648,39 +777,23 @@ if (loading) return (
             <p style={{ margin:"0 0 4px", fontSize:13, color:"rgba(255,255,255,.75)", fontWeight:500 }}>
               Welcome back 👋
             </p>
-            <h1 style={{
+            <h1 className="welcome-name" style={{
               margin:"0 0 16px", fontSize:26, fontWeight:700, color:"#fff",
               fontFamily:"'DM Serif Display',serif", letterSpacing:"-0.5px",
             }}>
               {studInfo.studentFullName}
             </h1>
             <div style={{ display:"flex", flexWrap:"wrap", gap:8 }}>
-              <span style={{
-                background:"rgba(255,255,255,.18)", backdropFilter:"blur(4px)",
-                borderRadius:8, padding:"5px 12px", fontSize:12, color:"#fff", fontWeight:500,
-                border:"1px solid rgba(255,255,255,.25)",
-              }}>
+              <span className="welcome-pill" style={pillStyle}>
                 {studInfo.studentAdmissionNumber}
               </span>
-              <span style={{
-                background:"rgba(255,255,255,.18)", backdropFilter:"blur(4px)",
-                borderRadius:8, padding:"5px 12px", fontSize:12, color:"#fff", fontWeight:500,
-                border:"1px solid rgba(255,255,255,.25)",
-              }}>
+              <span className="welcome-pill" style={pillStyle}>
                 {studInfo.studentDepartment} · Sem {studInfo.currentSemester}
               </span>
-              <span style={{
-                background:"rgba(255,255,255,.18)", backdropFilter:"blur(4px)",
-                borderRadius:8, padding:"5px 12px", fontSize:12, color:"#fff", fontWeight:500,
-                border:"1px solid rgba(255,255,255,.25)",
-              }}>
+              <span className="welcome-pill" style={pillStyle}>
                 {studInfo.studentCampus}
               </span>
-              <span style={{
-                background:"rgba(255,255,255,.18)", backdropFilter:"blur(4px)",
-                borderRadius:8, padding:"5px 12px", fontSize:12, color:"#fff", fontWeight:500,
-                border:"1px solid rgba(255,255,255,.25)",
-              }}>
+              <span className="welcome-pill" style={pillStyle}> 
                 AY {studInfo.currentAcademicYear}
               </span>
             </div>
@@ -688,11 +801,7 @@ if (loading) return (
         </div>
 
         {/* ── 4 Stat Cards ── */}
-        <div style={{
-          display:"grid",
-          gridTemplateColumns:"repeat(auto-fit,minmax(220px,1fr))",
-          gap:16, marginBottom:24,
-        }}>
+        <div className="stat-grid">
           <StatCard
             icon={IndianRupee}
             label="Total Amount"
@@ -728,7 +837,7 @@ if (loading) return (
         </div>
 
         {/* ── Info strip ── */}
-        <div style={{
+        <div className="info-strip" style={{
           background:"#fff", borderRadius:14, padding:"14px 20px",
           marginBottom:24, display:"flex", flexWrap:"wrap", gap:10,
           border:"1.5px solid #E9F3FF",
@@ -743,17 +852,18 @@ if (loading) return (
         </div>
 
         {/* ── Fee Breakdown Table ── */}
-        <div style={{
+        <div className="fee-card" style={{
           background:"#fff", borderRadius:16, overflow:"hidden",
           border:"1.5px solid #E9F3FF",
           boxShadow:"0 2px 20px #3D7DFC0a",
           animation:"fadeUp .5s .25s ease both",
         }}>
           {/* table header */}
-          <div style={{
+          <div className="fee-card-head" style={{
             padding:"18px 20px",
             borderBottom:"2px solid #E9F3FF",
             display:"flex", alignItems:"center", justifyContent:"space-between",
+            gap:10,
           }}>
             <div>
               <h2 style={{ margin:0, fontSize:16, fontWeight:700, color:"#0f172a" }}>Fee Breakdown</h2>
@@ -763,129 +873,109 @@ if (loading) return (
             </div>
             <div style={{
               background:"#E9F3FF", borderRadius:8, padding:"6px 14px",
-              fontSize:12, fontWeight:600, color:"#3D7DFC",
+              fontSize:12, fontWeight:600, color:"#3D7DFC", whiteSpace:"nowrap",
             }}>
               {fees.filter(f => f.feeStatus === "Paid").length}/{fees.length} Paid
             </div>
           </div>
 
-          {/* column labels */}
-         {/* column labels */}
-             <div
-               style={{
-                 display: "grid",
-                 gridTemplateColumns: "1fr 2fr 100px 100px 100px 110px 100px",
-                 gap: 12,
-                 padding: "10px 20px",
-                 background: "#f8faff",
-                 borderBottom: "1px solid #E9F3FF",
-               }}
-             >
-               {[
-                 "Fee Type",
-                 "Transaction ID",
-                 "Total",
-                 "Paid",
-                 "Balance",
-                 "Status",
-                 "Receipt",
-               ].map((h, i) => (
-                 <p
-                   key={h}
-                   style={{
-                     margin: 0,
-                     fontSize: 11,
-                     fontWeight: 600,
-                     color: "#94a3b8",
-                     textTransform: "uppercase",
-                     letterSpacing: ".06em",
-                     textAlign: i === 0 ? "left" : "right",
-                   }}
-                 >
-                   {h}
-                 </p>
-               ))}
-             </div>
+          {/* column labels (hidden on mobile) */}
+          <div
+            className="fee-grid fee-head"
+            style={{
+              padding: "10px 20px",
+              background: "#f8faff",
+              borderBottom: "1px solid #E9F3FF",
+            }}
+          >
+            {[
+              "Fee Type",
+              "Transaction ID",
+              "Total",
+              "Paid",
+              "Balance",
+              "Status",
+              "Receipt",
+            ].map((h, i) => (
+              <p
+                key={h}
+                style={{
+                  margin: 0,
+                  fontSize: 11,
+                  fontWeight: 600,
+                  color: "#94a3b8",
+                  textTransform: "uppercase",
+                  letterSpacing: ".06em",
+                  textAlign: i === 0 ? "left" : "right",
+                }}
+              >
+                {h}
+              </p>
+            ))}
+          </div>
 
           {/* rows */}
           {fees.map((fee, i) => (
-  <FeeRow
-    key={fee.typeOfFee}
-    fee={fee}
-    index={i}
-    downloadingReceipt={downloadingReceipt}
-    setDownloadingReceipt={setDownloadingReceipt}
-  />
-))}
+            <FeeRow
+              key={fee.typeOfFee}
+              fee={fee}
+              index={i}
+              downloadingReceipt={downloadingReceipt}
+              setDownloadingReceipt={setDownloadingReceipt}
+            />
+          ))}
 
           {/* totals footer */}
-{/* totals footer */}
-<div
-  style={{
-    display: "grid",
-    gridTemplateColumns: "1fr 2fr 100px 100px 100px 110px 100px",
-    gap: 12,
-    padding: "16px 20px",
-    background: "linear-gradient(90deg,#E9F3FF 0%,#f0f6ff 100%)",
-    borderTop: "2px solid #D8E4FA",
-  }}
->
-  <p
-    style={{
-      margin: 0,
-      fontWeight: 700,
-      fontSize: 13,
-      color: "#0f172a",
-    }}
-  >
-    Total
-  </p>
+          <div
+            className="fee-grid fee-foot"
+            style={{
+              padding: "16px 20px",
+              background: "linear-gradient(90deg,#E9F3FF 0%,#f0f6ff 100%)",
+              borderTop: "2px solid #D8E4FA",
+            }}
+          >
+            <p
+              className="ff-lbl"
+              style={{
+                margin: 0,
+                fontWeight: 700,
+                fontSize: 13,
+                color: "#0f172a",
+              }}
+            >
+              Total
+            </p>
 
-  {/* Transaction ID column */}
-  <div />
+            {/* Transaction ID column */}
+            <div className="ff-empty" />
 
-  <p
-    style={{
-      margin: 0,
-      fontWeight: 700,
-      fontSize: 13,
-      color: "#0f172a",
-      textAlign: "right",
-    }}
-  >
-    ₹{fmt(totals.totalAmount)}
-  </p>
+            <div className="ff-total" style={{ textAlign: "right" }}>
+              <span className="m-label">Total</span>
+              <p style={{ margin: 0, fontWeight: 700, fontSize: 13, color: "#0f172a" }}>
+                ₹{fmt(totals.totalAmount)}
+              </p>
+            </div>
 
-  <p
-    style={{
-      margin: 0,
-      fontWeight: 700,
-      fontSize: 13,
-      color: "#16a34a",
-      textAlign: "right",
-    }}
-  >
-    ₹{fmt(totals.amountPaid)}
-  </p>
+            <div className="ff-paid" style={{ textAlign: "right" }}>
+              <span className="m-label">Paid</span>
+              <p style={{ margin: 0, fontWeight: 700, fontSize: 13, color: "#16a34a" }}>
+                ₹{fmt(totals.amountPaid)}
+              </p>
+            </div>
 
-  <p
-    style={{
-      margin: 0,
-      fontWeight: 700,
-      fontSize: 13,
-      color: "#3D7DFC",
-      textAlign: "right",
-    }}
-  >
-    ₹{fmt(totals.balanceIncludingFine)}
-  </p>
+            <div className="ff-bal" style={{ textAlign: "right" }}>
+              <span className="m-label">Balance</span>
+              <p style={{ margin: 0, fontWeight: 700, fontSize: 13, color: "#3D7DFC" }}>
+                ₹{fmt(totals.balanceIncludingFine)}
+              </p>
+            </div>
 
-  {/* Status column */}
-  <div />
+            {/* Status column */}
+            <div className="ff-empty" />
 
-  {/* Receipt column */}
-  <div />
-</div>
+            {/* Receipt column */}
+            <div className="ff-empty" />
+          </div>
         </div>
 
         {/* footer */}
