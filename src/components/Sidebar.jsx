@@ -18,7 +18,14 @@ import {
 
 const Sidebar = ({ onClose }) => {
   const { user, logout } = useAuth();
-  const currentModule = moduleConfig[user?.role];
+const role = user?.role;
+
+const currentModule =
+  role === "STUDENT"
+    ? moduleConfig.STUDENT(user?.collegeLocation)
+    : moduleConfig[role];
+
+
 
   const linkClasses = ({ isActive }) =>
     `flex items-center gap-3 px-4 py-2.5 sm:py-2 rounded-md text-sm font-medium transition ${
@@ -162,6 +169,11 @@ const Sidebar = ({ onClose }) => {
               <ClipboardCheck size={18} />
               Permission Approvals
             </NavLink>
+
+            <NavLink to="/head/comp-off-approvals" className={linkClasses} onClick={() => onClose?.()}>
+              <ClipboardCheck size={18} />
+              Comp Off Approvals
+            </NavLink> 
           </>
         )}
 
@@ -198,10 +210,10 @@ const Sidebar = ({ onClose }) => {
               <ClipboardCheck size={18} />
               Permission Approvals
             </NavLink>
-            {/* <NavLink to="/admin/comp-off-approvals" className={linkClasses} onClick={() => onClose?.()}>
+             <NavLink to="/admin/comp-off-approvals" className={linkClasses} onClick={() => onClose?.()}>
               <ClipboardCheck size={18} />
               Comp Off Approvals
-            </NavLink> */}
+            </NavLink> 
           </>
         )}
 
@@ -222,13 +234,13 @@ const Sidebar = ({ onClose }) => {
 
             <p className={sectionTitle}>Request Status</p>
             <NavLink to="/faculty/my-leaves" className={linkClasses} onClick={() => onClose?.()}>
-              <ClipboardCheck size={18} />
+              <FileText size={18} />
               Pending Request
             </NavLink>
 
             <p className={sectionTitle}>Requests & Applications</p>
             <NavLink to="/faculty/apply-leave" className={linkClasses} onClick={() => onClose?.()}>
-              <FileText size={18} />
+              <ClipboardCheck size={18} />
               Apply Leave
             </NavLink>
             <NavLink to="/faculty/apply-permission" className={linkClasses} onClick={() => onClose?.()}>
@@ -239,10 +251,10 @@ const Sidebar = ({ onClose }) => {
               <ClipboardCheck size={18} />
               Apply OD
             </NavLink>
-            {/* <NavLink to="/faculty/apply-comp-off" className={linkClasses} onClick={() => onClose?.()}>
+             <NavLink to="/faculty/apply-comp-off" className={linkClasses} onClick={() => onClose?.()}>
               <ClipboardCheck size={18} />
               Apply Comp Off
-            </NavLink> */}
+            </NavLink> 
             <p className={sectionTitle}>Document</p>
             <NavLink to="/faculty/policy-documents" className={linkClasses} onClick={() => onClose?.()}>
               <Users size={18} />

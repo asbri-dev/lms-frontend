@@ -118,6 +118,7 @@ const handleVerifyOtp = async () => {
   name: data.employeeName|| null,
   admissionNumber: data.admissionNum|| null,
   studentName: data.studentName || null,
+  collegeLocation: data.collegeLocation || null,
 };
 
     // Add hierarchy fields only when needed
