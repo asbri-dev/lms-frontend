@@ -173,7 +173,6 @@ const ExitForm = ({ employee, exitInitiatedBy, onSubmitted, onCancel }) => {
             type="date"
             value={lastWorkingDay}
             onChange={(e) => setLastWorkingDay(e.target.value)}
-            min={new Date().toISOString().split("T")[0]}
             className="w-full border border-gray-200 px-3 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-200"
           />
         </div>
