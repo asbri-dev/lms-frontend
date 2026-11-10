@@ -8,7 +8,6 @@ import "react-datepicker/dist/react-datepicker.css";
 import {
   CalendarDays,
   FileText,
-  Upload,
   Download,
   FileSpreadsheet,
   Image as ImageIcon,
@@ -50,10 +49,41 @@ const validateImage = (file) => {
   return null;
 };
 
+/* ================= API HELPERS ================= */
+// Reads the body once and safely tries to parse JSON
+const readResponse = async (response) => {
+  const text = await response.text();
+  let data = null;
+  try {
+    data = JSON.parse(text);
+  } catch {
+    /* body is not JSON */
+  }
+  return { data, text };
+};
+
+// Picks the message to show for a non-OK response
+// (never shows raw HTML or stack traces to the user)
+const getApiMessage = (response, { data, text }, fallback) => {
+  if (response.status >= 500) return "Server error. Please try again later";
+  if (data?.message) return data.message;
+  if (text && text.length < 200 && !text.trim().startsWith("<")) return text;
+  return fallback;
+};
+
+// fetch() throws TypeError when the request never reached the server
+// (offline, CORS, blocked, request too large for proxy, etc.)
+const getNetworkMessage = (err) =>
+  err instanceof TypeError
+    ? "Network error. Check your connection and try again"
+    : "Something went wrong. Please try again";
+
+const EMPTY_STATUS = { type: "", text: "" };
+
 const ApplyOd = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const location = user?.employeeId?.startsWith("AREP") ? "Palakkad" : "Chittoor";
+  const campus = user?.employeeId?.startsWith("AREP") ? "Palakkad" : "Chittoor";
 
   /* ================= STATE ================= */
   const [fromDate, setFromDate] = useState(null);
@@ -68,14 +98,20 @@ const ApplyOd = () => {
   const [imageFile, setImageFile] = useState(null);
   const [excelError, setExcelError] = useState("");
   const [imageError, setImageError] = useState("");
-  const [fileInputKey, setFileInputKey] = useState(0); // forces <input type=file> to clear
+ 
 
   const [loading, setLoading] = useState(false);
   const [checking, setChecking] = useState(false);
   const [exporting, setExporting] = useState(false);
 
+  // eligible = "server said these dates are OK" (controls the submit button only)
   const [eligible, setEligible] = useState(false);
-  const [message, setMessage] = useState("");
+  // status = what the banner shows; its type controls the color
+  const [status, setStatus] = useState(EMPTY_STATUS);
+
+  const showError = (text) => setStatus({ type: "error", text });
+  const showSuccess = (text) => setStatus({ type: "success", text });
+  const clearStatus = () => setStatus(EMPTY_STATUS);
 
   /* ================= CALCULATE DAYS ================= */
   const totalDays = useMemo(() => {
@@ -168,21 +204,6 @@ const ApplyOd = () => {
     setImageFile(f);
   };
 
-  /* ================= RESET ================= */
-  const resetForm = () => {
-    setFromDate(null);
-    setToDate(null);
-    setSessionFrom("1");
-    setSessionTo("2");
-    setReason("");
-    setExcelFile(null);
-    setImageFile(null);
-    setExcelError("");
-    setImageError("");
-    setFileInputKey((k) => k + 1);
-    setEligible(false);
-  };
-
   /* ================= AUTO CHECK ================= */
   useEffect(() => {
     if (!fromDate || !toDate) return;
@@ -190,18 +211,17 @@ const ApplyOd = () => {
     let cancelled = false;
 
     const runCheck = async () => {
-      const error = validateDates();
+      clearStatus(); // remove the old message when dates/sessions change
+      setEligible(false);
 
+      const error = validateDates();
       if (error) {
-        setMessage(error);
-        setEligible(false);
+        showError(error);
         return;
       }
 
       try {
         setChecking(true);
-        setEligible(false);
-        setMessage("");
 
         const response = await fetch(`${API_BASE_URL}/checkOdEligible`, {
           method: "POST",
@@ -217,34 +237,20 @@ const ApplyOd = () => {
           }),
         });
 
-        const text = await response.text();
+        const result = await readResponse(response);
         if (cancelled) return;
 
-        let data = null;
-        try {
-          data = JSON.parse(text);
-        } catch {
-          console.log("Non-JSON response");
-        }
-
-        // Server error
-        if (response.status >= 500) {
-          setMessage("Server error. Try later");
-          return;
-        }
-
-        // 400 error
+        // 4xx / 5xx -> red message, form data is kept
         if (!response.ok) {
-          setMessage(data?.message || text || "OD not allowed");
-          resetForm();
+          showError(getApiMessage(response, result, "OD not allowed"));
           return;
         }
 
         // Success
         setEligible(true);
-        setMessage(data?.message || "Eligible");
-      } catch {
-        if (!cancelled) setMessage("Network error");
+        showSuccess(result.data?.message || "Eligible");
+      } catch (err) {
+        if (!cancelled) showError(getNetworkMessage(err));
       } finally {
         if (!cancelled) setChecking(false);
       }
@@ -260,10 +266,10 @@ const ApplyOd = () => {
   }, [fromDate, toDate, sessionFrom, sessionTo, totalDays]);
 
   /* ================= EXCEL TEMPLATE DOWNLOAD ================= */
-  const exportAttendanceExcel = async (location) => {
+  const exportAttendanceExcel = async () => {
     try {
       setExporting(true);
-      const response = await fetch(`${API_BASE_URL}/download-template/${location}`);
+      const response = await fetch(`${API_BASE_URL}/download-template/${campus}`);
 
       if (!response.ok) {
         throw new Error("Failed to download Excel");
@@ -292,45 +298,43 @@ const ApplyOd = () => {
   };
 
   /* ================= SUBMIT ================= */
+  const canSubmit =
+    eligible && !loading && !checking && !!excelFile && !!imageFile;
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!canSubmit) return;
 
-    if (!eligible) {
-      setMessage("Fix errors before submitting");
-      return;
-    }
-
+    // validation errors only show a message; `eligible` stays true
+    // so the user can fix the problem and submit again
     const error = validateAll();
     if (error) {
-      setEligible(false);
-      setMessage(error);
-      // keep the form usable: re-enable once the user fixes the problem
-      if (!error.startsWith("Fix the file")) return;
-      setEligible(true);
+      showError(error);
       return;
     }
 
     try {
       setLoading(true);
 
-      const formData = new FormData();
       const onDutyDto = {
-    empId: user.employeeId,
-    adminEmpId: user.adminId,
-    onDutyFrom: format(fromDate, "dd-MMM-yyyy"),
-    onDutyTo: format(toDate, "dd-MMM-yyyy"),
-    noOfDays: String(totalDays),
-    sessionFrom,
-    sessionTo,
-    appliedOn: format(new Date(), "dd-MMM-yyyy"),
-    reason: reason || ""
-};
+        empId: user.employeeId,
+        adminEmpId: user.adminId,
+        onDutyFrom: format(fromDate, "dd-MMM-yyyy"),
+        onDutyTo: format(toDate, "dd-MMM-yyyy"),
+        noOfDays: String(totalDays),
+        sessionFrom,
+        sessionTo,
+        appliedOn: format(new Date(), "dd-MMM-yyyy"),
+        reason: reason || "",
+      };
 
-
-      formData.append("onDutyDto", new Blob([JSON.stringify(onDutyDto)], { type: "application/json" }));
+      const formData = new FormData();
+      formData.append(
+        "onDutyDto",
+        new Blob([JSON.stringify(onDutyDto)], { type: "application/json" })
+      );
       formData.append("odForm", excelFile);
       formData.append("images", imageFile);
-      
 
       // Do NOT set Content-Type: the browser adds multipart/form-data + boundary
       const response = await fetch(`${API_BASE_URL}/odApply`, {
@@ -338,35 +342,31 @@ const ApplyOd = () => {
         body: formData,
       });
 
-      const text = await response.text();
+const result = await readResponse(response);
 
-      let data = null;
-      try {
-        data = JSON.parse(text);
-      } catch {
-        console.log("Non-JSON response");
-      }
+if (!response.ok) {
+  console.error("Backend Error:", result.text);
 
-      if (!response.ok) {
-        setEligible(false);
-        setMessage(data?.message || text || "Submit failed");
-        return;
-      }
+  showError(
+    result.text || `Request failed (${response.status})`
+  );
 
-      setMessage("OD applied successfully ✅");
-       toast.success("OD applied successfully ✅");
+  return;
+}
+
+      showSuccess("OD applied successfully");
+      toast.success("OD applied successfully ✅");
 
       setTimeout(() => {
         navigate("/faculty/my-leaves");
       }, 1200);
-    } catch {
-      setMessage("Server error");
-    } finally {
-      setLoading(false);
-    }
+    }  catch (err) {
+  console.error("Request Error:", err);
+  showError(err.message || "Network error");
+} finally {
+  setLoading(false);
+}
   };
-
-  const canSubmit = eligible && !loading && !checking && !!excelFile && !!imageFile;
 
   /* ================= UI ================= */
   return (
@@ -378,7 +378,7 @@ const ApplyOd = () => {
 
           <button
             type="button"
-            onClick={() => exportAttendanceExcel(location)}
+            onClick={exportAttendanceExcel}
             disabled={loading || exporting}
             className="flex items-center gap-2 px-4 py-2 rounded-lg 
                        bg-gradient-to-r from-[#2b3c6b] to-[#3f548f] 
@@ -391,16 +391,17 @@ const ApplyOd = () => {
           </button>
         </div>
 
-        {/* MESSAGE */}
-        {message && (
+        {/* MESSAGE (color comes from status.type, not from `eligible`) */}
+        {status.text && (
           <div
+            role={status.type === "error" ? "alert" : "status"}
             className={`p-3 rounded-lg text-sm ${
-              eligible
+              status.type === "success"
                 ? "bg-green-100 text-green-700"
                 : "bg-red-100 text-red-700"
             }`}
           >
-            {message}
+            {status.text}
           </div>
         )}
 
@@ -431,6 +432,8 @@ const ApplyOd = () => {
                 className="absolute left-3 top-3 text-gray-400"
                 size={16}
               />
+              {/* maxDate={fromDate} limits OD to a single day.
+                  Remove it if multi-day OD should be allowed. */}
               <DatePicker
                 selected={toDate}
                 onChange={setToDate}
@@ -505,7 +508,7 @@ const ApplyOd = () => {
                 size={16}
               />
               <input
-                key={`excel-${fileInputKey}`}
+                
                 type="file"
                 accept=".xlsx,.xls"
                 onChange={handleExcelChange}
@@ -533,7 +536,7 @@ const ApplyOd = () => {
                 size={16}
               />
               <input
-                key={`image-${fileInputKey}`}
+            
                 type="file"
                 accept="image/jpeg,image/png,image/webp"
                 onChange={handleImageChange}
