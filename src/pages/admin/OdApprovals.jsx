@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "../../auth/useAuth";
 import { API_BASE_URL } from "../../config/api";
+import { FileSpreadsheet, Image as ImageIcon } from "lucide-react";
+import toast from "react-hot-toast";
 
 const ITEMS_PER_PAGE = 5;
 
@@ -60,7 +62,7 @@ const OdApprovals = () => {
     setActionLoading(key);
 
     try {
-      const response = await fetch(`${API_BASE_URL}/odApprove`, {
+      const response = await fetch(`${API_BASE_URL}/appRejRevOd`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -122,6 +124,45 @@ const OdApprovals = () => {
       }
     }
   };
+
+   // Download Receipt
+  const downloadReceiptByPath = async (filePath, fileName) => {
+  try {
+    if (!filePath) {
+      toast.error("File not available");
+      return;
+    }
+
+    const response = await fetch(
+      `${API_BASE_URL}/api/fee-reciepts/file?path=${encodeURIComponent(filePath)}`
+    );
+
+    if (!response.ok) {
+      throw new Error("Failed to download file");
+    }
+
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = fileName;
+
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    setTimeout(() => {
+      window.URL.revokeObjectURL(url);
+    }, 1000);
+
+    toast.success("File downloaded successfully");
+
+  } catch (error) {
+    console.error("Download error:", error);
+    toast.error("Failed to download file");
+  }
+};
 
   /* 🔹 Loading / Error */
   if (loading) {
@@ -306,6 +347,60 @@ const OdApprovals = () => {
                         </div>
                       )}
                     </div>
+                    {/* ================= DOWNLOAD DOCUMENTS ================= */}
+{(od.odForm || od.geoTagImages) && (
+  <div className="mb-4">
+    <p className="text-xs font-semibold text-gray-500 mb-2">
+      Documents
+    </p>
+
+    <div className="flex flex-wrap gap-3">
+
+      {/* Download Excel */}
+      {od.odForm && (
+        <button
+          type="button"
+          onClick={() =>
+            downloadReceiptByPath(
+              od.odForm,
+              "OD_Form.xlsx"
+            )
+          }
+          className="inline-flex items-center gap-2 px-4 py-2
+          bg-green-50 text-green-700 border border-green-200
+          rounded-lg text-sm font-medium
+          hover:bg-green-600 hover:text-white
+          transition-all duration-200"
+        >
+          <FileSpreadsheet size={16} />
+          Download Excel
+        </button>
+      )}
+
+      {/* Download Image */}
+      {od.geoTagImages && (
+        <button
+          type="button"
+          onClick={() =>
+            downloadReceiptByPath(
+              od.geoTagImages,
+              "OD_GeoTag_Image.jpeg"
+            )
+          }
+          className="inline-flex items-center gap-2 px-4 py-2
+          bg-blue-50 text-blue-700 border border-blue-200
+          rounded-lg text-sm font-medium
+          hover:bg-blue-600 hover:text-white
+          transition-all duration-200"
+        >
+          <ImageIcon size={16} />
+          Download Image
+        </button>
+      )}
+
+    </div>
+  </div>
+)}
 
                     {/* Actions */}
                     <div className="flex justify-end gap-3 pt-4 border-t border-gray-100 mt-2">

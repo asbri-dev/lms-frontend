@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback, useMemo } from "react";
 import toast from "react-hot-toast";
 import { API_BASE_URL } from "../../../config/api";
+import { FileSpreadsheet, Image as ImageIcon,Loader2  } from "lucide-react";
 
 
 /* ─── Helpers ─── */
@@ -83,7 +84,7 @@ const DETAILS_STYLE = {
 const APPROVE_API = {
   Leave:      "/approveLeaves",
   Permission: "/approvePr",
-  OD:         "/odApprove",
+  OD:         "/appRejRevOd",
   CO:        "/approveCompOff",
 };
 
@@ -126,7 +127,6 @@ const Skeleton = ({ count = 6 }) => (
     ))}
   </div>
 );
-
 /* ════════════════════════════════════════
    LEAVE CARD
 ════════════════════════════════════════ */
@@ -243,48 +243,121 @@ const PermissionCard = ({ item, onAction, actionLoadingId }) => {
 /* ════════════════════════════════════════
    OD CARD
 ════════════════════════════════════════ */
-const ODCard = ({ item, onAction, actionLoadingId }) => {
-  const id      = `od-${item.empId}-${item.onDutyFrom}`;
-  const loc     = getLocation(item.empId);
+const ODCard = ({ item, onAction, actionLoadingId, onDownload,downloadingFile }) => {
+  const id = `od-${item.empId}-${item.onDutyFrom}`;
+  const loc = getLocation(item.empId);
   const loading = actionLoadingId === id;
 
   return (
-    <div className="bg-white border border-gray-200 rounded-xl p-4 space-y-3 hover:border-indigo-200 transition-colors">
-      <div className="flex items-start justify-between gap-2">
-        <div>
+    <div className="bg-white border border-gray-200 rounded-xl p-4 space-y-3 hover:border-indigo-300 hover:shadow-sm transition-all">
+      {/* Header */}
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="text-sm font-medium text-gray-800">{item.empName || item.empId}</span>
+            <span className="text-sm font-semibold text-gray-800 truncate">
+              {item.empName || item.empId}
+            </span>
             <Badge label={loc} style={LOC_STYLE[loc]} />
             <Badge label="OD" style={TYPE_STYLE.OD} />
           </div>
           <div className="text-xs text-gray-400 mt-0.5">{item.empId}</div>
         </div>
-        <Badge label={resolveStatus(item.status)} style={STATUS_STYLE[item.status] || "bg-gray-100 text-gray-500"} />
+
+        <Badge
+          label={resolveStatus(item.status)}
+          style={STATUS_STYLE[item.status] || "bg-gray-100 text-gray-500"}
+        />
       </div>
 
-      <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-gray-500">
-        <div><span className="text-gray-400">From: </span>{formatDate(item.onDutyFrom)}</div>
-        <div><span className="text-gray-400">To: </span>{formatDate(item.onDutyTo)}</div>
+      {/* Date Range */}
+      <div className="grid grid-cols-2 gap-3 text-xs">
+        <div className="bg-gray-50 rounded-lg px-3 py-2">
+          <span className="text-gray-400 block mb-0.5">From</span>
+          <span className="text-gray-700 font-medium">{formatDate(item.onDutyFrom)}</span>
+        </div>
+        <div className="bg-gray-50 rounded-lg px-3 py-2">
+          <span className="text-gray-400 block mb-0.5">To</span>
+          <span className="text-gray-700 font-medium">{formatDate(item.onDutyTo)}</span>
+        </div>
       </div>
 
+      {/* Reason */}
       {item.reason && (
-        <div className="text-xs text-gray-500 bg-gray-50 rounded-lg px-3 py-2">
-          <span className="text-gray-400">Reason: </span>{item.reason}
+        <div className="text-xs text-gray-600 bg-gray-50 rounded-lg px-3 py-2.5 border border-gray-100">
+          <span className="text-gray-400 font-medium">Reason: </span>
+          {item.reason}
         </div>
       )}
 
-      <div className="flex gap-2 pt-1 border-t border-gray-100">
+      {/* Documents */}
+      {(item.odForm || item.geoTagImages) && (
+        <div className="space-y-2">
+          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+            Documents
+          </p>
+
+          <div className="flex flex-wrap gap-2">
+            {item.odForm && (
+              <button
+                type="button"
+                 disabled={!!downloadingFile}
+                onClick={() =>onDownload(item.odForm, "OD_Form.xlsx", `excel-${id}`)}
+                className="inline-flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium
+                  bg-green-50 text-green-700 border border-green-200
+                  hover:bg-green-600 hover:text-white hover:border-green-600 transition-colors"
+              >
+  {downloadingFile === `excel-${id}` ? (
+    <Loader2 size={15} className="animate-spin" />
+  ) : (
+    <FileSpreadsheet size={15} />
+  )}
+  {downloadingFile === "excel" ? "Downloading..." : "Download Excel"}
+              </button>
+            )}
+
+            {item.geoTagImages && (
+              <button
+                type="button"
+                disabled={!!downloadingFile}
+                onClick={() => {
+  const extension = item.geoTagImages.split(".").pop()?.toLowerCase() || "jpg";
+   onDownload(
+    item.geoTagImages,
+    `OD_GeoTag_Image.${extension}`,
+    `image-${id}`
+  );
+}}
+                className="inline-flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium
+                  bg-blue-50 text-blue-700 border border-blue-200
+                  hover:bg-blue-600 hover:text-white hover:border-blue-600 transition-colors"
+              >
+                {downloadingFile === `image-${id}` ? (
+                  <Loader2 size={15} className="animate-spin" />
+                ) : (
+                  <ImageIcon size={15} />
+                )}
+                {downloadingFile === "image" ? "Downloading..." : "Download Image"}
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Actions */}
+      <div className="flex gap-2 pt-2 border-t border-gray-100">
         <button
           onClick={() => onAction(item, "OD", "Approved", id)}
           disabled={loading}
-          className="flex-1 text-xs font-medium py-1.5 rounded-lg bg-green-600 text-white hover:bg-green-700 disabled:opacity-50 transition-colors"
+          className="flex-1 text-xs font-medium py-2 rounded-lg bg-green-600 text-white 
+            hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
           {loading ? "..." : "✓ Approve"}
         </button>
         <button
           onClick={() => onAction(item, "OD", "Rejected", id)}
           disabled={loading}
-          className="flex-1 text-xs font-medium py-1.5 rounded-lg border border-red-200 text-red-600 hover:bg-red-50 disabled:opacity-50 transition-colors"
+          className="flex-1 text-xs font-medium py-2 rounded-lg border border-red-200 text-red-600 
+            hover:bg-red-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
           {loading ? "..." : "✕ Reject"}
         </button>
@@ -747,6 +820,52 @@ const PendingRequests = () => {
   const token = sessionStorage.getItem("authToken");
   const user  = JSON.parse(sessionStorage.getItem("authUser") || "{}");
 
+
+  const [downloadingFile, setDownloadingFile] = useState(null);
+
+
+  // Download receipt by path
+const downloadReceiptByPath = async (filePath, fileName,fileId) => {
+  try {
+    if (!filePath) {
+      toast.error("File not available");
+      return;
+    }
+   setDownloadingFile(fileId);
+    const response = await fetch(
+      `${API_BASE_URL}/api/fee-reciepts/file?path=${encodeURIComponent(filePath)}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error("Failed to download file");
+    }
+
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = fileName;
+
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    setTimeout(() => window.URL.revokeObjectURL(url), 1000);
+
+    toast.success("File downloaded successfully");
+  } catch (error) {
+    console.error(error);
+    toast.error("Failed to download file");
+  } finally {
+    setDownloadingFile(null);
+  }
+};
 
 
 
@@ -1293,6 +1412,8 @@ if (r._type === "Leave") {
                     item={item}
                     onAction={handleAction}
                     actionLoadingId={actionLoadingId}
+                    onDownload={downloadReceiptByPath}
+                     downloadingFile={downloadingFile}
                   />
                 ))}
               </div>
