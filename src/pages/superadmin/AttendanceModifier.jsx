@@ -404,83 +404,99 @@ function ToggleSwitch({ value, onChange, disabled }) {
 }
 
 // ─── AttendanceRow ────────────────────────────────────────────────────────────
+
+// ─── SessionCell: toggle ON flips the Present/Absent text (UI only) ──────────
+function SessionCell({ present, apply, onApply, disabled }) {
+  // When toggle is ON, show the opposite of the recorded state
+  const shown = apply ? !present : present;
+
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+      <ToggleSwitch value={apply} onChange={onApply} disabled={disabled} />
+      <span style={{
+        fontSize: 11,
+        fontWeight: 600,
+        color: shown ? "#16a34a" : "#f31313",
+      }}>
+        {shown ? "Present" : "Absent"}
+      </span>
+    </div>
+  );
+}
+
+// ─── AttendanceRow ────────────────────────────────────────────────────────────
 function AttendanceRow({ record, empName, empId, onSave, isSaving, monthLocked }) {
   const { user } = useAuth();
-  const locked =
-    monthLocked ||
-    isLocked(record.AttendanceDetails?.status);
-  const originalStatus = record.AttendanceDetails?.status || "";
-  const originalS1 = record.AttendanceDetails?.sessionOne;
-  const originalS2 = record.AttendanceDetails?.sessionTwo;
 
-  const toBoolean = (val) => {  //
+  const originalStatus = record.AttendanceDetails?.status || "";
+  const locked = monthLocked || isLocked(originalStatus);
+
+  const toBoolean = (val) => {
     if (typeof val === "boolean") return val;
     const s = (val || "").toLowerCase();
-    return s === "present" || s === "pr-present" || s === "true"|| s==="Present(O)".toLowerCase();
+    return s === "present" || s === "pr-present" || s === "true" || s === "present(o)" || s === "off";
   };
 
-  const [s1, setS1] = useState(toBoolean(originalS1));
-  const [s2, setS2] = useState(toBoolean(originalS2));
- const displayStatus = (status) => {
-  const map = {
-    "cl(o)": "CL",
-    "ml(o)": "ML",
-    "od(o)": "OD",
-    "PR-Present:Present": "Present"
-    
+  const displayStatus = (st) => {
+    const map = {
+      "cl(o)": "CL",
+      "ml(o)": "ML",
+      "od(o)": "OD",
+      "pr-present:present": "Present",
+    };
+    return map[(st || "").toLowerCase()] || st;
   };
 
-  return map[status?.toLowerCase()] || status;
-};
+  // Real recorded session state (read-only, comes from backend)
+  const s1Present = toBoolean(record.AttendanceDetails?.sessionOne);
+  const s2Present = toBoolean(record.AttendanceDetails?.sessionTwo);
 
-const [status, setStatus] = useState(
-  displayStatus(originalStatus)
-);
-  const [s1Changed, setS1Changed] = useState(false);
-  const [s2Changed, setS2Changed] = useState(false);
+  // Current status of the day (dropdown default)
+  const currentStatus =
+    normalizeStatus(displayStatus(originalStatus)) || "Present";
 
-  // ── NEW: reason modal state ───────────────────────────────────────────────
+  // Action state: toggles ALWAYS start OFF
+  const [apply1, setApply1] = useState(false);
+  const [apply2, setApply2] = useState(false);
+  const [status, setStatus] = useState(currentStatus);
   const [showReasonModal, setShowReasonModal] = useState(false);
 
-const isDirty =
-  s1 !== toBoolean(originalS1) ||
-  s2 !== toBoolean(originalS2) ||
-  displayStatus(status) !== displayStatus(originalStatus);
+  const statusChanged = status !== currentStatus;
+  const canSave = (apply1 || apply2) && !!status;   // at least one session ON
+  const isDirty = apply1 || apply2 || statusChanged;
 
-  // Called when user clicks "Save" → open modal
   const handleSaveClick = () => {
-    if (!isDirty || isSaving) return;
+    if (!canSave || isSaving) return;
     setShowReasonModal(true);
   };
 
-  // Called when modal is confirmed with a reason
   const handleReasonConfirm = async (reason) => {
     setShowReasonModal(false);
     await onSave({
       superAdminEmpId: user.employeeId,
       empId,
       date: record.Date,
-      sessionOne: s1Changed ? s1 : false,
-      sessionTwo: s2Changed ? s2 : false,
-      status: status || "Present",
+      sessionOne: apply1,
+      sessionTwo: apply2,
+      status,
       reason,
     });
+    // After save, the parent reloads records and this row remounts,
+    // so toggles go back to OFF automatically.
   };
 
   const handleReset = () => {
-    setS1(toBoolean(originalS1));
-    setS2(toBoolean(originalS2));
-    setStatus(originalStatus);
+    setApply1(false);
+    setApply2(false);
+    setStatus(currentStatus);
   };
-
-
 
   const dayName = getDayName(record.Date);
   const isWeekend = dayName === "Sat" || dayName === "Sun";
+  const selectStyle = getStatusStyle(status);
 
   return (
     <>
-      {/* Reason modal — rendered at row level, portals above everything */}
       {showReasonModal && (
         <tr style={{ display: "contents" }}>
           <td style={{ display: "contents" }}>
@@ -494,34 +510,28 @@ const isDirty =
         </tr>
       )}
 
-      <tr
-        style={{
-          background: isDirty
-            ? "linear-gradient(90deg,#fffbeb 0%,#fefce8 100%)"
-            : locked
-              ? "#f8fafc"
-              : "white",
-          transition: "background 0.2s",
-          borderBottom: "1px solid #f1f5f9",
-        }}
-      >
+      <tr style={{
+        background: isDirty
+          ? "linear-gradient(90deg,#fffbeb 0%,#fefce8 100%)"
+          : locked ? "#f8fafc" : "white",
+        transition: "background 0.2s",
+        borderBottom: "1px solid #f1f5f9",
+      }}>
         {/* Date */}
         <td style={{ padding: "10px 14px", whiteSpace: "nowrap" }}>
           <div style={{ fontSize: 13, fontWeight: 600, color: "#1e293b" }}>{record.Date}</div>
-          <div
-            style={{
-              fontSize: 11,
-              color: isWeekend ? "#f59e0b" : "#94a3b8",
-              fontWeight: isWeekend ? 600 : 400,
-            }}
-          >
+          <div style={{
+            fontSize: 11,
+            color: isWeekend ? "#f59e0b" : "#94a3b8",
+            fontWeight: isWeekend ? 600 : 400,
+          }}>
             {dayName}
           </div>
         </td>
 
-        {/* Name */}
+        {/* Current status */}
         <td style={{ padding: "10px 14px" }}>
-          <StatusBadge status={normalizeStatus(backendStatusMap(record.AttendanceDetails?.status))} />
+          <StatusBadge status={normalizeStatus(backendStatusMap(originalStatus))} />
         </td>
 
         {/* Punch In / Out */}
@@ -535,61 +545,38 @@ const isDirty =
 
         {/* Work Duration */}
         <td style={{ padding: "10px 14px" }}>
-          <span
-            style={{
-              fontSize: 12,
-              color: "#475569",
-              fontVariantNumeric: "tabular-nums",
-            }}
-          >
+          <span style={{ fontSize: 12, color: "#475569", fontVariantNumeric: "tabular-nums" }}>
             {record.AttendanceDetails?.workDuration || "—"}
           </span>
         </td>
 
         {/* Session 1 */}
         <td style={{ padding: "10px 14px" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <ToggleSwitch
-              value={s1}
-              onChange={(v) => {
-                setS1(v);
-                setS1Changed(true);
-              }}
-              disabled={locked}
-            />
-            <span style={{ fontSize: 11, color: s1 ? "#16a34a" : "#94a3b8", fontWeight: 600 }}>
-              {s1 ? "Present" : "Absent"}
-            </span>
-          </div>
+          <SessionCell
+            present={s1Present}
+            apply={apply1}
+            onApply={setApply1}
+            disabled={locked}
+          />
         </td>
 
         {/* Session 2 */}
         <td style={{ padding: "10px 14px" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <ToggleSwitch
-              value={s2}
-              onChange={(v) => {
-                setS2(v);
-                setS2Changed(true);
-              }}
-              disabled={locked}
-            />
-            <span style={{ fontSize: 11, color: s2 ? "#16a34a" : "#94a3b8", fontWeight: 600 }}>
-              {s2 ? "Present" : "Absent"}
-            </span>
-          </div>
+          <SessionCell
+            present={s2Present}
+            apply={apply2}
+            onApply={setApply2}
+            disabled={locked}
+          />
         </td>
 
-
-
-
-        {/* Status */}    {/* Status */}
+        {/* Override To */}
         <td style={{ padding: "10px 14px" }}>
           {locked ? (
-            <StatusBadge status={normalizeStatus(status)} />
+            <StatusBadge status={currentStatus} />
           ) : (
             <select
-              value={STATUS_OPTIONS.find((opt) => opt === normalizeStatus(status))}
+              value={STATUS_OPTIONS.includes(status) ? status : ""}
               onChange={(e) => setStatus(e.target.value)}
               style={{
                 padding: "5px 10px",
@@ -597,17 +584,15 @@ const isDirty =
                 border: "1.5px solid #e2e8f0",
                 fontSize: 12,
                 fontWeight: 600,
-                background: getStatusStyle(normalizeStatus(status)).bg,
-                color: getStatusStyle(normalizeStatus(status)).color,
+                background: selectStyle.bg,
+                color: selectStyle.color,
                 cursor: "pointer",
                 outline: "none",
-                transition: "border-color 0.15s",
               }}
             >
+              {!STATUS_OPTIONS.includes(status) && <option value="">—</option>}
               {STATUS_OPTIONS.map((opt) => (
-                <option key={opt} value={opt}>
-                  {opt}
-                </option>
+                <option key={opt} value={opt}>{opt}</option>
               ))}
             </select>
           )}
@@ -618,40 +603,47 @@ const isDirty =
           {locked ? (
             <span style={{ fontSize: 11, color: "#cbd5e1" }}>Locked</span>
           ) : (
-            <div style={{ display: "flex", gap: 6 }}>
-              <button
-                onClick={handleSaveClick}
-                disabled={!isDirty || isSaving}
-                style={{
-                  padding: "5px 14px",
-                  borderRadius: 7,
-                  border: "none",
-                  background: isDirty ? "#6366f1" : "#e2e8f0",
-                  color: isDirty ? "white" : "#94a3b8",
-                  fontSize: 12,
-                  fontWeight: 600,
-                  cursor: isDirty && !isSaving ? "pointer" : "not-allowed",
-                  transition: "all 0.15s",
-                }}
-              >
-                {isSaving ? "Saving…" : "Save"}
-              </button>
-              {isDirty && (
+            <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+              <div style={{ display: "flex", gap: 6 }}>
                 <button
-                  onClick={handleReset}
+                  onClick={handleSaveClick}
+                  disabled={!canSave || isSaving}
                   style={{
-                    padding: "5px 10px",
+                    padding: "5px 14px",
                     borderRadius: 7,
-                    border: "1.5px solid #e2e8f0",
-                    background: "white",
-                    color: "#64748b",
+                    border: "none",
+                    background: canSave ? "#6366f1" : "#e2e8f0",
+                    color: canSave ? "white" : "#94a3b8",
                     fontSize: 12,
                     fontWeight: 600,
-                    cursor: "pointer",
+                    cursor: canSave && !isSaving ? "pointer" : "not-allowed",
+                    transition: "all 0.15s",
                   }}
                 >
-                  ✕
+                  {isSaving ? "Saving…" : "Save"}
                 </button>
+                {isDirty && (
+                  <button
+                    onClick={handleReset}
+                    style={{
+                      padding: "5px 10px",
+                      borderRadius: 7,
+                      border: "1.5px solid #e2e8f0",
+                      background: "white",
+                      color: "#64748b",
+                      fontSize: 12,
+                      fontWeight: 600,
+                      cursor: "pointer",
+                    }}
+                  >
+                    ✕
+                  </button>
+                )}
+              </div>
+              {!canSave && statusChanged && (
+                <span style={{ fontSize: 10, color: "#f59e0b" }}>
+                  Turn on a session to apply
+                </span>
               )}
             </div>
           )}
