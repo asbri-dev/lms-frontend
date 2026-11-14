@@ -823,7 +823,7 @@ useEffect(() => {
     }).replace(/ /g, "-");
 
     const response = await fetch(
-      `${API_BASE_URL}/downloadOverrideExcel?fromDate=${formattedFrom}&toDate=${formattedTo}&adminEmpId=${user.employeeId}&collegeLocation=${location}`,
+      `${API_BASE_URL}/reports/exportOverrideInfo?fromDate=${formattedFrom}&toDate=${formattedTo}&adminEmpId=${user.employeeId}&collegeLocation=${location}`,
     );
 
     if (!response.ok) {
